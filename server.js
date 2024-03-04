@@ -15,6 +15,8 @@ const invoiceRoutes = require('./routes/invoiceRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const outstandingRouter = require('./routes/outstandingRouter');
 const dateProductRoute = require('./routes/dateProductRoute');
+const orderRoute = require('./routes/orderRoute');
+const adminRouter = require('./routes/adminRouter');
 
 
 const app=express()
@@ -43,8 +45,8 @@ app.use('/api', customerRoutes);
 app.use('/api', outstandingRouter);
 
 app.use('/api', dateProductRoute);
-
-
+app.use('/api', orderRoute)
+app.use('/api', adminRouter )
 
 
 

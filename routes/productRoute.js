@@ -7,10 +7,10 @@ const router = express.Router();
 
 router.post("/", protect, upload.single("image"), createProduct);
 router.get("/", protect, getProducts);
-router.get("/:id", protect, getSingleProduct);
+router.get("/:id", getSingleProduct);
 router.delete("/:id", protect, deleteProduct);
 router.patch("/:id", protect, upload.single("image"), updateProduct);
-router.get("/category/:category", protect, getProductByCategory); 
+router.get("/category/:category", getProductByCategory); 
 
 
 module.exports = router;
