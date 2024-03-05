@@ -18,6 +18,11 @@ const outstandingSchema = new mongoose.Schema({
         
 
     },
+     CHnumber:{
+        type:String,
+        
+
+    },
     amount: {
         type: Number,
         required: true

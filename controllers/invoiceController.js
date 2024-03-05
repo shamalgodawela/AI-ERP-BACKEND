@@ -6,7 +6,14 @@ const escapeRegExp = (string) => {
 };
 const addInvoice = async (req, res) => {
   try {
-    const { products, ...invoiceData } = req.body;
+    const { products, invoiceNumber, ...invoiceData } = req.body;
+
+    // Check if the invoice number already exists in the database
+    const existingInvoice = await Invoice.findOne({ invoiceNumber });
+
+    if (existingInvoice) {
+      return res.status(400).json({ error: 'Invoice number already exists' });
+    }
 
     // Calculate unitPrice and invoiceTotal for each product
     for (const product of products) {
@@ -51,6 +58,7 @@ const addInvoice = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // controllers/invoiceController.js
 
