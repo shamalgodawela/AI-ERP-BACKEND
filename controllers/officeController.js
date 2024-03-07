@@ -38,7 +38,17 @@ const addOfficeInventory = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+const getAllOfficeInventory = async (req, res) => {
+    try {
+      const officeInventory = await OfficeInventory.find();
+      res.status(200).json(officeInventory);
+    } catch (error) {
+      console.error('Error fetching office inventory details:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
 
 module.exports = {
-  addOfficeInventory
+  addOfficeInventory,
+  getAllOfficeInventory
 };
