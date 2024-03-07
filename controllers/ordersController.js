@@ -1,4 +1,5 @@
 const Order = require('../models/order');
+const Invoice = require('../models/invoice');
 
 class OrdersController {
     async addOrder(req, res) {
@@ -52,7 +53,20 @@ class OrdersController {
         try {
             // Retrieve all orders from the database
             const orders = await Order.find();
-            res.status(200).json(orders);
+
+            // Check if each order is checked based on the presence of its order number in the invoice table
+            const ordersWithCheckStatus = await Promise.all(
+                orders.map(async (order) => {
+                    // Check if there's an invoice with the order number
+                    const invoice = await Invoice.findOne({ orderNumber: order.orderNumber });
+                    return {
+                        ...order.toJSON(),
+                        checked: !!invoice, // Indicates whether the order is checked (true) or not (false)
+                    };
+                })
+            );
+
+            res.status(200).json(ordersWithCheckStatus);
         } catch (error) {
             res.status(500).json({ error: 'Internal server error' });
         }

@@ -221,7 +221,16 @@ const getLastInvoiceNumber = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to fetch last numbers', error: error.message });
     }
 };
-
+const checkInvoice = async (orderNumber) => {
+  try {
+    // Check if the invoice number exists in the database
+    const existingInvoice = await Invoice.findOne({ orderNumber });
+    return !!existingInvoice; // Convert the result to a boolean
+  } catch (error) {
+    console.error('Error checking invoice:', error);
+    return false;
+  }
+};
 
 
 
@@ -234,7 +243,8 @@ module.exports = {
   deleteInvoice,
   getTotalInvoiceValueByCode,
   getMonthlyTotalInvoice,
-  getLastInvoiceNumber
+  getLastInvoiceNumber,
+  checkInvoice
 };
 
 
