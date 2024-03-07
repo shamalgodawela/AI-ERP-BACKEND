@@ -21,6 +21,7 @@ const productSchema=mongoose.Schema({
     },
     category:{
         type:String,
+        unique: true
        
     },
     quantity:{
