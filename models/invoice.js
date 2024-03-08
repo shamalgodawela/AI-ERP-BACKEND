@@ -12,11 +12,7 @@ const invoiceSchema = new mongoose.Schema({
       invoiceTotal: Number,
     }
   ],
-  invoiceNumber:{
-    type:String,
-    unique: true,
-    
-  },
+  invoiceNumber: String,
   customer: String,
   code:String,
   address:String,
