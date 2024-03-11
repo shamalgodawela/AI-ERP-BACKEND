@@ -15,13 +15,19 @@ const invoiceSchema = new mongoose.Schema({
   invoiceNumber: {
     type:String,
     required: true,
+    unique:true,
+    
   },
   customer: String,
   code:String,
   address:String,
   contact:String,
   invoiceDate: String,
-  orderNumber:String,
+  orderNumber:{
+    required:true,
+    type:String,
+    unique:true,
+  },
   orderDate:String,
   exe: String,
   ModeofPayment:String,
