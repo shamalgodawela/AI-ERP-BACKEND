@@ -16,4 +16,6 @@ router.get('/orders/:orderNumber', ordersController.getOrderDetails);
 // PUT route to update details of a specific order by order number
 router.put('/orders/:orderNumber', ordersController.updateOrderDetails);
 
+router.get('/allor', ordersController.getAllOr);
+
 module.exports = router;

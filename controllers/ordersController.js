@@ -109,6 +109,67 @@ class OrdersController {
             res.status(500).json({ error: 'Failed to update order details' });
         }
     }
+    async getAllOr(req, res) {
+        try {
+            // Extract query parameters from the request
+            const { period, status, exe } = req.query;
+
+            // Build the filter object based on the provided query parameters
+            const filter = {};
+            if (period) {
+                // Determine the start and end dates for the specified period
+                let startDate, endDate;
+                const today = moment().startOf('day'); // Get the current date at the start of the day
+                switch (period) {
+                    case 'today':
+                        startDate = today;
+                        endDate = moment(today).endOf('day');
+                        break;
+                    case 'thisWeek':
+                        startDate = moment(today).startOf('week');
+                        endDate = moment(today).endOf('week');
+                        break;
+                    case 'thisMonth':
+                        startDate = moment(today).startOf('month');
+                        endDate = moment(today).endOf('month');
+                        break;
+                    // Add cases for other date ranges as needed
+                    default:
+                        // Handle invalid period value
+                        return res.status(400).json({ error: 'Invalid period value.' });
+                }
+
+                // Add the date filter to the filter object
+                filter.createdAt = { $gte: startDate, $lte: endDate };
+            }
+            if (status) {
+                filter.status = status;
+            }
+            if (exe) {
+                filter.exe = exe;
+            }
+
+            // Retrieve orders from the database using the constructed filter
+            const orders = await Order.find(filter);
+
+            // Check if each order is checked based on the presence of its order number in the invoice table
+            const ordersWithCheckStatus = await Promise.all(
+                orders.map(async (order) => {
+                    // Check if there's an invoice with the order number
+                    const invoice = await Invoice.findOne({ orderNumber: order.orderNumber });
+                    return {
+                        ...order.toJSON(),
+                        checked: !!invoice, // Indicates whether the order is checked (true) or not (false)
+                    };
+                })
+            );
+
+            res.status(200).json(ordersWithCheckStatus);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
 }
 
 module.exports = OrdersController;
