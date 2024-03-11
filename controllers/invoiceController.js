@@ -1,5 +1,6 @@
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
+const Order = require('../models/order');
 
 const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
@@ -214,7 +215,23 @@ const getLastInvoiceNumber = async (req, res) => {
     }
 };
 
+const checkOrderNumberExists = async (req, res) => {
+  try {
+    const orderNumber = req.params.orderNumber;
+    const existingOrder = await Order.findOne({ orderNumber });
 
+    if (existingOrder) {
+      // Order number already exists
+      return res.json({ exists: true });
+    } else {
+      // Order number does not exist
+      return res.json({ exists: false });
+    }
+  } catch (error) {
+    console.error('Error checking order number:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
 module.exports = { 
@@ -226,6 +243,7 @@ module.exports = {
   getTotalInvoiceValueByCode,
   getMonthlyTotalInvoice,
   getLastInvoiceNumber,
+  checkOrderNumberExists
   
 };
 

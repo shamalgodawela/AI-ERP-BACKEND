@@ -9,5 +9,6 @@ router.post('/delete-invoice/:id', invoiceController.checkPassword, invoiceContr
 router.get('/get-total-invoice-value/:code', invoiceController.getTotalInvoiceValueByCode);
 router.get('/monthly-total-invoice/:code', invoiceController.getMonthlyTotalInvoice);
 router.get('/lastInvoiceNumber',invoiceController.getLastInvoiceNumber);
+router.get('/check/:orderNumber', invoiceController.checkOrderNumberExists);
 
 module.exports = router;
