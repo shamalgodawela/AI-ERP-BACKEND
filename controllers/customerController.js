@@ -74,12 +74,6 @@ const updateCustomer = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, code, companyName, contact, address, city, phone, email, fax } = req.body;
 
-  // Validation
-  if (!name || !code || !companyName || !contact || !address || !city || !phone) {
-    res.status(400);
-    throw new Error("Please fill all required fields");
-  }
-
   try {
     // Find the customer by id
     const customer = await Customer.findById(id);
@@ -90,15 +84,21 @@ const updateCustomer = asyncHandler(async (req, res) => {
     }
 
     // Update customer details
-    customer.name = name;
-    customer.code = code;
-    customer.companyName = companyName;
-    customer.contact = contact;
-    customer.address = address;
-    customer.city = city;
-    customer.phone = phone;
-    customer.email = email;
-    customer.fax = fax;
+    if (name) customer.name = name;
+    if (code) customer.code = code;
+    if (companyName) customer.companyName = companyName;
+    if (contact) customer.contact = contact;
+    if (address) customer.address = address;
+    if (city) customer.city = city;
+    if (phone) customer.phone = phone;
+    if (email) customer.email = email;
+    if (fax) customer.fax = fax;
+
+    // Validation
+    if (!customer.name || !customer.code || !customer.companyName || !customer.contact || !customer.address || !customer.city || !customer.phone) {
+      res.status(400);
+      throw new Error("Please fill all required fields");
+    }
 
     // Save the updated customer
     const updatedCustomer = await customer.save();
