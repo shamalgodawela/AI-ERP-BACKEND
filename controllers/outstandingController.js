@@ -1,4 +1,5 @@
 const Outstanding = require('../models/outStanding');
+const Invoice=require('../models/invoice')
 
 const outstandingController = {
     createOutstanding: async (req, res) => {
@@ -89,7 +90,7 @@ const outstandingController = {
             }
     
             // Perform the search using your model
-            const searchResults = await Outstanding.find(searchQuery);
+            const searchResults = await Invoice.find(searchQuery);
     
             // Return the search results
             res.json(searchResults);
