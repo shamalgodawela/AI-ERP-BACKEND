@@ -74,6 +74,42 @@ const outstandingController = {
             console.error('Error fetching outstanding statuses:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+    },
+    // New function to handle search
+    searchOutstanding: async (req, res) => {
+        try {
+            // Extract search parameters from the request query
+            const { invoiceNumber, exe, customer, status } = req.query;
+
+            // Build the search query based on the provided parameters
+            const searchQuery = {};
+
+            if (invoiceNumber) {
+                searchQuery.invoiceNumber = invoiceNumber;
+            }
+
+            if (exe) {
+                searchQuery.exe = exe;
+            }
+
+            if (customer) {
+                searchQuery.customer = customer;
+            }
+
+            if (status) {
+                searchQuery.status = status;
+            }
+
+            // Perform the search using your model
+            const searchResults = await Outstanding.find(searchQuery);
+
+            // Return the search results
+            res.json(searchResults);
+        } catch (error) {
+            // Handle errors
+            console.error('Error during search:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
     
     
