@@ -80,17 +80,13 @@ const outstandingController = {
     searchOutstanding: async (req, res) => {
         try {
             // Extract search parameters from the request query
-            const { exe, status } = req.query;
+            const { exe } = req.query;
     
             // Build the search query based on the provided parameters
             const searchQuery = {};
     
             if (exe) {
                 searchQuery.exe = exe;
-            }
-    
-            if (status) {
-                searchQuery.status = status; // Add status to the search query
             }
     
             // Perform the search using your model
@@ -104,7 +100,6 @@ const outstandingController = {
             res.status(500).json({ error: 'Internal server error' });
         }
     }
-    
     
     
     
