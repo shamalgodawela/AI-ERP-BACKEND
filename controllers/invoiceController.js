@@ -218,7 +218,7 @@ const getLastInvoiceNumber = async (req, res) => {
 const checkOrderNumberExists = async (req, res) => {
   try {
     const orderNumber = req.params.orderNumber;
-    const existingOrder = await Order.findOne({ orderNumber });
+    const existingOrder = await Invoice.findOne({ orderNumber });
 
     if (existingOrder) {
       // Order number already exists
