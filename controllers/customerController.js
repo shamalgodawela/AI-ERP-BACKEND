@@ -70,6 +70,45 @@ const getCustomerByCode = asyncHandler(async (req, res) => {
     throw new Error("Customer not found");
   }
 });
+const updateCustomer = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, code, companyName, contact, address, city, phone, email, fax } = req.body;
+
+  // Validation
+  if (!name || !code || !companyName || !contact || !address || !city || !phone) {
+    res.status(400);
+    throw new Error("Please fill all required fields");
+  }
+
+  try {
+    // Find the customer by id
+    const customer = await Customer.findById(id);
+
+    if (!customer) {
+      res.status(404);
+      throw new Error("Customer not found");
+    }
+
+    // Update customer details
+    customer.name = name;
+    customer.code = code;
+    customer.companyName = companyName;
+    customer.contact = contact;
+    customer.address = address;
+    customer.city = city;
+    customer.phone = phone;
+    customer.email = email;
+    customer.fax = fax;
+
+    // Save the updated customer
+    const updatedCustomer = await customer.save();
+
+    res.json(updatedCustomer);
+  } catch (error) {
+    res.status(500);
+    throw new Error("Failed to update customer details");
+  }
+});
 
 
 
@@ -77,5 +116,6 @@ module.exports={
   createCustomer,
   getCustomers,
   getCustomerByCode,
+  updateCustomer
 
 }

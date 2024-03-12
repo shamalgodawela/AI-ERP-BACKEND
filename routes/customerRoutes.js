@@ -10,5 +10,6 @@ router.post('/customers', protect, customerController.createCustomer);
 router.get('/customers', protect, customerController.getCustomers);
 // New route for getting a single customer by code
 router.get('/customers/:code', customerController.getCustomerByCode);
+router.patch('/customersup/:id', protect, customerController.updateCustomer);
 
 module.exports = router;
