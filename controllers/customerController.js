@@ -109,6 +109,19 @@ const updateCustomer = asyncHandler(async (req, res) => {
     throw new Error("Failed to update customer details");
   }
 });
+const getCustomerById = asyncHandler(async (req, res) => {
+  const customerId = req.params.id;
+
+  // Find the customer by ID
+  const customer = await Customer.findById(customerId);
+
+  if (customer) {
+    res.json(customer);
+  } else {
+    res.status(404);
+    throw new Error("Customer not found");
+  }
+});
 
 
 
@@ -116,6 +129,7 @@ module.exports={
   createCustomer,
   getCustomers,
   getCustomerByCode,
-  updateCustomer
+  updateCustomer,
+  getCustomerById
 
 }

@@ -12,4 +12,8 @@ router.get('/customers', protect, customerController.getCustomers);
 router.get('/customers/:code', customerController.getCustomerByCode);
 router.patch('/customersup/:id', protect, customerController.updateCustomer);
 
+//get customer by id
+
+router.get('/customersn/:id', protect, customerController.getCustomerById);
+
 module.exports = router;
