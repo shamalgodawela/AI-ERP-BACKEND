@@ -25,7 +25,6 @@ const invoiceSchema = new mongoose.Schema({
   invoiceDate: String,
   orderNumber:{
     type:String,
-    unique:true,
   },
   orderDate:String,
   exe: String,
