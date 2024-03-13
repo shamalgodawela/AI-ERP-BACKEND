@@ -10,5 +10,7 @@ router.get('/get-total-invoice-value/:code', invoiceController.getTotalInvoiceVa
 router.get('/monthly-total-invoice/:code', invoiceController.getMonthlyTotalInvoice);
 router.get('/lastInvoiceNumber',invoiceController.getLastInvoiceNumber);
 router.get('/check/:orderNumber', invoiceController.checkOrderNumberExists);
+// Route for searching invoices
+router.get('/search-invoices', invoiceController.searchInvoices);
 
 module.exports = router;

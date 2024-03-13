@@ -233,6 +233,48 @@ const checkOrderNumberExists = async (req, res) => {
   }
 };
 
+const searchInvoices = async (req, res) => {
+  try {
+    // Destructure parameters from request query
+    const { searchQuery, startDate, endDate, exe } = req.query;
+
+    // Construct the query object based on provided parameters
+    const query = {};
+
+    if (searchQuery) {
+      // Add searchQuery to search by invoiceNumber or customer
+      query.$or = [
+        { invoiceNumber: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search
+        { customer: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search
+      ];
+    }
+
+    if (startDate && endDate) {
+      // Parse startDate and endDate into Date objects
+      const parsedStartDate = new Date(startDate);
+      const parsedEndDate = new Date(endDate);
+
+      // Add startDate and endDate to filter by invoiceDate within the specified range
+      query.invoiceDate = { $gte: parsedStartDate, $lte: parsedEndDate };
+    }
+
+    if (exe) {
+      // Add exe to filter by exe
+      query.exe = exe;
+    }
+
+    // Fetch invoices based on the constructed query
+    const invoices = await Invoice.find(query);
+
+    // Send the response with the filtered invoices
+    res.json(invoices);
+  } catch (error) {
+    // Handle errors
+    console.error('Failed to search invoicesss:', error);
+    res.status(500).json({ error: 'Failed to search invoices' });
+  }
+};
+
 
 module.exports = { 
   addInvoice,
@@ -243,7 +285,8 @@ module.exports = {
   getTotalInvoiceValueByCode,
   getMonthlyTotalInvoice,
   getLastInvoiceNumber,
-  checkOrderNumberExists
+  checkOrderNumberExists,
+  searchInvoices
   
 };
 
