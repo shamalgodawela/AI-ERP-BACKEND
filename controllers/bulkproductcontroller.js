@@ -4,7 +4,7 @@ const BulkProduct = require('../models/bulkproduct');
 const addProduct = async (req, res) => {
   try {
     // Extract data from request body
-    const { bulkCode, quantity, weight } = req.body;
+    const { bulkCode, products, quantity, weight } = req.body;
 
     // Calculate total weight
     const totweight = quantity * weight;
@@ -12,6 +12,7 @@ const addProduct = async (req, res) => {
     // Create a new product instance
     const newProduct = new BulkProduct({
       bulkCode,
+      products,
       quantity,
       weight,
       totweight
@@ -26,6 +27,8 @@ const addProduct = async (req, res) => {
     res.status(500).json({ error: 'Failed to add product' });
   }
 };
+
+// Controller function to get all products from the database
 const getAllProducts = async (req, res) => {
   try {
     // Fetch all products from the database
@@ -37,6 +40,7 @@ const getAllProducts = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 };
+
 module.exports = { 
   addProduct,
   getAllProducts

@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 
 // Define the product schema
 const productSchema = new mongoose.Schema({
+  products:[
+    {
+      productCode: String,
+      productName: String,
+    }
+  ],
   bulkCode: {
     type: String,
     required: true,
