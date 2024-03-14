@@ -1,5 +1,6 @@
 const Product = require('../models/productModel'); // Import the old Product model
 const DateProduct = require('../models/dateProduct'); // Import the new DateProduct model
+const BulkProduct = require('../models/bulkproduct');
 
 // Controller function to add a new product and update existing products based on category match
 const addProductAndUpdate = async (req, res) => {
@@ -20,6 +21,19 @@ const addProductAndUpdate = async (req, res) => {
             // Update quantity by adding parsedNumberOfUnits
             existingProduct.quantity = parsedExistingQuantity + parsedNumberOfUnits;
             await existingProduct.save();
+
+            // Find bulk product with the same category
+            const bulkProduct = await BulkProduct.findOne({ category });
+
+            if (bulkProduct) {
+                // Reduce the quantity in the BulkProduct
+                bulkProduct.quantity -= parsedNumberOfUnits;
+                await bulkProduct.save();
+            } else {
+                console.log('No bulkProduct found with the same category.');
+                // If no bulk product found, return error
+                return res.status(404).json({ success: false, message: 'No bulkProduct found with the same category.' });
+            }
 
             // Create a new product using the dateProduct data
             const newProduct = await DateProduct.create({
