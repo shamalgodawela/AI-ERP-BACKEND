@@ -4,29 +4,27 @@ const BulkProduct = require('../models/bulkproduct');
 const addProduct = async (req, res) => {
   try {
     // Extract data from request body
-    const { bulkCode, products, quantity, weight } = req.body;
-
-    // Calculate total weight
-    const totweight = quantity * weight;
-
-    // Create a new product instance
-    const newProduct = new BulkProduct({
+    const { bulkCode, products, quantity, weight,weightsh } = req.body;
+// Create a new bulk product instance
+    const newBulkProduct = new BulkProduct({
       bulkCode,
       products,
       quantity,
       weight,
-      totweight
+      weightsh
+      
     });
 
-    // Save the new product to the database
-    await newProduct.save();
+    // Save the new bulk product to the database
+    await newBulkProduct.save();
 
-    res.status(201).json({ message: 'Product added successfully', product: newProduct });
+    res.status(201).json({ message: 'Bulk product added successfully', product: newBulkProduct });
   } catch (error) {
-    console.error('Error adding product:', error);
-    res.status(500).json({ error: 'Failed to add product' });
+    console.error('Error adding bulk product:', error);
+    res.status(500).json({ error: 'Failed to add bulk product' });
   }
 };
+
 
 // Controller function to get all products from the database
 const getAllProducts = async (req, res) => {

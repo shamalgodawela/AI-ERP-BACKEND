@@ -1,5 +1,7 @@
 const Product = require('../models/productModel'); // Import the old Product model
 const DateProduct = require('../models/dateProduct'); // Import the new DateProduct model
+const BulkProduct = require('../models/bulkproduct');
+
 
 // Controller function to add a new product and update existing products based on category match
 const addProductAndUpdate = async (req, res) => {
@@ -25,15 +27,32 @@ const addProductAndUpdate = async (req, res) => {
             const bulkProduct = await BulkProduct.findOne({ 'products.productCode': category });
 
             if (bulkProduct) {
-                // Reduce the quantity in the BulkProduct
-                const productIndex = bulkProduct.products.findIndex(product => product.productCode === category);
-                bulkProduct.products[productIndex].quantity -= parsedNumberOfUnits;
+                let newQuantity;
+
+      // Check if all necessary values are valid numbers
+if (!isNaN(bulkProduct.weight) && !isNaN(bulkProduct.quantity) && !isNaN(numberOfUnits)) {
+    // Convert packsize to an integer only if it represents a valid number
+    const parsedPacksize = !isNaN(parseInt(packsize)) ? parseInt(packsize) : 0;
+
+    // Calculate newQuantity if packsize is a valid number
+    newQuantity = (bulkProduct.weight * bulkProduct.quantity - numberOfUnits * parsedPacksize) / bulkProduct.weight;
+} else {
+    // If any of the values are not valid numbers, set newQuantity to 0 or handle it accordingly
+    newQuantity = 0; // Or handle it based on your requirements
+}
+
+                
+
+                // Update quantity in BulkProduct
+                bulkProduct.quantity = newQuantity;
                 await bulkProduct.save();
             } else {
                 console.log('No bulkProduct found with the same product code.');
                 // If no bulk product found, return error
                 return res.status(404).json({ success: false, message: 'No bulkProduct found with the same product code.' });
             }
+
+            const totweight = numberOfUnits * parseInt(packsize);
 
             // Create a new product using the dateProduct data
             const newProduct = await DateProduct.create({
@@ -43,7 +62,8 @@ const addProductAndUpdate = async (req, res) => {
                 category,
                 unitPrice,
                 numberOfUnits,
-                packsize
+                packsize,
+                totweight
             });
 
             // Send success response
@@ -57,6 +77,7 @@ const addProductAndUpdate = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Failed to add product.', error: error.message });
     }
 };
+
 
 // Controller function to get all dateProducts
 const getAllDateProducts = async (req, res) => {

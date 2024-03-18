@@ -26,7 +26,12 @@ const dateproductNewSchema = new mongoose.Schema({
     },
     packsize:{
         type:String,
+    },
+    totweight:{
+        type:Number,
+
     }
+
 });
 
 const dateProduct = mongoose.model("dateProduct", dateproductNewSchema);

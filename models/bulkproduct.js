@@ -4,8 +4,13 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema({
   products:[
     {
-      productCode: String,
-      productName: String,
+      productCode:
+      {
+        type:String,
+        required:true
+      
+      },
+      
     }
   ],
   bulkCode: {
@@ -21,9 +26,12 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  totweight: {
-    type: Number,
+  weightsh: {
+    type: String,
+    required: true
   }
+  
+ 
 });
 
 // Create the Product model
