@@ -23,29 +23,39 @@ const addProductAndUpdate = async (req, res) => {
             existingProduct.quantity = parsedExistingQuantity + parsedNumberOfUnits;
             await existingProduct.save();
 
-            // Find bulk product with the same product code
-            const bulkProduct = await BulkProduct.findOne({ 'products.productCode': category });
+            // Find bulk products with the same product code
+            const bulkProducts = await BulkProduct.find({ 'products.productCode': category });
 
-            if (bulkProduct) {
+            if (bulkProducts.length > 0) {
                 let newQuantity;
 
-      // Check if all necessary values are valid numbers
-if (!isNaN(bulkProduct.weight) && !isNaN(bulkProduct.quantity) && !isNaN(numberOfUnits)) {
-    // Convert packsize to an integer only if it represents a valid number
-    const parsedPacksize = !isNaN(parseInt(packsize)) ? parseInt(packsize) : 0;
+                // Check if category is BP20
+                if (category === 'BP20') {
+                    // Iterate over bulk products
+                    for (const bulkProduct of bulkProducts) {
+                        // Set weight based on bulk code
+                        const weight = bulkProduct.products.productCode === 'BPB15' ? 15 : bulkProduct.products.productCode === 'GRN25' ? 5 : bulkProduct.weight;
 
-    // Calculate newQuantity if packsize is a valid number
-    newQuantity = (bulkProduct.weight * bulkProduct.quantity - numberOfUnits * parsedPacksize) / bulkProduct.weight;
-} else {
-    // If any of the values are not valid numbers, set newQuantity to 0 or handle it accordingly
-    newQuantity = 0; // Or handle it based on your requirements
-}
+                        // Update weight in bulk product
+                        bulkProduct.weight = weight;
+                        await bulkProduct.save();
 
-                
+                        // Calculate newQuantity for both bulk codes
+                        newQuantity = (bulkProduct.weight * bulkProduct.quantity - numberOfUnits * parsedPacksize) / bulkProduct.weight;
 
-                // Update quantity in BulkProduct
-                bulkProduct.quantity = newQuantity;
-                await bulkProduct.save();
+                        // Update quantity in BulkProduct
+                        bulkProduct.quantity = newQuantity;
+                        await bulkProduct.save();
+                    }
+                } else {
+                    // Calculate newQuantity for single bulk product
+                    const bulkProduct = bulkProducts[0];
+                    newQuantity = (bulkProduct.weight * bulkProduct.quantity - numberOfUnits * parsedPacksize) / bulkProduct.weight;
+
+                    // Update quantity in BulkProduct
+                    bulkProduct.quantity = newQuantity;
+                    await bulkProduct.save();
+                }
             } else {
                 console.log('No bulkProduct found with the same product code.');
                 // If no bulk product found, return error
@@ -77,6 +87,7 @@ if (!isNaN(bulkProduct.weight) && !isNaN(bulkProduct.quantity) && !isNaN(numberO
         return res.status(500).json({ success: false, message: 'Failed to add product.', error: error.message });
     }
 };
+
 
 
 // Controller function to get all dateProducts
