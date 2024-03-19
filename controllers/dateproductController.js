@@ -23,43 +23,49 @@ const addProductAndUpdate = async (req, res) => {
             existingProduct.quantity = parsedExistingQuantity + parsedNumberOfUnits;
             await existingProduct.save();
 
-            // Find bulk products with the same product code
-            const bulkProducts = await BulkProduct.find({ 'products.productCode': category });
+            // Define parsedPacksize here
+            const parsedPacksize = !isNaN(parseInt(packsize)) ? parseInt(packsize) : 0;
 
-            if (bulkProducts.length > 0) {
-                let newQuantity;
+            // Check if category is BP20
+            if (category === 'BP20') {
+                // Find the bulk code BPB15 in bulk products
+                let bulkProductBPB15 = await BulkProduct.findOne({ bulkCode: 'BPB15' });
+                if (bulkProductBPB15) {
+                    // Calculate newQuantity for bulk code BPB15
+                    let newQuantityBPB15 = (bulkProductBPB15.weight * bulkProductBPB15.quantity - numberOfUnits * 15) / bulkProductBPB15.weight;
 
-                // Check if category is BP20
-                if (category === 'BP20') {
-                    // Iterate over bulk products
-                    for (const bulkProduct of bulkProducts) {
-                        // Set weight based on bulk code
-                        const weight = bulkProduct.products.productCode === 'BPB15' ? 15 : bulkProduct.products.productCode === 'GRN25' ? 5 : bulkProduct.weight;
+                    // Update quantity for bulk code BPB15
+                    bulkProductBPB15.quantity = newQuantityBPB15;
+                    await bulkProductBPB15.save();
+                }
 
-                        // Update weight in bulk product
-                        bulkProduct.weight = weight;
-                        await bulkProduct.save();
+                // Find the bulk code GRN25 in bulk products
+                let bulkProductGRN25 = await BulkProduct.findOne({ bulkCode: 'GRN25' });
+                if (bulkProductGRN25) {
+                    // Calculate newQuantity for bulk code GRN25
+                    let newQuantityGRN25 = (bulkProductGRN25.weight * bulkProductGRN25.quantity - numberOfUnits * 5) / bulkProductGRN25.weight;
 
-                        // Calculate newQuantity for both bulk codes
-                        newQuantity = (bulkProduct.weight * bulkProduct.quantity - numberOfUnits * parsedPacksize) / bulkProduct.weight;
+                    // Update quantity for bulk code GRN25
+                    bulkProductGRN25.quantity = newQuantityGRN25;
+                    await bulkProductGRN25.save();
+                }
+            } else {
+                // Find bulk products with the same product code
+                const bulkProducts = await BulkProduct.find({ 'products.productCode': category });
 
-                        // Update quantity in BulkProduct
-                        bulkProduct.quantity = newQuantity;
-                        await bulkProduct.save();
-                    }
-                } else {
+                if (bulkProducts.length > 0) {
                     // Calculate newQuantity for single bulk product
                     const bulkProduct = bulkProducts[0];
-                    newQuantity = (bulkProduct.weight * bulkProduct.quantity - numberOfUnits * parsedPacksize) / bulkProduct.weight;
+                    let newQuantity = (bulkProduct.weight * bulkProduct.quantity - numberOfUnits * parsedPacksize) / bulkProduct.weight;
 
                     // Update quantity in BulkProduct
                     bulkProduct.quantity = newQuantity;
                     await bulkProduct.save();
+                } else {
+                    console.log('No bulkProduct found with the same product code.');
+                    // If no bulk product found, return error
+                    return res.status(404).json({ success: false, message: 'No bulkProduct found with the same product code.' });
                 }
-            } else {
-                console.log('No bulkProduct found with the same product code.');
-                // If no bulk product found, return error
-                return res.status(404).json({ success: false, message: 'No bulkProduct found with the same product code.' });
             }
 
             const totweight = numberOfUnits * parseInt(packsize);
