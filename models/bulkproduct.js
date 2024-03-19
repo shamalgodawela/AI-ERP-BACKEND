@@ -29,6 +29,10 @@ const productSchema = new mongoose.Schema({
   weightsh: {
     type: String,
     required: true
+  },
+  name: {
+    type: String,
+    required: true
   }
   
  
