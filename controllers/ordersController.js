@@ -170,7 +170,76 @@ class OrdersController {
             res.status(500).json({ error: 'Internal server error' });
         }
     }
+    async getLastOrderNumberStartingWithEA(req, res) {
+        try {
+            // Find the last order number that starts with "EA"
+            const lastOrder = await Order.findOne({ orderNumber: /^EA/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    async getLastOrderNumberStartingWithSU(req, res) {
+        try {
+            // Find the last order number that starts with "EA"
+            const lastOrder = await Order.findOne({ orderNumber: /^SU/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "SU" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    async getLastOrderNumberStartingWithNCP(req, res) {
+        try {
+            // Find the last order number that starts with "EA"
+            const lastOrder = await Order.findOne({ orderNumber: /^NCP/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "NCP" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    async getLastOrderNumberStartingWithUPC(req, res) {
+        try {
+            // Find the last order number that starts with "EA"
+            const lastOrder = await Order.findOne({ orderNumber: /^UPC/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "UPC" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
 }
+
 
 module.exports = OrdersController;
 

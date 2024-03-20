@@ -18,4 +18,12 @@ router.put('/orders/:orderNumber', ordersController.updateOrderDetails);
 
 router.get('/allor', ordersController.getAllOr);//lk
 
+//get last order number begin with selected character
+
+router.get('/lastorder/ea', ordersController.getLastOrderNumberStartingWithEA);
+router.get('/lastorder/su', ordersController.getLastOrderNumberStartingWithSU);
+router.get('/lastorder/ncp', ordersController.getLastOrderNumberStartingWithNCP);
+router.get('/lastorder/upc', ordersController.getLastOrderNumberStartingWithUPC);
+
+
 module.exports = router;
