@@ -19,6 +19,7 @@ const orderRoute = require('./routes/orderRoute');
 const adminRouter = require('./routes/adminRouter');
 const Office = require('./routes/Office');
 const bulkproduct = require('./routes/bulkproduct');
+const returnRoute = require('./routes/returnRoute');
 
 
 const app=express()
@@ -51,6 +52,7 @@ app.use('/api', orderRoute)
 app.use('/api', adminRouter )
 app.use('/api', Office )
 app.use('/api',bulkproduct)
+app.use('/api', returnRoute)
 
 
 
