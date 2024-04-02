@@ -21,6 +21,7 @@ const Office = require('./routes/Office');
 const bulkproduct = require('./routes/bulkproduct');
 const returnRoute = require('./routes/returnRoute');
 const stationery = require('./routes/stationery');
+const stationeryRouter = require('./routes/stationeryRouter');
 
 
 const app=express()
@@ -55,6 +56,8 @@ app.use('/api', Office )
 app.use('/api',bulkproduct)
 app.use('/api', returnRoute)
 app.use('/api', stationery)
+app.use('/api', stationeryRouter )
+
 
 
 
