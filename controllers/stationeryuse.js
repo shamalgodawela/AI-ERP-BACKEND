@@ -1,4 +1,4 @@
-const StationeryUse = require('../models/StationeryUse'); 
+const StationeryUse = require('../models/stationeryUse'); 
 const Stationery = require('../models/stationery'); 
 
 const addStationery = async (req, res) => {
