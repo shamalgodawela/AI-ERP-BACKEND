@@ -1,43 +1,69 @@
-const Return = require('../models/return');
+const Return = require('../models/Return');
+const Invoice = require('../models/invoice');
+const Product = require("../models/productModel");
 
 const addReturnDetails = async (req, res) => {
+    const {
+        products,
+        invoiceNumber,
+        customer,
+        reason,
+        date,
+        remarks
+    } = req.body;
+
     try {
-        // Extract data from the request body
-        const { products, invoiceNumber, customer, reason, date, remarks } = req.body;
+        const existingInvoice = await Invoice.findOne({ invoiceNumber: { $regex: new RegExp(invoiceNumber, "i") } });
 
-        // Find the invoice based on the provided invoiceNumber
-        const invoice = await Invoice.findOne({ invoiceNumber });
+        if (existingInvoice) {
+            for (const product of products) {
+                const { productCode, quantity } = product;
+                const productInInvoice = existingInvoice.products.find(p => p.productCode === productCode);
 
-        if (!invoice) {
-            return res.status(404).json({ message: 'Invoice not found' });
+                if (productInInvoice) {
+                    productInInvoice.quantity -= quantity;
+                }
+            }
+
+            await existingInvoice.save();
+
+            for (const product of products) {
+                const { productCode, quantity } = product;
+                
+                // Find the product by category in the Product database
+                const existingProduct = await Product.findOne({ category: productCode });
+                
+                if (existingProduct) {
+                    // Update the quantity of the existing product
+                    existingProduct.quantity = parseFloat(existingProduct.quantity) + parseFloat(quantity);
+                    await existingProduct.save();
+                }
+                
+            }
+            
+            
+
+            const newReturn = new Return({
+                products,
+                invoiceNumber,
+                customer,
+                reason,
+                date,
+                remarks
+            });
+
+            const savedReturn = await newReturn.save();
+
+            res.status(201).json(savedReturn);
+        } else {
+            console.error('No matching invoice found');
+            res.status(404).json({ message: 'No matching invoice found' });
         }
-
-        // Find the product in the invoice's products array based on the provided productCode
-        const product = invoice.products.find(prod => prod.productCode === products[0].productCode);
-
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found in the invoice' });
-        }
-
-        // Calculate the returntotal for the returned product
-        const returntotal = products[0].quantity * products[0].unitPrice;
-
-        // Reduce the invoiceTotal of the invoice by the returntotal of the returned product
-        product.invoiceTotal -= returntotal;
-
-        // Save the updated invoice back to the database
-        await invoice.save();
-
-        // Now proceed with adding the return details
-        // Your existing code to add return details goes here...
     } catch (error) {
-        // Handle errors
         console.error('Error adding return details:', error);
-        res.status(500).json({ message: 'An error occurred while adding return details' });
+        res.status(500).json({ message: 'Server error' });
     }
 };
-
-
 
 
 module.exports = { addReturnDetails };
