@@ -1,4 +1,4 @@
-const Return = require('../models/Return');
+const Return = require('../models/return');
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
 
