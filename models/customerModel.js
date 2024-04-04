@@ -12,7 +12,8 @@ const customerSchema = new Schema({
   city: { type: String, required: true },
   phone: { type: String, required: true },
   email: { type: String },
-  fax: { type: String }
+  fax: { type: String },
+  district:{type:String,required :true}
 });
 
 const Customer = mongoose.model('Customer', customerSchema);

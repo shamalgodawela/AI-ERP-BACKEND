@@ -2,7 +2,7 @@ const asyncHandler =require("express-async-handler");
 const Customer=require("../models/customerModel")
 
 const createCustomer = asyncHandler(async (req, res) => {
-  const { name, code, companyName, contact, address, city, phone, email, fax } = req.body;
+  const { name, code, companyName, contact, address, city, phone, email, fax, district } = req.body;
 
   // Validation
   if (!name || !code || !companyName || !contact || !address || !city || !phone) {
@@ -27,7 +27,8 @@ const createCustomer = asyncHandler(async (req, res) => {
     city,
     phone,
     email,
-    fax
+    fax,
+    district
   });
 
   res.status(201).json(customer);
@@ -72,7 +73,7 @@ const getCustomerByCode = asyncHandler(async (req, res) => {
 });
 const updateCustomer = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { name, code, companyName, contact, address, city, phone, email, fax } = req.body;
+  const { name, code, companyName, contact, address, city, phone, email, fax,district } = req.body;
 
   try {
     // Find the customer by id
@@ -93,6 +94,7 @@ const updateCustomer = asyncHandler(async (req, res) => {
     if (phone) customer.phone = phone;
     if (email) customer.email = email;
     if (fax) customer.fax = fax;
+    if (district) customer.district = district;
 
     // Validation
     if (!customer.name || !customer.code || !customer.companyName || !customer.contact || !customer.address || !customer.city || !customer.phone) {

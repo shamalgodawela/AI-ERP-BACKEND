@@ -64,6 +64,15 @@ const addReturnDetails = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+const getAllReturnDetails = async (req, res) => {
+    try {
+        const returnDetails = await Return.find();
+        res.status(200).json(returnDetails);
+    } catch (error) {
+        console.error('Error fetching return details:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
 
-module.exports = { addReturnDetails };
+module.exports = { addReturnDetails, getAllReturnDetails };
