@@ -22,6 +22,9 @@ const bulkproduct = require('./routes/bulkproduct');
 const returnRoute = require('./routes/returnRoute');
 const stationery = require('./routes/stationery');
 const stationeryRouter = require('./routes/stationeryRouter');
+const executiveRoute = require('./routes/executiveRoute');
+const locationRoute = require('./routes/locationRoute');
+const exeRouter=require('./routes/exeRouter');
 
 
 const app=express()
@@ -57,8 +60,9 @@ app.use('/api',bulkproduct)
 app.use('/api', returnRoute)
 app.use('/api', stationery)
 app.use('/api', stationeryRouter )
-
-
+app.use('/api', executiveRoute )
+app.use('/api', locationRoute )
+app.use('/api', exeRouter)
 
 
 // Routes

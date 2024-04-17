@@ -16,4 +16,6 @@ router.patch('/customersup/:id', protect, customerController.updateCustomer);
 
 router.get('/customersn/:id', protect, customerController.getCustomerById);
 
+router.delete('/customers/:id', protect, customerController.deleteCustomer);
+
 module.exports = router;

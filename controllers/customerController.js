@@ -125,6 +125,18 @@ const getCustomerById = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteCustomer = asyncHandler(async (req, res) => {
+  const customerId = req.params.id; // Get the customer ID from the request parameters
+
+  // Use Mongoose's findByIdAndDelete method to delete the customer by ID
+  const deletedCustomer = await Customer.findByIdAndDelete(customerId);
+
+  if (deletedCustomer) {
+    res.status(200).json({ message: 'Customer deleted successfully' });
+  } else {
+    res.status(404).json({ message: 'Customer not found' });
+  }
+});
 
 
 module.exports={
@@ -132,6 +144,7 @@ module.exports={
   getCustomers,
   getCustomerByCode,
   updateCustomer,
-  getCustomerById
+  getCustomerById,
+  deleteCustomer
 
 }
