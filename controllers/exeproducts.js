@@ -2,10 +2,10 @@ const asyncHandler = require("express-async-handler");
 const Exeproduct = require("../models/exeProduct");
 
 const createProductexe = asyncHandler(async (req, res) => {
-    const { name, productCode, quantity, price, description } = req.body;
+    const { name,quantity, price, code } = req.body;
 
     // Validation
-    if (!name || !productCode || !quantity || !price || !description) {
+    if (!name || !quantity || !price || !code) {
         res.status(400);
         throw new Error("Please fill all fields");
     }
@@ -17,17 +17,16 @@ const createProductexe = asyncHandler(async (req, res) => {
     }
 
     // Set SKU as the value of the category
-    const sku = productCode;
+    const sku = code;
 
     // Create product
     const productexe = await Exeproduct.create({
         user: req.user.id, // Assuming user ID is available in req.user
         name,
         sku,
-        productCode,
         price,
         quantity,
-        description,
+        code,
     });
 
     res.status(201).json(productexe);

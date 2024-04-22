@@ -15,14 +15,9 @@ const exeproductSchema=mongoose.Schema({
     },
     sku:{
         type:String,
-        required:true,
+       
         default:"SKU"
 
-    },
-    productCode:{
-        type:String,
-        unique: true
-       
     },
     quantity:{
         type:String,
@@ -34,7 +29,7 @@ const exeproductSchema=mongoose.Schema({
         required:[true,"please add a price"],
         trim:true
     },
-    description:{
+    code:{
         type:String,
         required:[true,"please add a description"],
         trim:true
