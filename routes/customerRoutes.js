@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const customerController = require('../controllers/customerController');
 const protect = require('../middleWare/authMiddleware');
+const protectexe = require('../middleWare2/authMiddleware1');
 
 router.post('/customers', protect, customerController.createCustomer);
 // Fetch all customers
@@ -14,7 +15,7 @@ router.patch('/customersup/:id', protect, customerController.updateCustomer);
 
 //get customer by id
 
-router.get('/customersn/:id', protect, customerController.getCustomerById);
+router.get('/customersn/:id', customerController.getCustomerById);
 
 router.delete('/customers/:id', protect, customerController.deleteCustomer);
 
