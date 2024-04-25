@@ -9,6 +9,9 @@ const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
 
+    // Add createdAt field with current date and time
+    invoiceData.createdAt = new Date();
+
     // Calculate unitPrice and invoiceTotal for each product
     for (const product of products) {
       product.unitPrice = parseFloat(product.labelPrice) - (parseFloat(product.labelPrice) * parseFloat(product.discount) / 100);
@@ -119,13 +122,14 @@ const deleteInvoice = async (req, res) => {
 
 const getAllInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find(); // Assuming your Invoice model is named "Invoice"
+    const invoices = await Invoice.find().sort({ invoiceDate: -1 }); // Sort by invoiceDate descending
     res.status(200).json(invoices);
   } catch (error) {
     console.error('Error fetching all invoices:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 const getTotalInvoiceValueByCode = async (req, res) => {
@@ -241,26 +245,33 @@ const searchInvoices = async (req, res) => {
     // Construct the query object based on provided parameters
     const query = {};
 
+    // Search by invoiceNumber or customer (case-insensitive)
     if (searchQuery) {
-      // Add searchQuery to search by invoiceNumber or customer
       query.$or = [
-        { invoiceNumber: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search
-        { customer: { $regex: searchQuery, $options: 'i' } }, // Case-insensitive search
+        { invoiceNumber: { $regex: searchQuery, $options: 'i' } },
+        { customer: { $regex: searchQuery, $options: 'i' } },
       ];
     }
 
-    if (startDate && endDate) {
-      // Parse startDate and endDate into Date objects
-      const parsedStartDate = new Date(startDate);
-      const parsedEndDate = new Date(endDate);
-
-      // Add startDate and endDate to filter by invoiceDate within the specified range
-      query.invoiceDate = { $gte: parsedStartDate, $lte: parsedEndDate };
+    // Filter by exe (optional)
+    if (exe) {
+      query.exe = exe;
     }
 
-    if (exe) {
-      // Add exe to filter by exe
-      query.exe = exe;
+    // Filter by invoiceDate within the specified range (validated)
+    if (startDate && endDate) {
+      try {
+        const parsedStartDate = new Date(startDate);
+        const parsedEndDate = new Date(endDate);
+        // Adjust the endDate to include the entire end day
+        parsedEndDate.setHours(23, 59, 59, 999);
+
+        // Add a condition to check if invoiceDate falls within the specified range
+        query.invoiceDate = { $gte: parsedStartDate, $lte: parsedEndDate };
+      } catch (error) {
+        console.error('Error parsing dates:', error);
+        return res.status(400).json({ error: 'Invalid startDate or endDate format.' });
+      }
     }
 
     // Fetch invoices based on the constructed query
@@ -269,11 +280,12 @@ const searchInvoices = async (req, res) => {
     // Send the response with the filtered invoices
     res.json(invoices);
   } catch (error) {
-    // Handle errors
-    console.error('Failed to search invoicesss:', error);
+    // Handle other errors
+    console.error('Failed to search invoices:', error);
     res.status(500).json({ error: 'Failed to search invoices' });
   }
 };
+
 
 
 module.exports = { 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { stringify } = require("querystring");
 
 const invoiceSchema = new mongoose.Schema({
   products: [
@@ -13,27 +14,28 @@ const invoiceSchema = new mongoose.Schema({
     }
   ],
   invoiceNumber: {
-    type:String,
+    type: String,
     required: true,
-    unique:true,
-    
+    unique: true,
+    trim:true
   },
   customer: String,
-  code:String,
-  address:String,
-  contact:String,
+  code: String,
+  address: String,
+  contact: String,
   invoiceDate: String,
-  orderNumber:{
-    type:String,
+  orderNumber: {
+    type: String,
+    trim:true
   },
-  orderDate:String,
+  orderDate: String,
   exe: String,
-  ModeofPayment:String,
-  TermsofPayment:String,
-  Duedate:String,
+  ModeofPayment: String,
+  TermsofPayment: String,
+  Duedate: String,
   Tax: Number,
   GatePassNo: String,
-  VehicleNo:String,
+  VehicleNo: String,
   
 });
 
