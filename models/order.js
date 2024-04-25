@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
       labelPrice: Number,
        discount: {
         type: String,
-        
+        default: '...'
     },
       unitPrice: Number,
       invoiceTotal: Number,
