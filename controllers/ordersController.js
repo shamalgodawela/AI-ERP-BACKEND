@@ -15,7 +15,7 @@ class OrdersController {
                 const labelPrice = parseFloat(product.labelPrice);
                 const discount = parseFloat(product.discount);
                 const quantity = parseFloat(product.quantity);
-                const unitPrice = labelPrice * (1 - discount / 100); // Calculate unit price
+                const unitPrice = parseFloat(product.unitPrice);
                 const invoiceTotal = unitPrice * quantity; // Calculate invoice total
                 return {
                     ...product,

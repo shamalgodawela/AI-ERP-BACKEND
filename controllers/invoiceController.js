@@ -11,7 +11,7 @@ const addInvoice = async (req, res) => {
 
     // Calculate unitPrice and invoiceTotal for each product
     for (const product of products) {
-      product.unitPrice = parseFloat(product.labelPrice) - (parseFloat(product.labelPrice) * parseFloat(product.discount) / 100);
+      
       product.invoiceTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
 
       // Find the corresponding product in the database based on product code (case-insensitive)
