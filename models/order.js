@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
       labelPrice: Number,
        discount: {
         type: Number,
-        default: '-' // Set your default value here
+        default: '--' // Set your default value here
     },
       unitPrice: Number,
       invoiceTotal: Number,
