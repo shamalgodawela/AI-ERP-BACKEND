@@ -7,10 +7,7 @@ const invoiceSchema = new mongoose.Schema({
       productName: String,
       quantity: Number,
       labelPrice: Number,
-      discount: {
-                type: String,
-                default: '-' // Set your default value here
-            },
+      discount: Number,
       unitPrice: Number,
       invoiceTotal: Number,
     }
@@ -39,16 +36,7 @@ const invoiceSchema = new mongoose.Schema({
   VehicleNo:String,
   
 });
-// Set default value before saving the document
-invoiceSchema.pre('save', function(next) {
-    // Loop through products array to set default discount value if not provided
-    this.products.forEach(product => {
-        if (!product.discount) {
-            product.discount = '-';
-        }
-    });
-    next();
-});
+
 const Invoice = mongoose.model('Invoice', invoiceSchema);
 
 module.exports = Invoice;
