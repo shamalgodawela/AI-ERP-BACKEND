@@ -37,6 +37,7 @@ const invoiceSchema = new mongoose.Schema({
   GatePassNo: String,
   VehicleNo: String,
   
+  
 });
 
 const Invoice = mongoose.model('Invoice', invoiceSchema);

@@ -3,34 +3,37 @@ const Product = require("../models/productModel");
 const Order = require('../models/order');
 
 const escapeRegExp = (string) => {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
 };
 const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
-
-    // Add createdAt field with current date and time
-    invoiceData.createdAt = new Date();
 
     // Calculate unitPrice and invoiceTotal for each product
     for (const product of products) {
       product.unitPrice = parseFloat(product.labelPrice) - (parseFloat(product.labelPrice) * parseFloat(product.discount) / 100);
       product.invoiceTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
 
-      // Find the corresponding product in the database based on product code (case-insensitive)
       const existingProduct = await Product.findOne({
         sku: { $regex: new RegExp(product.productCode, "i") },
         category: { $regex: new RegExp(product.category, "i") },
       });
 
       if (existingProduct) {
-        // Update the quantity and amount in the database
-        existingProduct.quantity -= parseFloat(product.quantity);
-        existingProduct.amount -= parseFloat(product.invoiceTotal);
-
+        
+        if (existingProduct.VehicleNo === 'N1') {
+          // Update the quantity and amount in the database
+          existingProduct.quantity -= parseFloat(product.quantity);
+          existingProduct.amount -= parseFloat(product.invoiceTotal);
+          console.log('Quantity reduced for product code', product.productCode);
+        } else {
+          console.log(`Quantity not reduced for product code ${product.productCode} as VehicleNo is not 'A'. VehicleNo: ${existingProduct.VehicleNo}`);
+        }
+        
         // Save the updated product in the database
         await existingProduct.save();
-      } else {
+      }
+       else {
         // Handle the case where no matching product is found or category mismatch
         console.error(`No matching product found for product code ${product.productCode} or category mismatch.`);
         return res.status(400).json({ error: 'Invalid product code or category mismatch' });
@@ -55,6 +58,7 @@ const addInvoice = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // controllers/invoiceController.js
 
