@@ -21,7 +21,7 @@ const addInvoice = async (req, res) => {
 
       if (existingProduct) {
         
-        if (existingProduct.VehicleNo === 'N1') {
+        if (existingProduct.VehicleNo === 'A') {
           // Update the quantity and amount in the database
           existingProduct.quantity -= parseFloat(product.quantity);
           existingProduct.amount -= parseFloat(product.invoiceTotal);
