@@ -20,20 +20,17 @@ const addInvoice = async (req, res) => {
       });
 
       if (existingProduct) {
-        
-        if (existingProduct.VehicleNo === 'A') {
+        if (existingProduct.VehicleNo === 'A') { // Check if storesCode is equal to 'A'
           // Update the quantity and amount in the database
           existingProduct.quantity -= parseFloat(product.quantity);
           existingProduct.amount -= parseFloat(product.invoiceTotal);
-          console.log('Quantity reduced for product code', product.productCode);
         } else {
-          console.log(`Quantity not reduced for product code ${product.productCode} as VehicleNo is not 'A'. VehicleNo: ${existingProduct.VehicleNo}`);
+          console.log(`Quantity not reduced for product code ${product.productCode} as storesCode is not 'A'.`);
         }
-        
+
         // Save the updated product in the database
         await existingProduct.save();
-      }
-       else {
+      } else {
         // Handle the case where no matching product is found or category mismatch
         console.error(`No matching product found for product code ${product.productCode} or category mismatch.`);
         return res.status(400).json({ error: 'Invalid product code or category mismatch' });
@@ -58,7 +55,6 @@ const addInvoice = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 // controllers/invoiceController.js
 
