@@ -1,6 +1,6 @@
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
-const Order = require('../models/order');
+
 
 const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
@@ -14,19 +14,16 @@ const addInvoice = async (req, res) => {
       product.unitPrice = parseFloat(product.labelPrice) - (parseFloat(product.labelPrice) * parseFloat(product.discount) / 100);
       product.invoiceTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
 
+      // Find the corresponding product in the database based on product code (case-insensitive)
       const existingProduct = await Product.findOne({
         sku: { $regex: new RegExp(product.productCode, "i") },
         category: { $regex: new RegExp(product.category, "i") },
       });
 
       if (existingProduct) {
-        if (existingProduct.VehicleNo === 'A') { // Check if storesCode is equal to 'A'
-          // Update the quantity and amount in the database
-          existingProduct.quantity -= parseFloat(product.quantity);
-          existingProduct.amount -= parseFloat(product.invoiceTotal);
-        } else {
-          console.log(`Quantity not reduced for product code ${product.productCode} as storesCode is not 'A'.`);
-        }
+        // Update the quantity and amount in the database
+        existingProduct.quantity -= parseFloat(product.quantity);
+        existingProduct.amount -= parseFloat(product.invoiceTotal);
 
         // Save the updated product in the database
         await existingProduct.save();
