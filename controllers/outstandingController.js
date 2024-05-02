@@ -99,7 +99,31 @@ const outstandingController = {
             console.error('Error during search:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+    },
+    searchOutstandingBycus: async (req, res) => {
+        try {
+            // Extract search parameters from the request query
+            const { code } = req.query;
+    
+            // Build the search query based on the provided parameters
+            const searchQuery = {};
+    
+            if (code) { // Check if code is provided
+                searchQuery.code = code;
+            }
+    
+            // Perform the search using your model
+            const searchResults = await Invoice.find(searchQuery);
+    
+            // Return the search results
+            res.json(searchResults);
+        } catch (error) {
+            // Handle errors
+            console.error('Error during search:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
+    
     
     
     
