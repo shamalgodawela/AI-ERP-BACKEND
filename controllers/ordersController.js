@@ -224,7 +224,24 @@ class OrdersController {
     async getLastOrderNumberStartingWithUPC(req, res) {
         try {
             // Find the last order number that starts with "EA"
-            const lastOrder = await Order.findOne({ orderNumber: /^UPC/ })
+            const lastOrder = await Order.findOne({ orderNumber: /^UPC1/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "UPC" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    async getLastOrderNumberStartingWithUPC2(req, res) {
+        try {
+            // Find the last order number that starts with "EA"
+            const lastOrder = await Order.findOne({ orderNumber: /^UPC2/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
     
