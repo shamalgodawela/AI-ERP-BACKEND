@@ -282,7 +282,30 @@ const searchInvoices = async (req, res) => {
     res.status(500).json({ error: 'Failed to search invoices' });
   }
 };
+const updateInvoice = async (req, res) => {
+  try {
+    const { invoiceNumber } = req.params; 
+    const updates = req.body; 
 
+    
+    const updatedInvoice = await Invoice.findOneAndUpdate(
+      { invoiceNumber },
+      updates,
+      { new: true }
+    );
+
+   
+    if (!updatedInvoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+   
+    res.json(updatedInvoice);
+  } catch (error) {
+    console.error('Error updating invoice:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 
 module.exports = { 
@@ -295,7 +318,8 @@ module.exports = {
   getMonthlyTotalInvoice,
   getLastInvoiceNumber,
   checkOrderNumberExists,
-  searchInvoices
+  searchInvoices,
+  updateInvoice 
   
 };
 
