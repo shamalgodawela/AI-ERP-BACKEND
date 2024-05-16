@@ -1,10 +1,10 @@
 const CanInvoice = require('../models/CanceldInvoice');
 const Product = require("../models/productModel");
 
+
 const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
 };
-
 const addCanceledInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
@@ -21,9 +21,9 @@ const addCanceledInvoice = async (req, res) => {
       });
 
       if (existingProduct) {
-        // Ensure values are numbers before adding
-        existingProduct.quantity = parseFloat(existingProduct.quantity) + parseFloat(product.quantity);
-        existingProduct.amount = parseFloat(existingProduct.amount) + parseFloat(product.invoiceTotal);
+        
+        existingProduct.quantity += parseFloat(product.quantity);
+        existingProduct.amount += parseFloat(product.invoiceTotal);
 
         // Save the updated product in the database
         await existingProduct.save();
@@ -53,6 +53,8 @@ const addCanceledInvoice = async (req, res) => {
   }
 };
 
-module.exports = {
-  addCanceledInvoice
-};
+module.exports=
+{
+    addCanceledInvoice
+
+}
