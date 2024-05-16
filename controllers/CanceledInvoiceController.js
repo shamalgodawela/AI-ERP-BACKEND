@@ -1,10 +1,10 @@
 const CanInvoice = require('../models/CanceldInvoice');
 const Product = require("../models/productModel");
 
-
 const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
 };
+
 const addCanceledInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
@@ -21,22 +21,13 @@ const addCanceledInvoice = async (req, res) => {
       });
 
       if (existingProduct) {
-        // Parse the existing quantity and invoice total as floats
-        const exQuantity = parseFloat(existingProduct.quantity);
-        const exInvoiceTotal = parseFloat(existingProduct.invoiceTotal);
-        
-        // Parse the incoming product's quantity and invoice total as floats
-        const newQuantity = parseFloat(product.quantity);
-        const newInvoiceTotal = parseFloat(product.invoiceTotal);
-        
-        // Update the existing product's quantity and invoice total
-        existingProduct.quantity = exQuantity + newQuantity;
-        existingProduct.invoiceTotal = exInvoiceTotal + newInvoiceTotal;
-        
+        // Ensure values are numbers before adding
+        existingProduct.quantity = parseFloat(existingProduct.quantity) + parseFloat(product.quantity);
+        existingProduct.amount = parseFloat(existingProduct.amount) + parseFloat(product.invoiceTotal);
+
         // Save the updated product in the database
         await existingProduct.save();
-    }
-     else {
+      } else {
         // Handle the case where no matching product is found or category mismatch
         console.error(`No matching product found for product code ${product.productCode} or category mismatch.`);
         return res.status(400).json({ error: 'Invalid product code or category mismatch' });
@@ -62,8 +53,6 @@ const addCanceledInvoice = async (req, res) => {
   }
 };
 
-module.exports=
-{
-    addCanceledInvoice
-
-}
+module.exports = {
+  addCanceledInvoice
+};
