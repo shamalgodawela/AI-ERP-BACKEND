@@ -22,8 +22,8 @@ const addCanceledInvoice = async (req, res) => {
 
       if (existingProduct) {
         // Update the quantity and amount in the database
-        existingProduct.quantity += parseFloat(product.quantity);
-        existingProduct.amount += parseFloat(product.invoiceTotal);
+        parseFloat(existingProduct.quantity) += parseFloat(product.quantity);
+        parseFloat(existingProduct.amount) += parseFloat(product.invoiceTotal);
 
         // Save the updated product in the database
         await existingProduct.save();

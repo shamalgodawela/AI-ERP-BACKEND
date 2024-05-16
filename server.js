@@ -43,14 +43,14 @@ app.use(cors({
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 //route middleware
-// Correct order:
+
 app.use("/api/users", userRoute);
 app.use("/api/products", productRoute);
 app.use("/api/contactus", contactRoute);
-app.use('/api', invoiceRoutes);  // <-- This should come before the error handling middleware
+app.use('/api', invoiceRoutes);  
 app.use(errorHandler);
 app.use('/api', customerRoutes); 
-// Mount the outstanding router
+
 app.use('/api', outstandingRouter);
 
 app.use('/api', dateProductRoute);
