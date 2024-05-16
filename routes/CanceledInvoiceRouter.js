@@ -4,5 +4,6 @@ const CanceledInvoiceController = require('../controllers/CanceledInvoiceControl
 
 
 router.post('/addCanceled-invoice', CanceledInvoiceController.addCanceledInvoice);
-
+router.get('/getallCancelInvoice',CanceledInvoiceController.getAllCancelInvoice )
+router.get('/getcancelbyid/:id',CanceledInvoiceController.getCancelInvoiceById)
 module.exports=router

@@ -1,5 +1,7 @@
 const CanInvoice = require('../models/CanceldInvoice');
 const Product = require("../models/productModel");
+const asyncHandler =require("express-async-handler");
+
 
 
 const escapeRegExp = (string) => {
@@ -21,9 +23,9 @@ const addCanceledInvoice = async (req, res) => {
       });
 
       if (existingProduct) {
-        
-        existingProduct.quantity += parseFloat(product.quantity);
-        existingProduct.amount += parseFloat(product.invoiceTotal);
+        // Ensure values are numbers before adding
+        existingProduct.quantity = parseFloat(existingProduct.quantity) + parseFloat(product.quantity);
+        existingProduct.amount = parseFloat(existingProduct.amount) + parseFloat(product.invoiceTotal);
 
         // Save the updated product in the database
         await existingProduct.save();
@@ -53,8 +55,40 @@ const addCanceledInvoice = async (req, res) => {
   }
 };
 
-module.exports=
-{
-    addCanceledInvoice
 
-}
+const getAllCancelInvoice = async(req, res)=>{
+  try {
+    const allcaninvoice= await CanInvoice.find().sort({invoiceDate: -1});
+    res.status(200).json(allcaninvoice)
+    
+  } catch (error) {
+    console.error('error fetching all invoices', error.message)
+
+    res.status(500).json({error: 'internal server error'})
+    
+  }
+};
+
+const getCancelInvoiceById = asyncHandler(async (req, res) => {
+  const { invoiceNumber } = req.params;
+
+  try {
+    const cancelInvoice = await CanInvoice.findOne({invoiceNumber});
+    
+    if (!cancelInvoice) {
+      return res.status(404).json({ error: 'Cancel invoice not found' });
+    }
+
+    res.status(200).json(cancelInvoice);
+  } catch (error) {
+    console.error(`Error fetching canceled invoice with id: ${invoiceNumber}`, error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+module.exports = {
+  addCanceledInvoice,
+  getAllCancelInvoice,
+  getCancelInvoiceById
+};
