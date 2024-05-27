@@ -53,9 +53,7 @@ const addInvoice = async (req, res) => {
   }
 };
 
-// controllers/invoiceController.js
 
-// ... Other imports
 
 const getInvoiceById = async (req, res) => {
   const { id } = req.params;
@@ -282,31 +280,79 @@ const searchInvoices = async (req, res) => {
     res.status(500).json({ error: 'Failed to search invoices' });
   }
 };
-const updateInvoice = async (req, res) => {
-  try {
-    const { invoiceNumber } = req.params; 
-    const updates = req.body; 
 
-    
-    const updatedInvoice = await Invoice.findOneAndUpdate(
-      { invoiceNumber },
-      updates,
-      { new: true }
+const updateInvoice = async (req, res) => {
+  const { invoiceNumber } = req.params;
+  const updateData = req.body;
+
+  try {
+    const invoice = await Invoice.findOneAndUpdate(
+      { invoiceNumber: invoiceNumber },
+      updateData,
+      { new: true, runValidators: true }
     );
 
-   
-    if (!updatedInvoice) {
+    if (!invoice) {
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
-   
-    res.json(updatedInvoice);
+    res.status(200).json({ message: 'Invoice updated successfully', invoice });
   } catch (error) {
-    console.error('Error updating invoice:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+const getInvoiceByNumber = async (req, res) => {
+  const { invoiceNumber } = req.params;
+
+  try {
+    const invoice = await Invoice.findOne({ invoiceNumber: invoiceNumber });
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    res.status(200).json(invoice);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
   }
 };
 
+
+
+const getSumByGatePassNo = async (req, res) => {
+  try {
+    const result = await Invoice.aggregate([
+      { $match: { GatePassNo: 'Printed' } }, // Match invoices with GatePassNo 'Printed'
+      { $unwind: '$products' }, // Deconstruct the products array
+      { 
+        $group: { 
+          _id: '$_id', 
+          invoiceTotal: { 
+            $sum: { 
+              $multiply: [
+                '$products.labelPrice',
+                { $subtract: [1, { $divide: ['$products.discount', 100] }] },
+                '$products.quantity'
+              ]
+            }
+          } 
+        }
+      }, // Group and sum the product totals for each invoice
+      { $group: { _id: null, totalSum: { $sum: '$invoiceTotal' } } } // Group and sum all invoice totals
+    ]);
+
+    const sum = result.length > 0 ? result[0].totalSum : 0; // Handle case where no documents are found
+
+    res.json({ sum });
+  } catch (error) {
+    console.error('Error calculating sum:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+module.exports = {
+  getSumByGatePassNo,
+};
 
 module.exports = { 
   addInvoice,
@@ -319,7 +365,10 @@ module.exports = {
   getLastInvoiceNumber,
   checkOrderNumberExists,
   searchInvoices,
-  updateInvoice 
+  updateInvoice,
+  getInvoiceByNumber,
+  getSumByGatePassNo
+  
   
 };
 
