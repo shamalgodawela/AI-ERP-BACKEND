@@ -12,5 +12,8 @@ router.get('/lastInvoiceNumber',invoiceController.getLastInvoiceNumber);
 router.get('/check/:orderNumber', invoiceController.checkOrderNumberExists);
 // Route for searching invoices
 router.get('/search-invoices', invoiceController.searchInvoices);
+router.put('/invoices/:invoiceNumber', invoiceController.updateInvoice);
+router.get('/invoices/:invoiceNumber', invoiceController.getInvoiceByNumber);
+router.get('/invoi/sum', invoiceController.getSumByGatePassNo);
 
 module.exports = router;
