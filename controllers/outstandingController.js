@@ -130,7 +130,7 @@ const outstandingController = {
                     $group: {
                         _id: null,
                         totalAmount: { $sum: '$amount' }
-                    }
+                    } 
                 }
             ]);
 

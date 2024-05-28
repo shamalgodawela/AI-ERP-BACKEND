@@ -350,6 +350,65 @@ const getSumByGatePassNo = async (req, res) => {
   }
 };
 
+const getMonthlySales = async (req, res) => {
+  try {
+    const result = await Invoice.aggregate([
+      { $match: { GatePassNo: 'Printed' } }, // Match invoices with GatePassNo 'Printed'
+      { $unwind: '$products' }, // Deconstruct the products array
+      {
+        $addFields: {
+          invoiceDate: { $toDate: '$invoiceDate' }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$invoiceDate' },
+            month: { $month: '$invoiceDate' },
+            invoiceId: '$_id'
+          },
+          invoiceTotal: {
+            $sum: {
+              $multiply: [
+                '$products.labelPrice',
+                { $subtract: [1, { $divide: ['$products.discount', 100] }] },
+                '$products.quantity'
+              ]
+            }
+          }
+        }
+      }, // Group and sum the product totals for each invoice
+      {
+        $group: {
+          _id: {
+            year: '$_id.year',
+            month: '$_id.month'
+          },
+          totalSales: { $sum: '$invoiceTotal' }
+        }
+      }, // Group and sum the invoice totals for each month
+      { $sort: { '_id.year': 1, '_id.month': 1 } } // Sort by year and month
+    ]);
+
+    const formattedResult = result.map(item => ({
+      year: item._id.year,
+      month: item._id.month,
+      totalSales: item.totalSales
+    }));
+
+    res.json(formattedResult);
+  } catch (error) {
+    console.error('Error fetching monthly sales:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
+
+
+
 module.exports = {
   getSumByGatePassNo,
 };
@@ -367,7 +426,8 @@ module.exports = {
   searchInvoices,
   updateInvoice,
   getInvoiceByNumber,
-  getSumByGatePassNo
+  getSumByGatePassNo,
+  getMonthlySales
   
   
 };

@@ -15,5 +15,6 @@ router.get('/search-invoices', invoiceController.searchInvoices);
 router.put('/invoices/:invoiceNumber', invoiceController.updateInvoice);
 router.get('/invoices/:invoiceNumber', invoiceController.getInvoiceByNumber);
 router.get('/invoi/sum', invoiceController.getSumByGatePassNo);
+router.get('/monthlysales',invoiceController.getMonthlySales)
 
 module.exports = router;
