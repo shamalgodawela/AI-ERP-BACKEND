@@ -14,5 +14,7 @@ router.get('/get-last-outstanding/:invoiceNumber', outstandingController.getLast
 router.get('/get-outstanding-statuses', outstandingController.getOutstandingStatuses);
 router.get('/search-outstanding', outstandingController.searchOutstanding);
 router.get('/search-outstandingbycus', outstandingController.searchOutstandingBycus)
+router.get('/sumofcollection', outstandingController.getSumOfOutstandingAmounts)
+
 module.exports = router;
 

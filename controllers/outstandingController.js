@@ -122,7 +122,26 @@ const outstandingController = {
             console.error('Error during search:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
-    }
+    },
+    getSumOfOutstandingAmounts: async (req, res) => {
+        try {
+            const result = await Outstanding.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        totalAmount: { $sum: '$amount' }
+                    }
+                }
+            ]);
+
+            const sum = result.length > 0 ? result[0].totalAmount : 0;
+            res.json({ sum });
+        } catch (error) {
+            console.error('Error calculating sum of outstanding amounts:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    },
+    
     
     
     
@@ -132,5 +151,7 @@ const outstandingController = {
     
 };
 
-module.exports = outstandingController;
+
+module.exports =outstandingController;
+
 
