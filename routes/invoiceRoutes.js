@@ -16,5 +16,7 @@ router.put('/invoices/:invoiceNumber', invoiceController.updateInvoice);
 router.get('/invoices/:invoiceNumber', invoiceController.getInvoiceByNumber);
 router.get('/invoi/sum', invoiceController.getSumByGatePassNo);
 router.get('/monthlysales',invoiceController.getMonthlySales)
+router.get('/monthlysalesbyexe',invoiceController.getMonthlySalesbyExe)
+router.get('/salesbyExe',invoiceController.getSalesByExe)
 
 module.exports = router;

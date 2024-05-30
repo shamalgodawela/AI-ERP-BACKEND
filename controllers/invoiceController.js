@@ -403,7 +403,105 @@ const getMonthlySales = async (req, res) => {
   }
 };
 
+const getMonthlySalesbyExe = async (req, res) => {
+  try {
+    const { exe } = req.query; // Extract 'exe' parameter from the request query
+    const matchStage = { GatePassNo: 'Printed' }; // Match invoices with GatePassNo 'Printed'
 
+    // Optionally, add the 'exe' field to the match stage if provided in the query
+    if (exe) {
+      matchStage.exe = exe;
+    }
+
+    const result = await Invoice.aggregate([
+      { $match: matchStage }, // Match invoices with specified criteria
+      { $unwind: '$products' }, // Deconstruct the products array
+      {
+        $addFields: {
+          invoiceDate: { $toDate: '$invoiceDate' }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$invoiceDate' },
+            month: { $month: '$invoiceDate' },
+            exe: '$exe' // Group by 'exe' field as well
+          },
+          invoiceTotal: {
+            $sum: {
+              $multiply: [
+                '$products.labelPrice',
+                { $subtract: [1, { $divide: ['$products.discount', 100] }] },
+                '$products.quantity'
+              ]
+            }
+          }
+        }
+      }, // Group and sum the product totals for each invoice
+      {
+        $group: {
+          _id: {
+            year: '$_id.year',
+            month: '$_id.month',
+            exe: '$_id.exe'
+          },
+          totalSales: { $sum: '$invoiceTotal' }
+        }
+      }, // Group and sum the invoice totals for each month and exe
+      { $sort: { '_id.year': 1, '_id.month': 1 } } // Sort by year and month
+    ]);
+
+    const formattedResult = result.map(item => ({
+      year: item._id.year,
+      month: item._id.month,
+      exe: item._id.exe,
+      totalSales: item.totalSales
+    }));
+
+    res.json(formattedResult);
+  } catch (error) {
+    console.error('Error fetching monthly sales:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+const getSalesByExe = async (req, res) => {
+  try {
+    const { exe } = req.query; // Extract 'exe' parameter from the request query
+    const matchStage = { GatePassNo: 'Printed' }; // Match invoices with GatePassNo 'Printed'
+
+    // Optionally, add the 'exe' field to the match stage if provided in the query
+    if (exe) {
+      matchStage.exe = exe;
+    }
+
+    const result = await Invoice.aggregate([
+      { $match: matchStage }, // Match invoices with specified criteria
+      { $unwind: '$products' }, // Deconstruct the products array
+      {
+        $group: {
+          _id: '$exe', // Group by 'exe' field
+          totalSales: {
+            $sum: {
+              $multiply: [
+                '$products.labelPrice',
+                { $subtract: [1, { $divide: ['$products.discount', 100] }] },
+                '$products.quantity'
+              ]
+            }
+          }
+        }
+      } // Group and sum the product totals for each executive
+    ]);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching sales by executive:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 
 
@@ -427,7 +525,9 @@ module.exports = {
   updateInvoice,
   getInvoiceByNumber,
   getSumByGatePassNo,
-  getMonthlySales
+  getMonthlySales,
+  getMonthlySalesbyExe,
+  getSalesByExe
   
   
 };
