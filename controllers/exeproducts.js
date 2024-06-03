@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Exeproduct = require("../models/exeProduct");
+const Exe = require('../models/exe');
+const { exec } = require("child_process");
 
 const createProductexe = asyncHandler(async (req, res) => {
     const { name,quantity, price, code } = req.body;
@@ -54,9 +56,99 @@ const getSingleProductexe= (asyncHandler(async(req, res)=>{
     res.status(200).json(product);
 
 }))
+const getProductsByAhamed = async (req, res) => {
+    const userId = "6622138a97797a3b0394692f";
+    try {
+      
+      const products = await Exeproduct.find({ user: userId });
+  
+      if (!products.length) {
+        return res.status(404).json({ error: 'No products found for this user' });
+      }
+  
+      res.json(products);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      res.status(500).json({ error: 'Failed to fetch products' });
+    }
+  };
 
+const getProductsBysanjeewa =async (req, res)=>{
+    const userId= "662214b897797a3b03946935";
+
+    try {
+        const products= await Exeproduct.find({user:userId})
+
+        if(!products.length){
+            return res.status(404).json({error:"no products found with this user"})
+        }
+        res.json(products);
+        
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Failed to fetch products' });
+        
+    }
+};
+
+const getproductsbychmeera= async (req,res)=>{
+    const userId="6622146b97797a3b03946932";
+
+    try {
+        const products= await Exeproduct.find({user:userId})
+
+        if(!products.length){
+            return res.status(400).json({error:'no products found with this user'})
+
+        }
+        res.json(products)
+        
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Failed to fetch products' });
+        
+    }
+}
+
+const getproductbydasun= async(req,res)=>{
+    const userId="66221af197797a3b03946938"
+    try {
+        const products= await Exeproduct.find({user:userId});
+        if(!products.length){
+            return res.status(404).json({error:'no products found with this user'})
+        }
+        res.json(products)
+        
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Failed to fetch products' });
+        
+    }
+}
+const getproductsbynawaneethan= async (req,res)=>{
+    const userId="663b46498da136f464fb3dd2";
+
+    try {
+
+        const products= await Exeproduct.find({user:userId});
+
+        if(!products.length){
+            return res.status(404).json({error:'no products found with this user'})
+        }
+        
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Failed to fetch products' });
+        
+    }
+}
 module.exports = {
     createProductexe,
     getProductsexe,
-    getSingleProductexe
+    getSingleProductexe,
+    getProductsByAhamed,
+    getProductsBysanjeewa,
+    getproductsbychmeera,
+    getproductbydasun,
+    getproductsbynawaneethan
 };
