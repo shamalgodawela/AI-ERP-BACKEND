@@ -1,5 +1,7 @@
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
+const outstanding=require("../models/outStanding");
+const Outstanding = require('../models/outStanding');
 
 
 const escapeRegExp = (string) => {
@@ -9,36 +11,36 @@ const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
 
-    // Calculate unitPrice and invoiceTotal for each product
+    
     for (const product of products) {
       product.unitPrice = parseFloat(product.labelPrice) - (parseFloat(product.labelPrice) * parseFloat(product.discount) / 100);
       product.invoiceTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
 
-      // Find the corresponding product in the database based on product code (case-insensitive)
+      
       const existingProduct = await Product.findOne({
         sku: { $regex: new RegExp(product.productCode, "i") },
         category: { $regex: new RegExp(product.category, "i") },
       });
 
       if (existingProduct) {
-        // Update the quantity and amount in the database
+        
         existingProduct.quantity -= parseFloat(product.quantity);
         existingProduct.amount -= parseFloat(product.invoiceTotal);
 
-        // Save the updated product in the database
+        
         await existingProduct.save();
       } else {
-        // Handle the case where no matching product is found or category mismatch
+        
         console.error(`No matching product found for product code ${product.productCode} or category mismatch.`);
         return res.status(400).json({ error: 'Invalid product code or category mismatch' });
       }
     }
 
-    // Calculate totalUnitPrice and totalInvoiceTotal for the entire invoice
+    
     const totalUnitPrice = products.reduce((total, product) => total + parseFloat(product.unitPrice || 0), 0);
     const totalInvoiceTotal = products.reduce((total, product) => total + parseFloat(product.invoiceTotal || 0), 0);
 
-    // Set the calculated values in the main invoice data
+    
     invoiceData.products = products;
     invoiceData.totalUnitPrice = totalUnitPrice;
     invoiceData.totalInvoiceTotal = totalInvoiceTotal;
@@ -77,11 +79,11 @@ const getInvoiceById = async (req, res) => {
 
 
 
-// Assuming you have a middleware to check the password
+
 const checkPassword = (req, res, next) => {
   const { password } = req.body;
   if (password === 'Nihon@2458') {
-    // Password is correct, proceed to the next middleware or logic
+    
     next();
   } else {
     return res.status(403).json({ error: 'Incorrect password' });
@@ -92,7 +94,7 @@ const deleteInvoice = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Wrap the deletion logic inside the checkPassword middleware
+   
     checkPassword(req, res, async () => {
       try {
         const result = await Invoice.deleteOne({ _id: id });
@@ -113,11 +115,11 @@ const deleteInvoice = async (req, res) => {
   }
 };
 
-// controllers/invoiceController.js
+
 
 const getAllInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find().sort({ invoiceDate: -1 }); // Sort by invoiceDate descending
+    const invoices = await Invoice.find().sort({ invoiceDate: -1 }); 
     res.status(200).json(invoices);
   } catch (error) {
     console.error('Error fetching all invoices:', error.message);
@@ -147,7 +149,7 @@ const getTotalInvoiceValueByCode = async (req, res) => {
   }
 };
 
-// Helper function to calculate invoice total
+
 const calculateInvoiceTotal = (invoice) => {
   return invoice.products.reduce((total, product) => {
     return total + parseFloat(product.invoiceTotal || 0);
@@ -155,9 +157,7 @@ const calculateInvoiceTotal = (invoice) => {
 };
 
 
-// controllers/invoiceController.js
 
-// controllers/invoiceController.js
 
 const getMonthlyTotalInvoice = async (req, res) => {
   const { code } = req.params;
@@ -167,7 +167,7 @@ const getMonthlyTotalInvoice = async (req, res) => {
       {
         $match: {
           code: code,
-          invoiceDate: { $ne: "" } // Filter out documents with empty invoiceDate
+          invoiceDate: { $ne: "" } 
         }
       },
       {
@@ -176,7 +176,7 @@ const getMonthlyTotalInvoice = async (req, res) => {
             year: { $year: { $dateFromString: { dateString: "$invoiceDate" } } },
             month: { $month: { $dateFromString: { dateString: "$invoiceDate" } } }
           },
-          totalInvoiceValue: { $sum: { $sum: "$products.invoiceTotal" } } // Sum up the invoiceTotal field for each invoice
+          totalInvoiceValue: { $sum: { $sum: "$products.invoiceTotal" } } 
         }
       }
     ]);
@@ -194,21 +194,21 @@ const getMonthlyTotalInvoice = async (req, res) => {
 
 const getLastInvoiceNumber = async (req, res) => {
     try {
-        // Find the last inserted invoice document and sort by descending order of invoiceDate
+       
         const lastInvoice = await Invoice.findOne().sort({ invoiceDate: -1 });
 
         if (lastInvoice) {
-            // Extract the invoiceNumber and orderNumber from the last invoice document
+            
             const lastInvoiceNumber = lastInvoice.invoiceNumber;
             const lastOrderNumber = lastInvoice.orderNumber;
 
             res.status(200).json({ success: true, lastInvoiceNumber, lastOrderNumber });
         } else {
-            // No invoices found in the database
+            
             res.status(404).json({ success: false, message: 'No invoices found in the database' });
         }
     } catch (error) {
-        // Handle database query errors
+       
         console.error('Error fetching last numbers:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch last numbers', error: error.message });
     }
@@ -220,10 +220,10 @@ const checkOrderNumberExists = async (req, res) => {
     const existingOrder = await Invoice.findOne({ orderNumber });
 
     if (existingOrder) {
-      // Order number already exists
+      
       return res.json({ exists: true });
     } else {
-      // Order number does not exist
+      
       return res.json({ exists: false });
     }
   } catch (error) {
@@ -234,13 +234,13 @@ const checkOrderNumberExists = async (req, res) => {
 
 const searchInvoices = async (req, res) => {
   try {
-    // Destructure parameters from request query
+    
     const { searchQuery, startDate, endDate, exe } = req.query;
 
-    // Construct the query object based on provided parameters
+    
     const query = {};
 
-    // Search by invoiceNumber or customer (case-insensitive)
+    
     if (searchQuery) {
       query.$or = [
         { invoiceNumber: { $regex: searchQuery, $options: 'i' } },
@@ -248,20 +248,20 @@ const searchInvoices = async (req, res) => {
       ];
     }
 
-    // Filter by exe (optional)
+    
     if (exe) {
       query.exe = exe;
     }
 
-    // Filter by invoiceDate within the specified range (validated)
+    
     if (startDate && endDate) {
       try {
         const parsedStartDate = new Date(startDate);
         const parsedEndDate = new Date(endDate);
-        // Adjust the endDate to include the entire end day
+        
         parsedEndDate.setHours(23, 59, 59, 999);
 
-        // Add a condition to check if invoiceDate falls within the specified range
+        
         query.invoiceDate = { $gte: parsedStartDate, $lte: parsedEndDate };
       } catch (error) {
         console.error('Error parsing dates:', error);
@@ -269,13 +269,13 @@ const searchInvoices = async (req, res) => {
       }
     }
 
-    // Fetch invoices based on the constructed query
+    
     const invoices = await Invoice.find(query);
 
-    // Send the response with the filtered invoices
+    
     res.json(invoices);
   } catch (error) {
-    // Handle other errors
+    
     console.error('Failed to search invoices:', error);
     res.status(500).json({ error: 'Failed to search invoices' });
   }
@@ -317,13 +317,13 @@ const getInvoiceByNumber = async (req, res) => {
   }
 };
 
-
+//get sales details -----------------------------------------------------------------------------------------------------
 
 const getSumByGatePassNo = async (req, res) => {
   try {
     const result = await Invoice.aggregate([
-      { $match: { GatePassNo: 'Printed' } }, // Match invoices with GatePassNo 'Printed'
-      { $unwind: '$products' }, // Deconstruct the products array
+      { $match: { GatePassNo: 'Printed' } }, 
+      { $unwind: '$products' }, 
       { 
         $group: { 
           _id: '$_id', 
@@ -337,11 +337,11 @@ const getSumByGatePassNo = async (req, res) => {
             }
           } 
         }
-      }, // Group and sum the product totals for each invoice
-      { $group: { _id: null, totalSum: { $sum: '$invoiceTotal' } } } // Group and sum all invoice totals
+      }, 
+      { $group: { _id: null, totalSum: { $sum: '$invoiceTotal' } } } 
     ]);
 
-    const sum = result.length > 0 ? result[0].totalSum : 0; // Handle case where no documents are found
+    const sum = result.length > 0 ? result[0].totalSum : 0; 
 
     res.json({ sum });
   } catch (error) {
@@ -353,8 +353,8 @@ const getSumByGatePassNo = async (req, res) => {
 const getMonthlySales = async (req, res) => {
   try {
     const result = await Invoice.aggregate([
-      { $match: { GatePassNo: 'Printed' } }, // Match invoices with GatePassNo 'Printed'
-      { $unwind: '$products' }, // Deconstruct the products array
+      { $match: { GatePassNo: 'Printed' } },
+      { $unwind: '$products' },
       {
         $addFields: {
           invoiceDate: { $toDate: '$invoiceDate' }
@@ -377,7 +377,7 @@ const getMonthlySales = async (req, res) => {
             }
           }
         }
-      }, // Group and sum the product totals for each invoice
+      }, 
       {
         $group: {
           _id: {
@@ -386,8 +386,8 @@ const getMonthlySales = async (req, res) => {
           },
           totalSales: { $sum: '$invoiceTotal' }
         }
-      }, // Group and sum the invoice totals for each month
-      { $sort: { '_id.year': 1, '_id.month': 1 } } // Sort by year and month
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } } 
     ]);
 
     const formattedResult = result.map(item => ({
@@ -405,17 +405,17 @@ const getMonthlySales = async (req, res) => {
 
 const getMonthlySalesbyExe = async (req, res) => {
   try {
-    const { exe } = req.query; // Extract 'exe' parameter from the request query
-    const matchStage = { GatePassNo: 'Printed' }; // Match invoices with GatePassNo 'Printed'
+    const { exe } = req.query; 
+    const matchStage = { GatePassNo: 'Printed' }; 
 
-    // Optionally, add the 'exe' field to the match stage if provided in the query
+    
     if (exe) {
       matchStage.exe = exe;
     }
 
     const result = await Invoice.aggregate([
-      { $match: matchStage }, // Match invoices with specified criteria
-      { $unwind: '$products' }, // Deconstruct the products array
+      { $match: matchStage }, 
+      { $unwind: '$products' }, 
       {
         $addFields: {
           invoiceDate: { $toDate: '$invoiceDate' }
@@ -426,7 +426,7 @@ const getMonthlySalesbyExe = async (req, res) => {
           _id: {
             year: { $year: '$invoiceDate' },
             month: { $month: '$invoiceDate' },
-            exe: '$exe' // Group by 'exe' field as well
+            exe: '$exe' 
           },
           invoiceTotal: {
             $sum: {
@@ -438,7 +438,7 @@ const getMonthlySalesbyExe = async (req, res) => {
             }
           }
         }
-      }, // Group and sum the product totals for each invoice
+      }, 
       {
         $group: {
           _id: {
@@ -448,8 +448,8 @@ const getMonthlySalesbyExe = async (req, res) => {
           },
           totalSales: { $sum: '$invoiceTotal' }
         }
-      }, // Group and sum the invoice totals for each month and exe
-      { $sort: { '_id.year': 1, '_id.month': 1 } } // Sort by year and month
+      }, 
+      { $sort: { '_id.year': 1, '_id.month': 1 } } 
     ]);
 
     const formattedResult = result.map(item => ({
@@ -469,20 +469,20 @@ const getMonthlySalesbyExe = async (req, res) => {
 
 const getSalesByExe = async (req, res) => {
   try {
-    const { exe } = req.query; // Extract 'exe' parameter from the request query
-    const matchStage = { GatePassNo: 'Printed' }; // Match invoices with GatePassNo 'Printed'
+    const { exe } = req.query;
+    const matchStage = { GatePassNo: 'Printed' }; 
 
-    // Optionally, add the 'exe' field to the match stage if provided in the query
+    
     if (exe) {
       matchStage.exe = exe;
     }
 
     const result = await Invoice.aggregate([
-      { $match: matchStage }, // Match invoices with specified criteria
-      { $unwind: '$products' }, // Deconstruct the products array
+      { $match: matchStage }, 
+      { $unwind: '$products' }, 
       {
         $group: {
-          _id: '$exe', // Group by 'exe' field
+          _id: '$exe', 
           totalSales: {
             $sum: {
               $multiply: [
@@ -493,7 +493,7 @@ const getSalesByExe = async (req, res) => {
             }
           }
         }
-      } // Group and sum the product totals for each executive
+      } 
     ]);
 
     res.json(result);
@@ -504,9 +504,40 @@ const getSalesByExe = async (req, res) => {
 };
 
 
+const getTotalQuantityByProductCode = async (req, res) => {
+  const code = req.params.code; // Assuming the code is passed as a parameter in the URL
 
+  try {
+    console.log(`Fetching total quantities for invoices with code: ${code}`);
 
+    const result = await Invoice.aggregate([
+      { $match: { code: code } }, // Match invoices that belong to the specified code
+      { $unwind: '$products' }, // Deconstruct the products array
+      {
+        $group: {
+          _id: '$products.productCode', // Group by product code
+          productName: { $first: '$products.productName' }, // Get the product name (assuming it's the same for all instances of the product code)
+          totalQuantity: { $sum: '$products.quantity' } // Calculate the total quantity for each product code
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          productCode: '$_id', // Rename _id to productCode
+          productName: 1,
+          totalQuantity: 1
+        }
+      }
+    ]);
 
+    console.log('Aggregation result:', result);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching total quantities:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 module.exports = {
   getSumByGatePassNo,
 };
@@ -527,7 +558,10 @@ module.exports = {
   getSumByGatePassNo,
   getMonthlySales,
   getMonthlySalesbyExe,
-  getSalesByExe
+  getSalesByExe,
+  getTotalQuantityByProductCode
+  
+ 
   
   
 };

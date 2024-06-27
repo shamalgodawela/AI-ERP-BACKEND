@@ -14,9 +14,15 @@ router.get('/check/:orderNumber', invoiceController.checkOrderNumberExists);
 router.get('/search-invoices', invoiceController.searchInvoices);
 router.put('/invoices/:invoiceNumber', invoiceController.updateInvoice);
 router.get('/invoices/:invoiceNumber', invoiceController.getInvoiceByNumber);
+
+//get sales details
 router.get('/invoi/sum', invoiceController.getSumByGatePassNo);
 router.get('/monthlysales',invoiceController.getMonthlySales)
 router.get('/monthlysalesbyexe',invoiceController.getMonthlySalesbyExe)
 router.get('/salesbyExe',invoiceController.getSalesByExe)
+
+router.get('/totalproduct', invoiceController.getTotalQuantityByProductCode)
+
+
 
 module.exports = router;

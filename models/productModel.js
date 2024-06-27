@@ -35,9 +35,9 @@ const productSchema=mongoose.Schema({
         trim:true
     },
     description:{
-        type:String,
+        type:Number,
         required:[true,"please add a description"],
-        trim:true
+        
     },
     image:{
         type:Object,
