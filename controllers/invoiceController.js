@@ -505,25 +505,24 @@ const getSalesByExe = async (req, res) => {
 
 
 const getTotalQuantityByProductCode = async (req, res) => {
-  const code = req.params.code; // Assuming the code is passed as a parameter in the URL
-
   try {
-    console.log(`Fetching total quantities for invoices with code: ${code}`);
+    console.log(`Fetching total quantities for all product codes`);
+    const matchStage = { GatePassNo: 'Printed' }; 
 
     const result = await Invoice.aggregate([
-      { $match: { code: code } }, // Match invoices that belong to the specified code
-      { $unwind: '$products' }, // Deconstruct the products array
+      { $unwind: '$products' },
+      { $match: matchStage }, 
       {
         $group: {
-          _id: '$products.productCode', // Group by product code
-          productName: { $first: '$products.productName' }, // Get the product name (assuming it's the same for all instances of the product code)
-          totalQuantity: { $sum: '$products.quantity' } // Calculate the total quantity for each product code
+          _id: '$products.productCode', 
+          productName: { $first: '$products.productName' }, 
+          totalQuantity: { $sum: '$products.quantity' } 
         }
       },
       {
         $project: {
           _id: 0,
-          productCode: '$_id', // Rename _id to productCode
+          productCode: '$_id', 
           productName: 1,
           totalQuantity: 1
         }
@@ -538,6 +537,7 @@ const getTotalQuantityByProductCode = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 module.exports = {
   getSumByGatePassNo,
 };
