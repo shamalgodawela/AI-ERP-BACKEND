@@ -43,7 +43,11 @@ const productSchema=mongoose.Schema({
         type:Object,
         default:{}
         
-    }
+    },
+    discount:{
+        type:Number
+
+    },
 
    
 

@@ -5,7 +5,7 @@ const cloudinary= require("cloudinary").v2;
 
 
 const createProduct = asyncHandler(async(req, res) => {
-    const { name, category, quantity, price, description } = req.body;
+    const { name, category, quantity, price, description,discount } = req.body;
 
     // Validation
     if (!name || !category || !quantity || !price || !description) {
@@ -47,6 +47,7 @@ const createProduct = asyncHandler(async(req, res) => {
         quantity,
         description,
         image: fileData,
+        discount,
     });
 
     res.status(201).json(product);
@@ -110,7 +111,7 @@ const deleteProduct=asyncHandler(async(req,res)=>{
 // update product----------------------------------------------------------------------------
 
 const updateProduct= asyncHandler(async(req, res)=>{
-    const {name, category, quantity,price, description}= req.body;
+    const {name, category, quantity,price, description,discount}= req.body;
     const {id}= req.params;
 
     const product= await Product.findById(id)
@@ -153,6 +154,7 @@ const updateProduct= asyncHandler(async(req, res)=>{
         quantity,
         price,
         description,
+        discount,
         image: Object.keys(fileData).length === 0 ? product.image :fileData,
     },
     {
