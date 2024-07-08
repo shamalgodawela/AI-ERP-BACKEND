@@ -5,6 +5,9 @@ const outstandingSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    exe:{
+        type:String
+    },
     date: {
         type: Date,
         required: true
