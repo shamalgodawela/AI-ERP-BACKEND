@@ -20,7 +20,7 @@ const outstandingSchema = new mongoose.Schema({
     },
      CHnumber:{
         type:String,
-        unique:true,
+        
         
 
     },
