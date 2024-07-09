@@ -36,10 +36,7 @@ const outstandingSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    executive:{
-        type:String,
-        required:true,
-    }
+   
 });
 
 const Outstanding = mongoose.model('Outstanding', outstandingSchema);
