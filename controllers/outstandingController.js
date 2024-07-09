@@ -48,7 +48,7 @@ const outstandingController = {
             
             if (lastOutstanding === null || lastOutstanding === undefined) {
                 
-                lastOutstanding = 0;
+                lastOutstanding = -1;
             } else {
                 lastOutstanding = lastOutstanding.outstanding; 
             }
