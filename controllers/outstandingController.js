@@ -4,8 +4,8 @@ const Invoice=require('../models/invoice')
 const outstandingController = {
     createOutstanding: async (req, res) => {
         try {
-            const { invoiceNumber, date,backName,depositedate,CHnumber, amount, outstanding } = req.body;
-            const newOutstanding = new Outstanding({ invoiceNumber , date,backName,depositedate,CHnumber, amount, outstanding });
+            const { invoiceNumber,exe, date,backName,depositedate,CHnumber, amount, outstanding } = req.body;
+            const newOutstanding = new Outstanding({ invoiceNumber,exe ,date,backName,depositedate,CHnumber, amount, outstanding});
             await newOutstanding.save();
             res.status(201).json({ message: 'Outstanding data created successfully' });
         } catch (error) {
@@ -44,18 +44,22 @@ const outstandingController = {
     getLastOutstandingByInvoiceNumber: async (req, res) => {
         try {
             const { invoiceNumber } = req.params;
-            const lastOutstanding = await Outstanding.findOne({ invoiceNumber }).sort({ date: -1 }).limit(1);
+            let lastOutstanding = await Outstanding.findOne({ invoiceNumber }).sort({ date: -1 }).limit(1);
             
             if (lastOutstanding === null || lastOutstanding === undefined) {
                 
-                return res.status(404).json({ error: 'No outstanding data found for this invoice number', outstanding: null });
+                lastOutstanding = 0;
+            } else {
+                lastOutstanding = lastOutstanding.outstanding; 
             }
-            res.status(200).json(lastOutstanding);
+    
+            res.status(200).json({ outstanding: lastOutstanding });
         } catch (error) {
             console.error('Error fetching last outstanding value:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     },
+    
     getOutstandingStatuses: async (req, res) => {
         try {
             const { invoiceNumbers } = req.body;
@@ -76,72 +80,52 @@ const outstandingController = {
             res.status(500).json({ error: 'Internal server error' });
         }
     },
-    
+    // New function to handle search
     searchOutstanding: async (req, res) => {
         try {
-            
+            // Extract search parameters from the request query
             const { exe } = req.query;
     
-            
+            // Build the search query based on the provided parameters
             const searchQuery = {};
     
             if (exe) {
                 searchQuery.exe = exe;
             }
     
-            
+            // Perform the search using your model
             const searchResults = await Invoice.find(searchQuery);
     
-            
+            // Return the search results
             res.json(searchResults);
         } catch (error) {
-           
+            // Handle errors
             console.error('Error during search:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     },
     searchOutstandingBycus: async (req, res) => {
         try {
-            
+            // Extract search parameters from the request query
             const { code } = req.query;
     
-           
+            // Build the search query based on the provided parameters
             const searchQuery = {};
     
-            if (code) { 
+            if (code) { // Check if code is provided
                 searchQuery.code = code;
             }
     
-            
+            // Perform the search using your model
             const searchResults = await Invoice.find(searchQuery);
     
-            
+            // Return the search results
             res.json(searchResults);
         } catch (error) {
-            
+            // Handle errors
             console.error('Error during search:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
-    },
-    searchOutstandingbyIncN :async(req,res)=>{
-        try {
-            const {invoiceNumber}= req.query;
-
-            const searchQuery ={};
-
-            if(invoiceNumber){
-                searchQuery.invoiceNumber=invoiceNumber;
-            }
-
-            const searchResults = await Invoice.find(searchQuery);
-            res.json(searchResults);
-            
-        } catch (error) {
-            console.error('Error during search:', error);
-            res.status(500).json({ error: 'Internal server error' });
-            
-        }
-
     },
     getSumOfOutstandingAmounts: async (req, res) => {
         try {

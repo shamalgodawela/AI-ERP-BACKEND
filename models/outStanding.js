@@ -5,7 +5,11 @@ const outstandingSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    
+    exe:{
+        type:String,
+        required:true
+
+    },
     date: {
         type: Date,
         required: true
@@ -22,7 +26,6 @@ const outstandingSchema = new mongoose.Schema({
      CHnumber:{
         type:String,
         
-        
 
     },
     amount: {
@@ -32,6 +35,10 @@ const outstandingSchema = new mongoose.Schema({
     outstanding: {
         type: Number,
         required: true
+    },
+    executive:{
+        type:String,
+        required:true,
     }
 });
 
