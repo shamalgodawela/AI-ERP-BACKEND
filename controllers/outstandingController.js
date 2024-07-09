@@ -4,8 +4,8 @@ const Invoice=require('../models/invoice')
 const outstandingController = {
     createOutstanding: async (req, res) => {
         try {
-            const { invoiceNumber,exe, date,backName,depositedate,CHnumber, amount, outstanding } = req.body;
-            const newOutstanding = new Outstanding({ invoiceNumber,exe ,date,backName,depositedate,CHnumber, amount, outstanding});
+            const { invoiceNumber, date,backName,depositedate,CHnumber, amount, outstanding } = req.body;
+            const newOutstanding = new Outstanding({ invoiceNumber ,date,backName,depositedate,CHnumber, amount, outstanding});
             await newOutstanding.save();
             res.status(201).json({ message: 'Outstanding data created successfully' });
         } catch (error) {
