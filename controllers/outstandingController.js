@@ -5,7 +5,7 @@ const outstandingController = {
     createOutstanding: async (req, res) => {
         try {
             const { invoiceNumber, date,backName,depositedate,CHnumber, amount, outstanding } = req.body;
-            const newOutstanding = new Outstanding({ invoiceNumber ,date,backName,depositedate,CHnumber, amount, outstanding});
+            const newOutstanding = new Outstanding({ invoiceNumber,date,backName,depositedate,CHnumber, amount, outstanding});
             await newOutstanding.save();
             res.status(201).json({ message: 'Outstanding data created successfully' });
         } catch (error) {
@@ -145,16 +145,25 @@ const outstandingController = {
             res.status(500).json({ error: 'Internal server error' });
         }
     },
+    getExecutiveCollection: async (req, res) => {
+        try {
+            const executives = await Invoice.distinct('exe');
     
+            const collections = await Promise.all(executives.map(async (exe) => {
+                const invoices = await Invoice.find({ exe: { $regex: new RegExp(exe, 'i') } });
+                const invoiceNumbers = invoices.map(invoice => invoice.invoiceNumber);
+                const outstandingRecords = await Outstanding.find({ invoiceNumber: { $in: invoiceNumbers } });
+                const totalCollection = outstandingRecords.reduce((acc, record) => acc + record.amount, 0);
+                return { exe, totalCollection };
+            }));
     
-    
-    
-    
-    
-    
-    
+            res.json(collections);
+        } catch (error) {
+            console.error('Failed to fetch executive collections', error);
+            res.status(500).json({ message: 'Failed to fetch executive collections' });
+        }
+    }   
 };
-
 
 module.exports =outstandingController;
 

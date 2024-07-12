@@ -36,6 +36,7 @@ const invoiceSchema = new mongoose.Schema({
   Tax: Number,
   GatePassNo: String,
   VehicleNo: String,
+
   
   
 });

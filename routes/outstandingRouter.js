@@ -15,6 +15,7 @@ router.get('/get-outstanding-statuses', outstandingController.getOutstandingStat
 router.get('/search-outstanding', outstandingController.searchOutstanding);
 router.get('/search-outstandingbycus', outstandingController.searchOutstandingBycus)
 router.get('/sumofcollection', outstandingController.getSumOfOutstandingAmounts)
+router.get('/collection-exe', outstandingController.getExecutiveCollection)
 
 module.exports = router;
 
