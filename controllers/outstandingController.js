@@ -162,7 +162,45 @@ const outstandingController = {
             console.error('Failed to fetch executive collections', error);
             res.status(500).json({ message: 'Failed to fetch executive collections' });
         }
-    }   
+    },
+    getMonthlyCollection: async (req, res) => {
+        try {
+
+            const result= await Outstanding.aggregate([
+                {
+                    $addFields:{
+                        date:{$toDate:'$date'}
+                    }
+                },
+                {
+                    $group:{
+                        _id:{
+                            year:{$year:'$date'},
+                            month:{$month:'$date'},
+                        },
+                        totalOutstanding:{$sum:'$amount'}
+                    }
+                },
+                {$sort:{'_id.year':1, '_id.month':1}}
+
+            ])
+
+            const formatresult= result.map(item=>({
+                year:item._id.year,
+                month:item._id.month,
+                totalOutstanding:item.totalOutstanding
+
+            }))
+
+            res.json(formatresult)
+            
+        } catch (error) {
+            console.error('error fetching monthly collection', error)
+            
+        }
+    }
+        
+    
 };
 
 module.exports =outstandingController;

@@ -13,9 +13,11 @@ router.get('/get-all-outstanding/:invoiceNumber', outstandingController.getAllOu
 router.get('/get-last-outstanding/:invoiceNumber', outstandingController.getLastOutstandingByInvoiceNumber);
 router.get('/get-outstanding-statuses', outstandingController.getOutstandingStatuses);
 router.get('/search-outstanding', outstandingController.searchOutstanding);
-router.get('/search-outstandingbycus', outstandingController.searchOutstandingBycus)
-router.get('/sumofcollection', outstandingController.getSumOfOutstandingAmounts)
-router.get('/collection-exe', outstandingController.getExecutiveCollection)
+router.get('/search-outstandingbycus', outstandingController.searchOutstandingBycus);
+router.get('/sumofcollection', outstandingController.getSumOfOutstandingAmounts);
+router.get('/collection-exe', outstandingController.getExecutiveCollection);
+
+router.get('/monthly-collection',outstandingController.getMonthlyCollection);
 
 module.exports = router;
 
