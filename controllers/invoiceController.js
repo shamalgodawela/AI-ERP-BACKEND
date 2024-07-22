@@ -353,8 +353,7 @@ const getSumByGatePassNo = async (req, res) => {
     ]);
 
     const totalsaless = result.length > 0 ? result[0].totalSum : 0;
-
-    res.json(totalsaless);
+    res.json({ sum: totalsaless });
   } catch (error) {
     console.error('Error calculating sum:', error);
     res.status(500).json({ error: 'Internal server error' });
