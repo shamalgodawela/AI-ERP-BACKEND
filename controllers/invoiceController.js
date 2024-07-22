@@ -322,33 +322,47 @@ const getInvoiceByNumber = async (req, res) => {
 const getSumByGatePassNo = async (req, res) => {
   try {
     const result = await Invoice.aggregate([
-      { $match: { GatePassNo: 'Printed' } }, 
-      { $unwind: '$products' }, 
-      { 
-        $group: { 
-          _id: '$_id', 
-          invoiceTotal: { 
-            $sum: { 
+      { $match: { GatePassNo: 'Printed' } },
+      { $unwind: '$products' },
+      {
+        $group: {
+          _id: '$_id',
+          invoiceTotal: {
+            $sum: {
               $multiply: [
                 '$products.labelPrice',
                 { $subtract: [1, { $divide: ['$products.discount', 100] }] },
                 '$products.quantity'
               ]
             }
-          } 
+          },
+          taxRate: { $first: { $ifNull: ['$Tax', 0] } } // Include tax rate or set to 0 if not present
         }
-      }, 
-      { $group: { _id: null, totalSum: { $sum: '$invoiceTotal' } } } 
+      },
+      {
+        $project: {
+          invoiceTotal: {
+            $add: [
+              '$invoiceTotal',
+              { $multiply: ['$invoiceTotal', { $divide: ['$taxRate', 100] }] }
+            ]
+          }
+        }
+      },
+      { $group: { _id: null, totalSum: { $sum: '$invoiceTotal' } } }
     ]);
 
-    const sum = result.length > 0 ? result[0].totalSum : 0; 
+    const totalsaless = result.length > 0 ? result[0].totalSum : 0;
 
-    res.json({ sum });
+    res.json(totalsaless);
   } catch (error) {
     console.error('Error calculating sum:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
 
 const getMonthlySales = async (req, res) => {
   try {
