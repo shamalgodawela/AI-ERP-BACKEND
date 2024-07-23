@@ -1,29 +1,165 @@
-const mongoose= require('mongoose');
+const mongoose = require('mongoose');
 
-const returnoldISchema= new mongoose.Schema({
-
-    InvoiceNo:{
+const returnOldIvoice= new mongoose.Schema({
+    invoiceNo:{
         type:String,
-        required:true,
+        require:true
+    },
+    InvoiceDte:{
+        type:String,
+        require:true
     },
     Customer:{
         type:String,
-        required:true,
+        require:true
     },
     ProductCode:{
-        required:true,
         type:String,
+        require:true
     },
-    ProductName:{
+    productName:{
         type:String,
-
+        require:true
     },
-    quantity:{
-        type:Number,
-        required:true,
+    quanity:{
+        type:String,
+        require:true
+    },
+    value:{
+        type:String,
+        require:true,
+    },
+    reason:{
+        type:String,
+        require:true,
     }
 
 })
+const returnInvoice= mongoose.model('Returnoldinvoice',returnOldIvoice);
+module.exports=returnInvoice;
 
-const RetunNoteOldI=mongoose.model('ReturnOldI',returnoldISchema);
-module.exports=RetunNoteOldI;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

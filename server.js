@@ -26,6 +26,7 @@ const locationRoute = require('./routes/locationRoute');
 const exeRouter=require('./routes/exeRouter');
 const exeProductRouter=require('./routes/exeProductRouter');
 const CanceledInvoiceRouter=require('./routes/CanceledInvoiceRouter');
+const returnAndNewProduct=require('./routes/returnAndNewProduct');
 
 
 const app=express()
@@ -65,6 +66,7 @@ app.use('/api', locationRoute )
 app.use('/api', exeRouter)
 app.use('/api', exeProductRouter)
 app.use('/api',CanceledInvoiceRouter)
+app.use('/api',returnAndNewProduct)
 
 
 // Routes
