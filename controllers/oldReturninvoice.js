@@ -37,7 +37,20 @@ const addProductAndreturn =async(req, res)=>{
     
 }
 
+const veiewallProductdetails= async(req, res)=>{
+    try {
+        const getalldetails= await ReturnOldinvoice.find();
+        res.status(200).json(getalldetails);
+        
+    } catch (error) {
+        console.log(error);
+        
+    }
+
+}
+
 module.exports={
 
-    addProductAndreturn
+    addProductAndreturn,
+    veiewallProductdetails
 }
