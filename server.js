@@ -27,6 +27,7 @@ const exeRouter=require('./routes/exeRouter');
 const exeProductRouter=require('./routes/exeProductRouter');
 const CanceledInvoiceRouter=require('./routes/CanceledInvoiceRouter');
 const returnAndNewProduct=require('./routes/returnAndNewProduct');
+const NewBulkRoute=require('./routes/NewBulkRoute')
 
 
 const app=express()
@@ -67,6 +68,7 @@ app.use('/api', exeRouter)
 app.use('/api', exeProductRouter)
 app.use('/api',CanceledInvoiceRouter)
 app.use('/api',returnAndNewProduct)
+app.use('/api',NewBulkRoute)
 
 
 // Routes
