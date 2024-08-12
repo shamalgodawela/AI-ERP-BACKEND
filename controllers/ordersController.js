@@ -39,6 +39,9 @@ class OrdersController {
                 orderDate: req.body.orderDate,
                 exe: req.body.exe,
                 status: status,
+                VatRegNo:req.body.VatRegNo,
+                VatNO:req.body.VatNO,
+                TaxNo:req.body.TaxNo
             });
 
             // Save the order

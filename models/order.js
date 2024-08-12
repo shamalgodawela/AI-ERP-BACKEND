@@ -25,6 +25,9 @@ const orderSchema = new mongoose.Schema({
   orderDate:String,
   exe: String,
   status:String,
+  VatRegNo:String,
+  VatNO:String,
+  TaxNo:String
   
   
 });

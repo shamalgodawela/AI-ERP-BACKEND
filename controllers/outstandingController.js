@@ -99,29 +99,29 @@ const outstandingController = {
             
             res.json(searchResults);
         } catch (error) {
-            // Handle errors
+           
             console.error('Error during search:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     },
     searchOutstandingBycus: async (req, res) => {
         try {
-            // Extract search parameters from the request query
+            
             const { code } = req.query;
     
-            // Build the search query based on the provided parameters
+           
             const searchQuery = {};
-            if (code) { // Check if code is provided
+            if (code) {
                 searchQuery.code = code;
             }
     
-            // Perform the search using your model
+           
             const searchResults = await Invoice.find(searchQuery);
     
-            // Return the search results
+           
             res.json(searchResults);
         } catch (error) {
-            // Handle errors
+            
             console.error('Error during search:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
@@ -197,11 +197,76 @@ const outstandingController = {
             console.error('error fetching monthly collection', error)
             
         }
+    },
+
+
+//-----------------------------------------Dealer wise total sales-------------------------------------------------//
+
+    getTotalSalesAndCollections: async (req, res) => {
+
+        try {
+            // Aggregate total sales from the Invoice collection
+            const totalSales = await Invoice.aggregate([
+                { $match: { GatePassNo: 'Printed' } },
+                { $unwind: '$products' },
+                {
+                    $group: {
+                        _id: "$code",
+                        totalSales: {
+                            $sum: {
+                                $multiply: [
+                                    '$products.labelPrice',
+                                    { $subtract: [1, { $divide: ['$products.discount', 100] }] },
+                                    '$products.quantity'
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]);
+    
+            // Calculate total collection for each dealer
+            const collectionsPromises = totalSales.map(async (dealer) => {
+                const invoices = await Invoice.find({ code: dealer._id }).select('invoiceNumber');
+                const invoiceNumbers = invoices.map(inv => inv.invoiceNumber);
+    
+                const totalCollection = await Outstanding.aggregate([
+                    { $match: { invoiceNumber: { $in: invoiceNumbers } } },
+                    {
+                        $group: {
+                            _id: null,
+                            totalCollection: { $sum: "$amount" }
+                        }
+                    }
+                ]);
+    
+                return {
+                    code: dealer._id,
+                    totalSales: dealer.totalSales,
+                    totalCollection: totalCollection.length > 0 ? totalCollection[0].totalCollection : 0
+                };
+            });
+    
+            const results = await Promise.all(collectionsPromises);
+    
+            console.log('Results:', results);
+            res.status(200).json(results);
+        } catch (error) {
+            console.error('Error fetching total sales and collections:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+
     }
-        
+       
+    
     
 };
 
+
+
+
+
 module.exports =outstandingController;
+
 
 

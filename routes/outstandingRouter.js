@@ -19,5 +19,7 @@ router.get('/collection-exe', outstandingController.getExecutiveCollection);
 
 router.get('/monthly-collection',outstandingController.getMonthlyCollection);
 
+router.get('/totalsales-and-collection-dealer',outstandingController.getTotalSalesAndCollections);
+
 module.exports = router;
 
