@@ -4,6 +4,11 @@ const invoiceController = require('../controllers/invoiceController');
 
 router.post('/add-invoice', invoiceController.addInvoice);
 router.get('/get-all-invoices', invoiceController.getAllInvoices);
+// get invoice details with last outstanding to admin operations and admin
+
+router.get('/get-lastoutstanding-invoicedetails',invoiceController.getAllInvoicesWithOutstanding)
+
+
 router.get('/get-invoice/:id', invoiceController.getInvoiceById);
 router.post('/delete-invoice/:id', invoiceController.checkPassword, invoiceController.deleteInvoice);
 router.get('/get-total-invoice-value/:code', invoiceController.getTotalInvoiceValueByCode);
@@ -22,6 +27,7 @@ router.get('/monthlysalesbyexe',invoiceController.getMonthlySalesbyExe)
 router.get('/salesbyExe',invoiceController.getSalesByExe)
 
 router.get('/totalproduct', invoiceController.getTotalQuantityByProductCode)
+router.get('/search-outstanding', invoiceController.getexeforoutstanding)
 
 
 

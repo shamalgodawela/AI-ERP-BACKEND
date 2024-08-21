@@ -551,6 +551,61 @@ const getTotalQuantityByProductCode = async (req, res) => {
   }
 };
 
+const getexeforoutstanding = async (req, res) => {
+  const { exe } = req.params;
+
+  try {
+    const outstandingData = await Outstanding.find({ exe: exe });
+
+    if (!outstandingData || outstandingData.length === 0) {
+      return res.status(404).json({ error: 'Outstanding data not found' });
+    }
+
+    res.status(200).json(outstandingData);
+  } catch (error) {
+    console.error('Error fetching outstanding data:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+const getAllInvoicesWithOutstanding = async (req, res) => {
+  try {
+      // Fetch all invoices
+      const invoices = await Invoice.find().sort({ invoiceDate: -1 });
+
+      // Loop through each invoice to get the last outstanding value
+      const invoicesWithOutstanding = await Promise.all(
+          invoices.map(async (invoice) => {
+              let lastOutstanding = await Outstanding.findOne({
+                  invoiceNumber: invoice.invoiceNumber,
+              }).sort({ date: -1 });
+
+              // Set status based on the last outstanding value
+              let status = "Not Paid"; // Default status
+
+              if (lastOutstanding) {
+                  if (lastOutstanding.outstanding === 0) {
+                      status = "Paid";
+                  } else {
+                      status = lastOutstanding.outstanding;
+                  }
+              }
+
+              // Add the status or last outstanding value to the invoice object
+              return {
+                  ...invoice._doc,
+                  lastOutstanding: status,
+              };
+          })
+      );
+
+      // Return the response with all invoices and their last outstanding values or statuses
+      res.status(200).json(invoicesWithOutstanding);
+  } catch (error) {
+      console.error('Error fetching invoices with outstanding details:', error.message);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
   getSumByGatePassNo,
 };
@@ -572,7 +627,9 @@ module.exports = {
   getMonthlySales,
   getMonthlySalesbyExe,
   getSalesByExe,
-  getTotalQuantityByProductCode
+  getTotalQuantityByProductCode,
+  getexeforoutstanding,
+  getAllInvoicesWithOutstanding
   
  
   

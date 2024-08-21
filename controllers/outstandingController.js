@@ -59,28 +59,6 @@ const outstandingController = {
             res.status(500).json({ error: 'Internal server error' });
         }
     },
-    
-    getOutstandingStatuses: async (req, res) => {
-        try {
-            const { invoiceNumbers } = req.body;
-            const statuses = {};
-            
-            for (const invoiceNumber of invoiceNumbers) {
-                const lastOutstanding = await Invoice.findOne({ invoiceNumber }).sort({ date: -1 }).limit(1);
-                if (lastOutstanding) {
-                    statuses[invoiceNumber] = lastOutstanding.outstanding === 0 ? 'Paid' : 'Unpaid';
-                } else {
-                    statuses[invoiceNumber] = 'Unpaid';
-                }
-            }
-            
-            res.status(200).json(statuses);
-        } catch (error) {
-            console.error('Error fetching outstanding statuses:', error);
-            res.status(500).json({ error: 'Internal server error' });
-        }
-    },
-    
     searchOutstanding: async (req, res) => {
         try {
             
@@ -94,7 +72,7 @@ const outstandingController = {
             }
     
             
-            const searchResults = await Invoice.find(searchQuery);
+            const searchResults = await Invoice.findOne(searchQuery);
     
             
             res.json(searchResults);
@@ -257,9 +235,6 @@ const outstandingController = {
         }
 
     }
-       
-    
-    
 };
 
 
