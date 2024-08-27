@@ -635,12 +635,10 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
                 }
 
                 // Add the status or last outstanding value to the invoice object
-                if (status !== "Paid") {
-                  return {
-                      ...invoice._doc,
-                      lastOutstanding: status,
-                  };
-              }
+                return {
+                    ...invoice._doc,
+                    lastOutstanding: status,
+                };
             })
         );
 
