@@ -570,14 +570,14 @@ const getexeforoutstanding = async (req, res) => {
 const getAllInvoicesWithOutstanding = async (req, res) => {
   try {
       // Fetch all invoices
-      const invoices = await Invoice.find().sort({ invoiceDate: -1 });
+      const invoices = await Invoice.find();
 
       // Loop through each invoice to get the last outstanding value
       const invoicesWithOutstanding = await Promise.all(
           invoices.map(async (invoice) => {
               let lastOutstanding = await Outstanding.findOne({
                   invoiceNumber: invoice.invoiceNumber,
-              }).sort({ date: -1 });
+              });
 
               // Set status based on the last outstanding value
               let status = "Not Paid"; // Default status
