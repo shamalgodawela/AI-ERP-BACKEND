@@ -570,14 +570,14 @@ const getexeforoutstanding = async (req, res) => {
 const getAllInvoicesWithOutstanding = async (req, res) => {
   try {
       // Fetch all invoices
-      const invoices = await Invoice.find().sort({ invoiceDate: -1 });
+      const invoices = await Invoice.find();
 
       // Filter and map through each invoice to get the last outstanding value
       const invoicesWithOutstanding = await Promise.all(
           invoices.map(async (invoice) => {
               let lastOutstanding = await Outstanding.findOne({
                   invoiceNumber: invoice.invoiceNumber,
-              }).sort({ date: -1 });
+              });
 
               // Determine the status based on the last outstanding value
               let status = "Not Paid"; // Default status
@@ -611,12 +611,52 @@ const getAllInvoicesWithOutstanding = async (req, res) => {
   }
 };
 
+const getAllInvoicesWithOutstandingadmin = async (req, res) => {
+  try {
+        // Fetch all invoices
+        const invoices = await Invoice.find().sort({ invoiceDate: -1 });
 
-module.exports = {
-  getSumByGatePassNo,
-};
+        // Loop through each invoice to get the last outstanding value
+        const invoicesWithOutstanding = await Promise.all(
+            invoices.map(async (invoice) => {
+                let lastOutstanding = await Outstanding.findOne({
+                    invoiceNumber: invoice.invoiceNumber,
+                }).sort({ date: -1 });
+
+                // Set status based on the last outstanding value
+                let status = "Not Paid"; // Default status
+
+                if (lastOutstanding) {
+                    if (lastOutstanding.outstanding === 0) {
+                        status = "Paid";
+                    } else {
+                        status = lastOutstanding.outstanding;
+                    }
+                }
+
+                // Add the status or last outstanding value to the invoice object
+                if (status !== "Paid") {
+                  return {
+                      ...invoice._doc,
+                      lastOutstanding: status,
+                  };
+              }
+            })
+        );
+
+        // Return the response with all invoices and their last outstanding values or statuses
+        res.status(200).json(invoicesWithOutstanding);
+    } catch (error) {
+        console.error('Error fetching invoices with outstanding details:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+
+
 
 module.exports = { 
+  getSumByGatePassNo,
   addInvoice,
   getAllInvoices, 
   getInvoiceById, 
@@ -635,7 +675,9 @@ module.exports = {
   getSalesByExe,
   getTotalQuantityByProductCode,
   getexeforoutstanding,
-  getAllInvoicesWithOutstanding
+  getAllInvoicesWithOutstanding,
+  getAllInvoicesWithOutstandingadmin
+  
   
  
   

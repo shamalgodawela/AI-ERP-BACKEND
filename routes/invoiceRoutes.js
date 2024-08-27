@@ -7,7 +7,7 @@ router.get('/get-all-invoices', invoiceController.getAllInvoices);
 // get invoice details with last outstanding to admin operations and admin
 
 router.get('/get-lastoutstanding-invoicedetails',invoiceController.getAllInvoicesWithOutstanding)
-
+router.get('/get-invoicedetails-admin',invoiceController.getAllInvoicesWithOutstandingadmin)
 
 router.get('/get-invoice/:id', invoiceController.getInvoiceById);
 router.post('/delete-invoice/:id', invoiceController.checkPassword, invoiceController.deleteInvoice);
