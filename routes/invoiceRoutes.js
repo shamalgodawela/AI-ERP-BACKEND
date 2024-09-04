@@ -30,5 +30,8 @@ router.get('/totalproduct', invoiceController.getTotalQuantityByProductCode)
 router.get('/search-outstanding', invoiceController.getexeforoutstanding)
 
 
+//search invoice
+router.get('/search-invoice-by-executive/:code',invoiceController.searchInvoicesByExe)
+
 
 module.exports = router;

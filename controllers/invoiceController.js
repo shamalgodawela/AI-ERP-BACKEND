@@ -650,6 +650,29 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
     }
 }
 
+const searchInvoicesByExe = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    if (!code) {
+      return res.status(400).json({ error: 'Executive (code) is required' });
+    }
+
+    const invoices = await Invoice.find({ code }).sort({ invoiceDate: -1 });
+
+    if (invoices.length === 0) {
+      return res.status(404).json({ message: 'No invoices found for the specified executive' });
+    }
+
+    res.status(200).json(invoices);
+  } catch (error) {
+    console.error('Error searching invoices by exe:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+
 
 
 
@@ -674,7 +697,8 @@ module.exports = {
   getTotalQuantityByProductCode,
   getexeforoutstanding,
   getAllInvoicesWithOutstanding,
-  getAllInvoicesWithOutstandingadmin
+  getAllInvoicesWithOutstandingadmin,
+  searchInvoicesByExe
   
   
  
