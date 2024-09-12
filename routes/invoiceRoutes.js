@@ -37,6 +37,11 @@ router.get('/search-invoice-by-executive/:code',invoiceController.searchInvoices
 router.get('/get-total-salesby-dealer/:code',invoiceController.gettotsalesByDealercode)
 
 
+//search by product code
+
+router.get('/search-by-productcode/:productCode',invoiceController.searchInvoicesByProductCode)
+
+
 
 
 module.exports = router;

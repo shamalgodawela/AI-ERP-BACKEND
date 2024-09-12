@@ -736,9 +736,31 @@ const gettotsalesByDealercode = async (req, res) => {
 };
 
 
+// search by product code---------------------------------------------------------------------------------------------
 
+const searchInvoicesByProductCode = async (req, res) => {
+  try {
+    const { productCode } = req.params;
 
-// get total collection each delaer------------------------------------------------------------------------------------------------
+    if (!productCode) {
+      return res.status(400).json({ error: 'Product code is required' });
+    }
+
+    // Find invoices where any of the products have the given product code
+    const invoices = await Invoice.find({ 'products.productCode': productCode }).sort({ invoiceDate: -1 });
+
+    if (invoices.length === 0) {
+      return res.status(404).json({ message: 'No invoices found with the specified product code' });
+    }
+
+    // Return the invoices that contain the product
+    res.status(200).json(invoices);
+  } catch (error) {
+    console.error('Error searching invoices by product code:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 
 
 
@@ -766,7 +788,8 @@ module.exports = {
   getAllInvoicesWithOutstanding,
   getAllInvoicesWithOutstandingadmin,
   searchInvoicesByExe,
-  gettotsalesByDealercode
+  gettotsalesByDealercode,
+  searchInvoicesByProductCode
   
   
  
