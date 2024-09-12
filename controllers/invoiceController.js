@@ -614,14 +614,14 @@ const getAllInvoicesWithOutstanding = async (req, res) => {
 const getAllInvoicesWithOutstandingadmin = async (req, res) => {
   try {
         // Fetch all invoices
-        const invoices = await Invoice.find().sort({ invoiceDate: -1 });
+        const invoices = await Invoice.find().sort({ invoiceDate: 1 });
 
         // Loop through each invoice to get the last outstanding value
         const invoicesWithOutstanding = await Promise.all(
             invoices.map(async (invoice) => {
                 let lastOutstanding = await Outstanding.findOne({
                     invoiceNumber: invoice.invoiceNumber,
-                }).sort({ date: -1 });
+                }).sort({ date: 1 });
 
                 // Set status based on the last outstanding value
                 let status = "Not Paid"; // Default status
@@ -658,7 +658,7 @@ const searchInvoicesByExe = async (req, res) => {
       return res.status(400).json({ error: 'Executive (code) is required' });
     }
 
-    const invoices = await Invoice.find({ code }).sort({ invoiceDate: -1 });
+    const invoices = await Invoice.find({ code }).sort({ invoiceDate: 1 });
 
     if (invoices.length === 0) {
       return res.status(404).json({ message: 'No invoices found for the specified executive' });
@@ -672,6 +672,73 @@ const searchInvoicesByExe = async (req, res) => {
 };
 
 
+//get total sales by dealerID--------------------------------------------------------------------------------------------------------------------------------
+
+const gettotsalesByDealercode = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    if (!code) {
+      return res.status(400).json({ error: 'Customer code is required' });
+    }
+
+    // Fetch invoices with the specified code and where GatePassNo is 'Printed'
+    const invoices = await Invoice.find({ code, GatePassNo: 'Printed' }).sort({ invoiceDate: -1 });
+
+    if (invoices.length === 0) {
+      return res.status(404).json({ message: 'No invoices found with GatePassNo "Printed" for the specified customer code' });
+    }
+
+    // Initialize totals and product movement tracking
+    let totalInvoiceAmount = 0;
+    let totalCollectionAmount = 0;
+    let productMovement = {};
+
+    // Loop through each invoice to calculate totals and track product movement
+    for (const invoice of invoices) {
+      // Calculate total product amounts in each invoice
+      if (invoice.products && Array.isArray(invoice.products)) {
+        invoice.products.forEach((product) => {
+          const productTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
+          totalInvoiceAmount += productTotal;
+
+          // Track product movement by summing quantities for each product
+          const { productName, quantity } = product;
+          if (productMovement[productName]) {
+            productMovement[productName] += parseFloat(quantity);
+          } else {
+            productMovement[productName] = parseFloat(quantity);
+          }
+        });
+      }
+
+      // Find all outstanding entries for the current invoice number
+      const outstandingEntries = await Outstanding.find({ invoiceNumber: invoice.invoiceNumber });
+
+      // Sum up the amount field from the Outstanding collection for this invoice number
+      if (outstandingEntries.length > 0) {
+        outstandingEntries.forEach((entry) => {
+          totalCollectionAmount += parseFloat(entry.amount);
+        });
+      }
+    }
+
+    // Return the calculated totals and product movement
+    res.status(200).json({
+      totalInvoiceAmount: totalInvoiceAmount.toFixed(2),
+      totalCollectionAmount: totalCollectionAmount.toFixed(2),
+      productMovement, // Returns an object with product names and their total quantities
+    });
+  } catch (error) {
+    console.error('Error searching invoices by code:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+
+
+// get total collection each delaer------------------------------------------------------------------------------------------------
 
 
 
@@ -698,7 +765,8 @@ module.exports = {
   getexeforoutstanding,
   getAllInvoicesWithOutstanding,
   getAllInvoicesWithOutstandingadmin,
-  searchInvoicesByExe
+  searchInvoicesByExe,
+  gettotsalesByDealercode
   
   
  

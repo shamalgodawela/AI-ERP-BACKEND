@@ -33,5 +33,10 @@ router.get('/search-outstanding', invoiceController.getexeforoutstanding)
 //search invoice
 router.get('/search-invoice-by-executive/:code',invoiceController.searchInvoicesByExe)
 
+//get total sales for each Delaer
+router.get('/get-total-salesby-dealer/:code',invoiceController.gettotsalesByDealercode)
+
+
+
 
 module.exports = router;
