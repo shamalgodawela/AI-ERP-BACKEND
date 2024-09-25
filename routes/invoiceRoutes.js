@@ -41,6 +41,10 @@ router.get('/get-total-salesby-dealer/:code',invoiceController.gettotsalesByDeal
 
 router.get('/search-by-productcode/:productCode',invoiceController.searchInvoicesByProductCode)
 
+// get executives product wise sales 
+router.get('/get-executives-sales-eachProduct/:exe',invoiceController.getProductWiseSalesByExe)
+
+
 
 
 

@@ -762,7 +762,63 @@ const searchInvoicesByProductCode = async (req, res) => {
 };
 
 
+// get executives product wise sales------------------------------------------------------------------------------------------------------
+const getProductWiseSalesByExe = async (req, res) => {
+  try {
+    const { exe } = req.params; // Get the exe name from the request parameters
 
+    if (!exe) {
+      return res.status(400).json({ error: 'Sales executive name (exe) is required' });
+    }
+
+    const salesData = await Invoice.aggregate([
+      {
+        $match: { GatePassNo: 'Printed', exe }, // Filter invoices by the given exe and 'Printed' GatePassNo
+      },
+      {
+        $unwind: '$products', // Deconstruct the products array
+      },
+      {
+        $group: {
+          _id: {
+            productName: '$products.productName', // Group by product name
+          },
+          totalSales: {
+            $sum: {
+              $multiply: [
+                { $toDouble: '$products.unitPrice' }, // Convert unitPrice to double for multiplication
+                { $toDouble: '$products.quantity' }, // Convert quantity to double for multiplication
+              ],
+            },
+          },
+          totalQuantity: {
+            $sum: { $toDouble: '$products.quantity' }, // Sum of quantities for each product
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          productName: '$_id.productName', // Product name
+          totalSales: { $round: ['$totalSales', 2] }, // Total sales for the product, rounded to 2 decimals
+          totalQuantity: '$totalQuantity', // Total quantity sold for the product
+        },
+      },
+      {
+        $sort: { productName: 1 }, // Sort by product name
+      },
+    ]);
+
+    if (salesData.length === 0) {
+      return res.status(404).json({ message: `No sales data found for sales executive: ${exe}` });
+    }
+
+    res.status(200).json(salesData);
+  } catch (error) {
+    console.error('Error fetching product-wise sales data:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
 module.exports = { 
@@ -789,7 +845,8 @@ module.exports = {
   getAllInvoicesWithOutstandingadmin,
   searchInvoicesByExe,
   gettotsalesByDealercode,
-  searchInvoicesByProductCode
+  searchInvoicesByProductCode,
+  getProductWiseSalesByExe
   
   
  
