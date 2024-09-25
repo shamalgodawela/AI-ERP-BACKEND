@@ -621,7 +621,7 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
             invoices.map(async (invoice) => {
                 let lastOutstanding = await Outstanding.findOne({
                     invoiceNumber: invoice.invoiceNumber,
-                }).sort({ date: 1 });
+                }).sort({ date: -1 });
 
                 // Set status based on the last outstanding value
                 let status = "Not Paid"; // Default status
