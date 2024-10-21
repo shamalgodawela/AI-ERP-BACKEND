@@ -5,7 +5,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   const { name, code, companyName, contact, address, city, phone, email, fax, district } = req.body;
 
   // Validation
-  if (!name || !code || !companyName || !contact || !address || !city || !phone) {
+  if (!name || !code || !companyName || !contact || !address || !city || !phone || BankName || AccountNo ) {
     res.status(400);
     throw new Error("Please fill all required fields");
   }
@@ -28,7 +28,12 @@ const createCustomer = asyncHandler(async (req, res) => {
     phone,
     email,
     fax,
-    district
+    district,
+    BankName,
+    AccountNo,
+    Branch,
+    OtherAccunt
+    
   });
 
   res.status(201).json(customer);
@@ -37,7 +42,7 @@ const createCustomer = asyncHandler(async (req, res) => {
 
 //get all Customers
 
-// controllers/customerController.js
+
 
 
 const getCustomers = asyncHandler(async (req, res) => {
@@ -45,11 +50,11 @@ const getCustomers = asyncHandler(async (req, res) => {
   let query = {};
 
   if (name) {
-    query.name = { $regex: new RegExp(name, 'i') }; // Case-insensitive search by name
+    query.name = { $regex: new RegExp(name, 'i') }; 
   }
 
   if (code) {
-    query.code = { $regex: new RegExp(code, 'i') }; // Case-insensitive search by code
+    query.code = { $regex: new RegExp(code, 'i') }; 
   }
 
   const customers = await Customer.find(query);
@@ -73,7 +78,7 @@ const getCustomerByCode = asyncHandler(async (req, res) => {
 });
 const updateCustomer = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { name, code, companyName, contact, address, city, phone, email, fax,district } = req.body;
+  const { name, code, companyName, contact, address, city, phone, email, fax,district,BankName,AccountNo,Branch,OtherAccunt } = req.body;
 
   try {
     // Find the customer by id
@@ -95,6 +100,10 @@ const updateCustomer = asyncHandler(async (req, res) => {
     if (email) customer.email = email;
     if (fax) customer.fax = fax;
     if (district) customer.district = district;
+    if (BankName) customer. BankName = BankName;
+    if (AccountNo) customer.AccountNo = AccountNo;
+    if (Branch) customer.Branch = Branch;
+    if (OtherAccunt) customer.OtherAccunt = OtherAccunt;
 
     // Validation
     if (!customer.name || !customer.code || !customer.companyName || !customer.contact || !customer.address || !customer.city || !customer.phone) {

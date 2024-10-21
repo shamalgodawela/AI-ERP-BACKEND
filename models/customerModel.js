@@ -13,7 +13,11 @@ const customerSchema = new Schema({
   phone: { type: String, required: true },
   email: { type: String },
   fax: { type: String },
-  district:{type:String,required :true}
+  district:{type:String,required :true},
+  BankName:{type:String, required : true},
+  AccountNo:{type: String, required: true},
+  Branch:{type:String},
+  OtherAccunt:{type:String},
 });
 
 const Customer = mongoose.model('Customer', customerSchema);
