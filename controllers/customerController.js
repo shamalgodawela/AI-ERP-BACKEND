@@ -100,7 +100,7 @@ const updateCustomer = asyncHandler(async (req, res) => {
     if (email) customer.email = email;
     if (fax) customer.fax = fax;
     if (district) customer.district = district;
-    if (BankName) customer. BankName = BankName;
+    if (BankName) customer.BankName = BankName;
     if (AccountNo) customer.AccountNo = AccountNo;
     if (Branch) customer.Branch = Branch;
     if (OtherAccunt) customer.OtherAccunt = OtherAccunt;

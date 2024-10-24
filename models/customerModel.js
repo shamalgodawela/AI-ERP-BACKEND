@@ -13,9 +13,9 @@ const customerSchema = new Schema({
   phone: { type: String, required: true },
   email: { type: String },
   fax: { type: String },
-  district:{type:String,required :true},
-  BankName:{type:String, required : true},
-  AccountNo:{type: String, required: true},
+  district:{type:String},
+  BankName:{type:String},
+  AccountNo:{type: String},
   Branch:{type:String},
   OtherAccunt:{type:String},
 });
