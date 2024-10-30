@@ -52,7 +52,7 @@ const addProductAndUpdate = async (req, res) => {
             } 
             else if (category === 'MNP10') {
                 // Find the bulk code MNPB50 in bulk products
-                let bulkProductMNPB50 = await BulkProduct.findOne({ bulkCode: 'MNPB50' });
+                let bulkProductMNPB50 = await BulkProduct.findOne({ bulkCode: 'DAP50' });
                 if (bulkProductMNPB50) {
                     // Calculate newQuantity for bulk code BPB15
                     let newQuantityMNPB50 = (bulkProductMNPB50.weight * bulkProductMNPB50.quantity - numberOfUnits * 6) / bulkProductMNPB50.weight;
