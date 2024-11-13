@@ -41,7 +41,9 @@ class OrdersController {
                 status: status,
                 VatRegNo:req.body.VatRegNo,
                 VatNO:req.body.VatNO,
-                TaxNo:req.body.TaxNo
+                TaxNo:req.body.TaxNo,
+                CreditPeriod:req.body.CreditPeriod,
+                Paymentmethod:req.body.Paymentmethod
             });
 
             // Save the order

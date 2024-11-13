@@ -27,9 +27,18 @@ const orderSchema = new mongoose.Schema({
   status:String,
   VatRegNo:String,
   VatNO:String,
-  TaxNo:String
+  TaxNo:String,
+
+  CreditPeriod:{
+    type:String,
+    unique:true
   
-  
+  },
+
+  Paymentmethod:{
+    type:String,
+    unique:true
+  }
 });
 
 const Order = mongoose.model('Order', orderSchema);
