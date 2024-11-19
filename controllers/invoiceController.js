@@ -655,44 +655,50 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
     // Fetch all invoices
     const invoices = await Invoice.find().sort({ invoiceDate: 1 });
 
-    // Filter and map through each invoice to get the last outstanding value and cheque details
-    const invoicesWithDetails = await Promise.all(
+    // Loop through each invoice to get the last outstanding value and cheque details
+    const invoicesWithOutstanding = await Promise.all(
       invoices.map(async (invoice) => {
         // Fetch the last outstanding value
-        const lastOutstanding = await Outstanding.findOne({
+        let lastOutstanding = await Outstanding.findOne({
           invoiceNumber: invoice.invoiceNumber,
         }).sort({ date: -1 });
 
-        // Fetch all cheques related to the invoice
+        // Fetch cheque details related to the invoice
         const chequeDetails = await Cheque.find({ invoiceNumber: invoice.invoiceNumber });
 
-        // Determine the status based on the last outstanding value
+        // Extract only the cheque values
+        const chequeValues = chequeDetails.map((cheque) => cheque.ChequeValue);
+
+        // Set status based on the last outstanding value
         let status = "Not Paid"; // Default status
+
         if (lastOutstanding) {
-          status = lastOutstanding.outstanding === 0 ? "Paid" : lastOutstanding.outstanding;
+          if (lastOutstanding.outstanding === 0) {
+            status = "Paid";
+          } else {
+            status = lastOutstanding.outstanding;
+          }
         }
 
-        // Only include invoices that are not fully paid
-        if (status !== "Paid") {
-          return {
-            ...invoice._doc,
-            lastOutstanding: status,
-            chequeDetails: chequeDetails.length > 0 ? chequeDetails : "No Cheques Found", // Add cheque details
-          };
-        }
+        // Add the status, last outstanding value, and cheque values to the invoice object
+        return {
+          ...invoice._doc,
+          lastOutstanding: status,
+          chequeValues: chequeValues.length > 0 ? chequeValues : "No Cheques Found", // Include cheque values
+        };
       })
     );
 
-    // Filter out undefined values (which are "Paid" invoices)
-    const filteredInvoices = invoicesWithDetails.filter((invoice) => invoice !== undefined);
-
-    // Return the response with invoices that have outstanding values or statuses and their cheque details
-    res.status(200).json(filteredInvoices);
+    // Return the response with all invoices and their details
+    res.status(200).json(invoicesWithOutstanding);
   } catch (error) {
-    console.error("Error fetching invoices with outstanding and cheque details:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error('Error fetching invoices with outstanding and cheque details:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+
 
 const searchInvoicesByExe = async (req, res) => {
   try {
