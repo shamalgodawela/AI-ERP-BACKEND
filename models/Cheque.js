@@ -12,7 +12,7 @@ const ChequeSchema= new Schema({
 
     },
     ChequeValue:{
-        type:String,
+        type:Number,
         required:true,
     },
     DepositeDate:{
