@@ -664,10 +664,12 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
         }).sort({ date: -1 });
 
         // Fetch cheque details related to the invoice
-        const chequeDetails = await Cheque.find({ invoiceNumber: invoice.invoiceNumber });
+        const chequeDetails = await Cheque.findOne({ invoiceNumber: invoice.invoiceNumber });
 
-        // Extract only the cheque values
-        const chequeValues = chequeDetails.map((cheque) => cheque.ChequeValue);
+        // Ensure chequeValues is an array or fallback to a string
+        const chequeValues = chequeDetails ? 
+                              (Array.isArray(chequeDetails.ChequeValue) ? chequeDetails.ChequeValue : [chequeDetails.ChequeValue]) 
+                              : "No Cheques Found";
 
         // Set status based on the last outstanding value
         let status = "Not Paid"; // Default status
@@ -684,7 +686,7 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
         return {
           ...invoice._doc,
           lastOutstanding: status,
-          chequeValues: chequeValues.length > 0 ? chequeValues : "No Cheques Found", // Include cheque values
+          chequeValues: chequeValues, // Include cheque values, which can be an array or "No Cheques Found"
         };
       })
     );
@@ -696,6 +698,7 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 
