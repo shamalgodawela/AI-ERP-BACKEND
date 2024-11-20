@@ -8,7 +8,11 @@ const outstandingController = {
             const { invoiceNumber, date, backName, depositedate, CHnumber, amount, outstanding } = req.body;
     
             // Check if a cheque with the provided CHnumber exists
-            const existingCheque = await Cheque.findOne({ ChequeNumber: CHnumber });
+            const existingCheque = await Cheque.findOne({ 
+                ChequeNumber: CHnumber, 
+                invoiceNumber: invoiceNumber 
+            });
+            
     
             if (existingCheque) {
                 // Update ChequeValue
