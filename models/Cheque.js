@@ -17,6 +17,9 @@ const ChequeSchema= new Schema({
     },
     DepositeDate:{
         type:String,
+    },
+    Bankdetails:{
+        type:String,
     }
     
 
