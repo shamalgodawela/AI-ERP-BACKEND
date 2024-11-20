@@ -1,12 +1,33 @@
 const Outstanding = require('../models/outStanding');
 const Invoice=require('../models/invoice')
+const Cheque=require('../models/Cheque')
 
 const outstandingController = {
     createOutstanding: async (req, res) => {
         try {
-            const { invoiceNumber, date,backName,depositedate,CHnumber, amount, outstanding } = req.body;
-            const newOutstanding = new Outstanding({ invoiceNumber,date,backName,depositedate,CHnumber, amount, outstanding});
+            const { invoiceNumber, date, backName, depositedate, CHnumber, amount, outstanding } = req.body;
+    
+            // Check if a cheque with the provided CHnumber exists
+            const existingCheque = await Cheque.findOne({ ChequeNumber: CHnumber });
+    
+            if (existingCheque) {
+                // Update ChequeValue
+                existingCheque.ChequeValue = parseFloat(existingCheque.ChequeValue) - parseFloat(amount);
+                await existingCheque.save();
+            }
+    
+            // Create a new Outstanding entry
+            const newOutstanding = new Outstanding({
+                invoiceNumber,
+                date,
+                backName,
+                depositedate,
+                CHnumber,
+                amount,
+                outstanding
+            });
             await newOutstanding.save();
+    
             res.status(201).json({ message: 'Outstanding data created successfully' });
         } catch (error) {
             console.error('Error creating outstanding data:', error);

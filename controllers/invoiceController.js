@@ -18,6 +18,8 @@ const addInvoice = async (req, res) => {
       product.invoiceTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
 
       
+
+      
       const existingProduct = await Product.findOne({
         sku: { $regex: new RegExp(product.productCode, "i") },
         category: { $regex: new RegExp(product.category, "i") },
