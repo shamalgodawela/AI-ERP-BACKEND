@@ -20,6 +20,10 @@ const ChequeSchema= new Schema({
     },
     Bankdetails:{
         type:String,
+    },
+    BankBranch:{
+        type:String,
+        required:true,
     }
     
 

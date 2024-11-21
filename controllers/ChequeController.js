@@ -3,7 +3,7 @@ const Invoice = require("../models/invoice");
 
 const AddChequeDetails = async (req, res) => {
     try {
-        const { invoiceNumber, ChequeNumber, ChequeValue, DepositeDate,Bankdetails } = req.body;
+        const { invoiceNumber, ChequeNumber, ChequeValue, DepositeDate,Bankdetails,BankBranch } = req.body;
 
         // Validate input
         if (!invoiceNumber || !ChequeNumber || !ChequeValue) {
@@ -18,7 +18,8 @@ const AddChequeDetails = async (req, res) => {
                 ChequeNumber,
                 ChequeValue,
                 DepositeDate,
-                Bankdetails
+                Bankdetails,
+                BankBranch
             });
 
             await newCheque.save();
