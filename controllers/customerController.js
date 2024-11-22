@@ -5,7 +5,7 @@ const createCustomer = asyncHandler(async (req, res) => {
   const { name, code, companyName, contact, address, city, phone, email, fax, district } = req.body;
 
   // Validation
-  if (!name || !code || !companyName || !contact || !address || !city || !phone || BankName || AccountNo ) {
+  if (!name || !code || !companyName || !contact || !address || !city || !phone ) {
     res.status(400);
     throw new Error("Please fill all required fields");
   }
