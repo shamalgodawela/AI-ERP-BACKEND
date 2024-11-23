@@ -2,7 +2,7 @@ const asyncHandler =require("express-async-handler");
 const Customer=require("../models/customerModel")
 
 const createCustomer = asyncHandler(async (req, res) => {
-  const { name, code, companyName, contact, address, city, phone, email, fax, district } = req.body;
+  const { name, code, companyName, contact, address, city, phone, email, fax, district,BankName,AccountNo,Branch,OtherAccunt } = req.body;
 
   // Validation
   if (!name || !code || !companyName || !contact || !address || !city || !phone ) {
