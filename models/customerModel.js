@@ -14,10 +14,6 @@ const customerSchema = new Schema({
   email: { type: String },
   fax: { type: String },
   district:{type:String},
-  BankName:{type:String},
-  AccountNo:{type: String},
-  Branch:{type:String},
-  OtherAccunt:{type:String},
 });
 
 const Customer = mongoose.model('Customer', customerSchema);
