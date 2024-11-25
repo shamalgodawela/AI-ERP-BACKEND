@@ -615,28 +615,35 @@ const getAllInvoicesWithOutstanding = async (req, res) => {
 };
 const getAllInvoicesWithOutstandingadmin = async (req, res) => {
   try {
-    // Fetch all invoices
-    const invoices = await Invoice.find().sort({ invoiceDate: 1 });
+    // Fetch all invoices and sort them based on the last three digits of the invoice number
+    const invoices = await Invoice.find().sort({
+      invoiceNumber: 1, // Sort the invoiceNumbers lexicographically first
+    });
 
-    // Loop through each invoice to get the last outstanding value and cheque details
     const invoicesWithOutstanding = await Promise.all(
       invoices.map(async (invoice) => {
-        // Fetch the last outstanding value
+        // Extract the last three digits of the invoice number
+        const invoiceSuffix = invoice.invoiceNumber.slice(-3);
+
+        // Fetch the last outstanding entry for the invoice
         let lastOutstanding = await Outstanding.findOne({
           invoiceNumber: invoice.invoiceNumber,
         }).sort({ date: -1 });
 
-        // Fetch cheque details related to the invoice
-        const chequeDetails = await Cheque.findOne({ invoiceNumber: invoice.invoiceNumber });
+        // Fetch cheque details for the invoice
+        const chequeDetails = await Cheque.findOne({
+          invoiceNumber: invoice.invoiceNumber,
+        });
 
-        // Ensure chequeValues is an array or fallback to a string
-        const chequeValues = chequeDetails ? 
-                              (Array.isArray(chequeDetails.ChequeValue) ? chequeDetails.ChequeValue : [chequeDetails.ChequeValue]) 
-                              : "No Cheques Found";
+        // Handle cheque values
+        const chequeValues = chequeDetails
+          ? Array.isArray(chequeDetails.ChequeValue)
+            ? chequeDetails.ChequeValue
+            : [chequeDetails.ChequeValue]
+          : "No Cheques Found";
 
-        // Set status based on the last outstanding value
-        let status = "Not Paid"; // Default status
-
+        // Determine the status
+        let status = "Not Paid";
         if (lastOutstanding) {
           if (lastOutstanding.outstanding === 0) {
             status = "Paid";
@@ -645,22 +652,33 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
           }
         }
 
-        // Add the status, last outstanding value, and cheque values to the invoice object
+        // Return the updated invoice object
         return {
           ...invoice._doc,
+          invoiceSuffix, // Adding suffix for clarity
           lastOutstanding: status,
-          chequeValues: chequeValues, // Include cheque values, which can be an array or "No Cheques Found"
+          chequeValues: chequeValues,
         };
       })
     );
 
-    // Return the response with all invoices and their details
+    // Sort the final result based on the extracted suffix numerically
+    invoicesWithOutstanding.sort(
+      (a, b) =>
+        parseInt(a.invoiceSuffix) - parseInt(b.invoiceSuffix)
+    );
+
+    // Send the response
     res.status(200).json(invoicesWithOutstanding);
   } catch (error) {
-    console.error('Error fetching invoices with outstanding and cheque details:', error.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error(
+      "Error fetching invoices with outstanding and cheque details:",
+      error.message
+    );
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 
