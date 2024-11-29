@@ -628,20 +628,16 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
         }).sort({ date: -1 });
 
       
-        const chequeDetails = await Cheque.find({ invoiceNumber: invoice.invoiceNumber });
+        const chequeDetails = await Cheque.findOne({
+          invoiceNumber: invoice.invoiceNumber,
+        });
 
-        let chequeValues = "No Cheques Found";
-        
-        if (chequeDetails.length > 0) {
-          chequeValues = chequeDetails.reduce((sum, cheque) => {
-            const value = Array.isArray(cheque.ChequeValue)
-              ? cheque.ChequeValue.reduce((subSum, val) => subSum + val, 0)
-              : cheque.ChequeValue;
-        
-            return sum + value;
-          }, 0); // Initial sum is 0
-        }
-        
+       
+        const chequeValues = chequeDetails
+          ? Array.isArray(chequeDetails.ChequeValue)
+            ? chequeDetails.ChequeValue
+            : [chequeDetails.ChequeValue]
+          : "No Cheques Found";
 
       
         let status = "Not Paid";
