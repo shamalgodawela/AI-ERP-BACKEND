@@ -16,10 +16,7 @@ const addInvoice = async (req, res) => {
     for (const product of products) {
       product.unitPrice = parseFloat(product.labelPrice) - (parseFloat(product.labelPrice) * parseFloat(product.discount) / 100);
       product.invoiceTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
-
-      
-
-      
+       
       const existingProduct = await Product.findOne({
         sku: { $regex: new RegExp(product.productCode, "i") },
         category: { $regex: new RegExp(product.category, "i") },
@@ -572,18 +569,18 @@ const getexeforoutstanding = async (req, res) => {
 };
 const getAllInvoicesWithOutstanding = async (req, res) => {
   try {
-      // Fetch all invoices
+     
       const invoices = await Invoice.find();
 
-      // Filter and map through each invoice to get the last outstanding value
+      
       const invoicesWithOutstanding = await Promise.all(
           invoices.map(async (invoice) => {
               let lastOutstanding = await Outstanding.findOne({
                   invoiceNumber: invoice.invoiceNumber,
               });
 
-              // Determine the status based on the last outstanding value
-              let status = "Not Paid"; // Default status
+              
+              let status = "Not Paid"; 
 
               if (lastOutstanding) {
                   if (lastOutstanding.outstanding === 0) {
@@ -593,7 +590,7 @@ const getAllInvoicesWithOutstanding = async (req, res) => {
                   }
               }
 
-              // Only include invoices that are not fully paid
+             
               if (status !== "Paid") {
                   return {
                       ...invoice._doc,
@@ -603,10 +600,10 @@ const getAllInvoicesWithOutstanding = async (req, res) => {
           })
       );
 
-      // Filter out undefined values (which are "Paid" invoices)
+     
       const filteredInvoices = invoicesWithOutstanding.filter(invoice => invoice !== undefined);
 
-      // Return the response with invoices that have outstanding values or statuses
+      
       res.status(200).json(filteredInvoices);
   } catch (error) {
       console.error('Error fetching invoices with outstanding details:', error.message);
@@ -615,34 +612,38 @@ const getAllInvoicesWithOutstanding = async (req, res) => {
 };
 const getAllInvoicesWithOutstandingadmin = async (req, res) => {
   try {
-    // Fetch all invoices and sort them based on the last three digits of the invoice number
+    
     const invoices = await Invoice.find().sort({
-      invoiceNumber: 1, // Sort the invoiceNumbers lexicographically first
+      invoiceNumber: 1, 
     });
 
     const invoicesWithOutstanding = await Promise.all(
       invoices.map(async (invoice) => {
-        // Extract the last three digits of the invoice number
+        
         const invoiceSuffix = invoice.invoiceNumber.slice(-3);
 
-        // Fetch the last outstanding entry for the invoice
+       
         let lastOutstanding = await Outstanding.findOne({
           invoiceNumber: invoice.invoiceNumber,
         }).sort({ date: -1 });
 
-        // Fetch cheque details for the invoice
-        const chequeDetails = await Cheque.findOne({
-          invoiceNumber: invoice.invoiceNumber,
-        });
+      
+        const chequeDetails = await Cheque.find({ invoiceNumber: invoice.invoiceNumber });
 
-        // Handle cheque values
-        const chequeValues = chequeDetails
-          ? Array.isArray(chequeDetails.ChequeValue)
-            ? chequeDetails.ChequeValue
-            : [chequeDetails.ChequeValue]
-          : "No Cheques Found";
+        let chequeValues = "No Cheques Found";
+        
+        if (chequeDetails.length > 0) {
+          chequeValues = chequeDetails.reduce((sum, cheque) => {
+            const value = Array.isArray(cheque.ChequeValue)
+              ? cheque.ChequeValue.reduce((subSum, val) => subSum + val, 0)
+              : cheque.ChequeValue;
+        
+            return sum + value;
+          }, 0); // Initial sum is 0
+        }
+        
 
-        // Determine the status
+      
         let status = "Not Paid";
         if (lastOutstanding) {
           if (lastOutstanding.outstanding === 0) {
@@ -652,23 +653,23 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
           }
         }
 
-        // Return the updated invoice object
+        
         return {
           ...invoice._doc,
-          invoiceSuffix, // Adding suffix for clarity
+          invoiceSuffix, 
           lastOutstanding: status,
           chequeValues: chequeValues,
         };
       })
     );
 
-    // Sort the final result based on the extracted suffix numerically
+    
     invoicesWithOutstanding.sort(
       (a, b) =>
         parseInt(a.invoiceSuffix) - parseInt(b.invoiceSuffix)
     );
 
-    // Send the response
+   
     res.status(200).json(invoicesWithOutstanding);
   } catch (error) {
     console.error(
@@ -716,27 +717,27 @@ const gettotsalesByDealercode = async (req, res) => {
       return res.status(400).json({ error: 'Customer code is required' });
     }
 
-    // Fetch invoices with the specified code and where GatePassNo is 'Printed'
+    
     const invoices = await Invoice.find({ code, GatePassNo: 'Printed' }).sort({ invoiceDate: -1 });
 
     if (invoices.length === 0) {
       return res.status(404).json({ message: 'No invoices found with GatePassNo "Printed" for the specified customer code' });
     }
 
-    // Initialize totals and product movement tracking
+    
     let totalInvoiceAmount = 0;
     let totalCollectionAmount = 0;
     let productMovement = {};
 
-    // Loop through each invoice to calculate totals and track product movement
+    
     for (const invoice of invoices) {
-      // Calculate total product amounts in each invoice
+      
       if (invoice.products && Array.isArray(invoice.products)) {
         invoice.products.forEach((product) => {
           const productTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
           totalInvoiceAmount += productTotal;
 
-          // Track product movement by summing quantities for each product
+       
           const { productName, quantity } = product;
           if (productMovement[productName]) {
             productMovement[productName] += parseFloat(quantity);
@@ -746,10 +747,10 @@ const gettotsalesByDealercode = async (req, res) => {
         });
       }
 
-      // Find all outstanding entries for the current invoice number
+   
       const outstandingEntries = await Outstanding.find({ invoiceNumber: invoice.invoiceNumber });
 
-      // Sum up the amount field from the Outstanding collection for this invoice number
+ 
       if (outstandingEntries.length > 0) {
         outstandingEntries.forEach((entry) => {
           totalCollectionAmount += parseFloat(entry.amount);
@@ -757,11 +758,11 @@ const gettotsalesByDealercode = async (req, res) => {
       }
     }
 
-    // Return the calculated totals and product movement
+
     res.status(200).json({
       totalInvoiceAmount: totalInvoiceAmount.toFixed(2),
       totalCollectionAmount: totalCollectionAmount.toFixed(2),
-      productMovement, // Returns an object with product names and their total quantities
+      productMovement,
     });
   } catch (error) {
     console.error('Error searching invoices by code:', error.message);
@@ -780,14 +781,14 @@ const searchInvoicesByProductCode = async (req, res) => {
       return res.status(400).json({ error: 'Product code is required' });
     }
 
-    // Find invoices where any of the products have the given product code
+   
     const invoices = await Invoice.find({ 'products.productCode': productCode }).sort({ invoiceDate: -1 });
 
     if (invoices.length === 0) {
       return res.status(404).json({ message: 'No invoices found with the specified product code' });
     }
 
-    // Return the invoices that contain the product
+   
     res.status(200).json(invoices);
   } catch (error) {
     console.error('Error searching invoices by product code:', error.message);
@@ -799,7 +800,7 @@ const searchInvoicesByProductCode = async (req, res) => {
 // get executives product wise sales------------------------------------------------------------------------------------------------------
 const getProductWiseSalesByExe = async (req, res) => {
   try {
-    const { exe } = req.params; // Get the exe name from the request parameters
+    const { exe } = req.params; 
 
     if (!exe) {
       return res.status(400).json({ error: 'Sales executive name (exe) is required' });
@@ -807,39 +808,39 @@ const getProductWiseSalesByExe = async (req, res) => {
 
     const salesData = await Invoice.aggregate([
       {
-        $match: { GatePassNo: 'Printed', exe }, // Filter invoices by the given exe and 'Printed' GatePassNo
+        $match: { GatePassNo: 'Printed', exe }, 
       },
       {
-        $unwind: '$products', // Deconstruct the products array
+        $unwind: '$products', 
       },
       {
         $group: {
           _id: {
-            productName: '$products.productName', // Group by product name
+            productName: '$products.productName',
           },
           totalSales: {
             $sum: {
               $multiply: [
-                { $toDouble: '$products.unitPrice' }, // Convert unitPrice to double for multiplication
-                { $toDouble: '$products.quantity' }, // Convert quantity to double for multiplication
+                { $toDouble: '$products.unitPrice' }, 
+                { $toDouble: '$products.quantity' },
               ],
             },
           },
           totalQuantity: {
-            $sum: { $toDouble: '$products.quantity' }, // Sum of quantities for each product
+            $sum: { $toDouble: '$products.quantity' }, 
           },
         },
       },
       {
         $project: {
           _id: 0,
-          productName: '$_id.productName', // Product name
-          totalSales: { $round: ['$totalSales', 2] }, // Total sales for the product, rounded to 2 decimals
-          totalQuantity: '$totalQuantity', // Total quantity sold for the product
+          productName: '$_id.productName', 
+          totalSales: { $round: ['$totalSales', 2] }, 
+          totalQuantity: '$totalQuantity', 
         },
       },
       {
-        $sort: { productName: 1 }, // Sort by product name
+        $sort: { productName: 1 },
       },
     ]);
 
