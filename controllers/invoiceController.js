@@ -633,11 +633,11 @@ const getAllInvoicesWithOutstandingadmin = async (req, res) => {
         });
 
        
-        const chequeValues = 
-  chequeDetails.length > 0
-    ? chequeDetails.reduce((total, cheque) => total + cheque.ChequeValue, 0)
-    : "No Cheques Found";
-
+        const chequeValues = chequeDetails
+          ? Array.isArray(chequeDetails.ChequeValue)
+            ? chequeDetails.ChequeValue
+            : [chequeDetails.ChequeValue]
+          : "No Cheques Found";
 
       
         let status = "Not Paid";
