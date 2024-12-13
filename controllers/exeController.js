@@ -2,6 +2,7 @@ const asyncHandler =require("express-async-handler");
 const Exe = require("../models/exe");
 const jwt = require("jsonwebtoken");
 const bcrypt =require("bcryptjs");
+const Invoice= require('../models/invoice')
 
 
 const generateToken=(id)=>{
@@ -67,54 +68,67 @@ const exeregister = asyncHandler( async(req,res)=>{
 
 //Login exe
 
-const loginExe=asyncHandler (async(req,res)=>{
-    const {email, password}= req.body
+const loginExe = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    //validate request
-    if(!email || !password){
+  // Validate request
+  if (!email || !password) {
       res.status(400);
-      throw new Error("please fill the email and /or password of  your account")
-    }
-    // check if user exists
-    const user= await Exe.findOne({email})
-    if(!user){
-      res.status(400);
-      throw new Error("User not found")
-    }
-  
-    //user exists, check password is correct
-    const passwordIsCorrect= await bcrypt.compare(password, user.password);
-    //generate token
-  const token=generateToken(user._id);
-  
-  // sent http-only cookie
-  
-  if(passwordIsCorrect){
-  res.cookie("token", token, {
-    path:"/",
-    httpOnly: true,
-    expires: new Date(Date.now()+ 1000 * 86400),// 1 day
-    sameSite:"none",
-    secure:true,
-  });
-  
+      throw new Error("Please fill the email and/or password of your account");
   }
-    if (user && passwordIsCorrect){
-      const {_id,name,email}= user
-      res.status(200).json({
-          _id, 
-          name,
-          email,   
-          token,
+
+  // Check if user exists
+  const user = await Exe.findOne({ email });
+  if (!user) {
+      res.status(400);
+      throw new Error("User not found");
+  }
+
+  // User exists, check if password is correct
+  const passwordIsCorrect = await bcrypt.compare(password, user.password);
+
+  // Generate token
+  const token = generateToken(user._id);
+
+  // Send HTTP-only cookie
+  if (passwordIsCorrect) {
+      res.cookie("token", token, {
+          path: "/",
+          httpOnly: true,
+          expires: new Date(Date.now() + 1000 * 86400), // 1 day
+          sameSite: "none",
+          secure: true,
       });
+  }
+
   
-      
-    }else{
-      res.status(400)
-      throw new Error("invalid email or password")
+  if (email === "ncpsales1@nihonagholdings.com" && passwordIsCorrect && user) {
+ 
+    try {
+        const invoices = await Invoice.find({ exe: "Mr.Ahamed" });
+
+        const { _id, name, email } = user;
+
+        res.status(200).json({
+            _id,
+            name,
+            message: "Logged in successfully",
+            email,
+            invoices,
+            token,
+        });
+    } catch (error) {
+        res.status(500); // Internal Server Error
+        throw new Error("Error fetching invoices");
     }
+} else {
+    res.status(400); // Bad Request
+    throw new Error("Invalid email or password");
+}
 
 });
+
+
 
 const logoutexe= asyncHandler (async(req,res)=>{
     res.cookie("token", "", {
