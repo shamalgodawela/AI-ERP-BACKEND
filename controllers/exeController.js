@@ -105,7 +105,7 @@ const loginExe = asyncHandler(async (req, res) => {
   if (email === "ncpsales1@nihonagholdings.com" && passwordIsCorrect && user) {
  
     try {
-        const invoices = await Invoice.find({ exe: "Mr.Ahamed" });
+        const invoices = await Invoice.find({ exe: "Mr.Chameera" });
 
         const { _id, name, email } = user;
 
