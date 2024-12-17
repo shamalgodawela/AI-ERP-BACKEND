@@ -5,6 +5,7 @@ const bcrypt =require("bcryptjs");
 const Invoice= require('../models/invoice')
 
 
+
 const generateToken=(id)=>{
     return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1d"})
   
@@ -68,63 +69,52 @@ const exeregister = asyncHandler( async(req,res)=>{
 
 //Login exe
 
-const loginExe = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+const loginExe=asyncHandler (async(req,res)=>{
+    const {email, password}= req.body
 
-  // Validate request
-  if (!email || !password) {
+    //validate request
+    if(!email || !password){
       res.status(400);
-      throw new Error("Please fill the email and/or password of your account");
-  }
-
-  // Check if user exists
-  const user = await Exe.findOne({ email });
-  if (!user) {
-      res.status(400);
-      throw new Error("User not found");
-  }
-
-  // User exists, check if password is correct
-  const passwordIsCorrect = await bcrypt.compare(password, user.password);
-
-  // Generate token
-  const token = generateToken(user._id);
-
-  // Send HTTP-only cookie
-  if (passwordIsCorrect) {
-      res.cookie("token", token, {
-          path: "/",
-          httpOnly: true,
-          expires: new Date(Date.now() + 1000 * 86400), // 1 day
-          sameSite: "none",
-          secure: true,
-      });
-  }
-
-  
-  if (email === "ncpsales1@nihonagholdings.com" && passwordIsCorrect && user) {
- 
-    try {
-        const invoices = await Invoice.find({ exe: "Mr.Chameera" });
-
-        const { _id, name, email } = user;
-
-        res.status(200).json({
-            _id,
-            name,
-            message: "Logged in successfully",
-            email,
-            invoices,
-            token,
-        });
-    } catch (error) {
-        res.status(500); // Internal Server Error
-        throw new Error("Error fetching invoices");
+      throw new Error("please fill the email and /or password of  your account")
     }
-} else {
-    res.status(400); // Bad Request
-    throw new Error("Invalid email or password");
-}
+    // check if user exists
+    const user= await Exe.findOne({email})
+    if(!user){
+      res.status(400);
+      throw new Error("User not found")
+    }
+  
+    //user exists, check password is correct
+    const passwordIsCorrect= await bcrypt.compare(password, user.password);
+    //generate token
+  const token=generateToken(user._id);
+  
+  // sent http-only cookie
+  
+  if(passwordIsCorrect){
+  res.cookie("token", token, {
+    path:"/",
+    httpOnly: true,
+    expires: new Date(Date.now()+ 1000 * 86400),// 1 day
+    sameSite:"none",
+    secure:true,
+  });
+  
+  }
+    if (user && passwordIsCorrect){
+      const {_id,name,email}= user
+      res.status(200).json({
+          _id, 
+          name,
+          email,   
+          token,
+      });
+  
+      
+    }else{
+      res.status(400)
+      throw new Error("invalid email or password")
+    }
 
 });
 
