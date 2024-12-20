@@ -3,18 +3,30 @@ const TaxInvoices= require('../models/TaxInvoice')
 
 const getAllTaxInvoices = async (req, res) => {
   try {
-      // Use aggregation to convert TaxNo to a number and sort
-      const invoices = await TaxInvoices.aggregate([
-          { $addFields: { TaxNoAsNumber: { $toInt: "$TaxNo" } } },
-          { $sort: { TaxNoAsNumber: 1 } }
-      ]);
+    // Use aggregation to convert TaxNo to a number and sort
+    const invoices = await TaxInvoices.aggregate([
+      {
+        $addFields: { 
+          TaxNoAsNumber: { $toInt: "$TaxNo" } // Convert TaxNo to a number for sorting
+        }
+      },
+      {
+        $sort: { TaxNoAsNumber: 1 } // Sort by the converted TaxNo field
+      },
+      {
+        $project: { 
+          TaxNoAsNumber: 0 // Remove the temporary TaxNoAsNumber field from the result
+        }
+      }
+    ]);
 
-      res.status(200).json(invoices);
+    res.status(200).json(invoices);
   } catch (error) {
-      console.error('Error fetching all invoices:', error.message);
-      res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error fetching all invoices:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 
