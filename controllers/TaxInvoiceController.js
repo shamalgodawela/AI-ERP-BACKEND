@@ -3,8 +3,11 @@ const TaxInvoices= require('../models/TaxInvoice')
 
 const getAllTaxInvoices = async (req, res) => {
   try {
-      // Fetch all invoices sorted by TaxNo in ascending order
-      const invoices = await TaxInvoices.find().sort({ TaxNo: 1 });
+      // Use aggregation to convert TaxNo to a number and sort
+      const invoices = await TaxInvoices.aggregate([
+          { $addFields: { TaxNoAsNumber: { $toInt: "$TaxNo" } } },
+          { $sort: { TaxNoAsNumber: 1 } }
+      ]);
 
       res.status(200).json(invoices);
   } catch (error) {
@@ -12,6 +15,7 @@ const getAllTaxInvoices = async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 const getTaxInvoiceByNumber = async (req, res) => {
