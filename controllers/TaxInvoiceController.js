@@ -1,7 +1,7 @@
 const TaxInvoices= require('../models/TaxInvoice')
 
 
-const getAllInvoices = async (req, res) => {
+const getAllTaxInvoices = async (req, res) => {
     try {
       const invoices = await TaxInvoices.find().sort({ invoiceDate: -1 }); 
       res.status(200).json(invoices);
@@ -11,7 +11,7 @@ const getAllInvoices = async (req, res) => {
     }
   };
 
-const getInvoiceByNumber = async (req, res) => {
+const getTaxInvoiceByNumber = async (req, res) => {
     const { invoiceNumber } = req.params;
   
     try {
@@ -27,9 +27,59 @@ const getInvoiceByNumber = async (req, res) => {
     }
   };
 
+  const searchTaxInvoices = async (req, res) => {
+    try {
+      
+      const { searchQuery, startDate, endDate, exe } = req.query;
+  
+      
+      const query = {};
+  
+      
+      if (searchQuery) {
+        query.$or = [
+          { invoiceNumber: { $regex: searchQuery, $options: 'i' } },
+          { customer: { $regex: searchQuery, $options: 'i' } },
+        ];
+      }
+  
+      
+      if (exe) {
+        query.exe = exe;
+      }
+  
+      
+      if (startDate && endDate) {
+        try {
+          const parsedStartDate = new Date(startDate);
+          const parsedEndDate = new Date(endDate);
+          
+          parsedEndDate.setHours(23, 59, 59, 999);
+  
+          
+          query.invoiceDate = { $gte: parsedStartDate, $lte: parsedEndDate };
+        } catch (error) {
+          console.error('Error parsing dates:', error);
+          return res.status(400).json({ error: 'Invalid startDate or endDate format.' });
+        }
+      }
+  
+      
+      const invoices = await TaxInvoices.find(query);
+  
+      
+      res.json(invoices);
+    } catch (error) {
+      
+      console.error('Failed to search invoices:', error);
+      res.status(500).json({ error: 'Failed to search invoices' });
+    }
+  };
+
   module.exports = { 
-    getAllInvoices,
-    getInvoiceByNumber
+    getAllTaxInvoices,
+    getTaxInvoiceByNumber,
+    searchTaxInvoices,
 
 
   }
