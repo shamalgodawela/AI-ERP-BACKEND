@@ -30,6 +30,8 @@ const returnAndNewProduct=require('./routes/returnAndNewProduct');
 const NewBulkRoute=require('./routes/NewBulkRoute')
 const AdminOperation=require('./routes/AdminOperation')
 const ChequeRoute=require('./routes/ChequeRoute')
+const TaxInvoiceRoute=require('./routes/TaxInvoiceRoute')
+const MirateRouter=require('./routes/MirateRouter')
 
 
 const app=express()
@@ -73,6 +75,8 @@ app.use('/api',returnAndNewProduct)
 app.use('/api',NewBulkRoute)
 app.use('/api',AdminOperation)
 app.use('/api',ChequeRoute)
+app.use('/api',TaxInvoiceRoute)
+app.use('/api',MirateRouter)
 
 
 // Routes
