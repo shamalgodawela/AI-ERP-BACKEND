@@ -2,14 +2,17 @@ const TaxInvoices= require('../models/TaxInvoice')
 
 
 const getAllTaxInvoices = async (req, res) => {
-    try {
-      const invoices = await TaxInvoices.find().sort({ invoiceDate: -1 }); 
+  try {
+      // Fetch all invoices sorted by TaxNo in ascending order
+      const invoices = await TaxInvoices.find().sort({ TaxNo: 1 });
+
       res.status(200).json(invoices);
-    } catch (error) {
+  } catch (error) {
       console.error('Error fetching all invoices:', error.message);
       res.status(500).json({ error: 'Internal Server Error' });
-    }
-  };
+  }
+};
+
 
 const getTaxInvoiceByNumber = async (req, res) => {
     const { invoiceNumber } = req.params;
