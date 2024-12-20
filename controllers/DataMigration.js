@@ -6,7 +6,7 @@ const migrateData = async (req, res) => {
         const startDate = new Date('2024-10-01'); 
         const endDate = new Date(); 
 
-        // Fetch data from source collection using $expr and $dateFromString
+      
         const dataToMigrate = await Invoice.aggregate([
             {
                 $addFields: {
