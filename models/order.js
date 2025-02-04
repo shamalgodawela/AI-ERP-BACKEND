@@ -31,7 +31,7 @@ const orderSchema = new mongoose.Schema({
 
   CreditPeriod:{
     type:String,
-    unique:true
+    
   
   },
 
