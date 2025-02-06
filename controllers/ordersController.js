@@ -178,7 +178,7 @@ class OrdersController {
     async getLastOrderNumberStartingWithEA(req, res) {
         try {
             // Find the last order number that starts with "EA"
-            const lastOrder = await Order.findOne({ orderNumber: /^EA/ })
+            const lastOrder = await Order.findOne({ orderNumber: /^EA1/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
     
