@@ -26,6 +26,7 @@ router.get('/lastorder/ncp', ordersController.getLastOrderNumberStartingWithNCP)
 router.get('/lastorder/upc', ordersController.getLastOrderNumberStartingWithUPC);
 router.get('/lastorder/upc1', ordersController.getLastOrderNumberStartingWithUPC2);
 router.get('/lastorder/NUM', ordersController.getLastOrderNumberStartingWithNUM)
+router.get('/lastorder/EA2', ordersController.getLastOrderNumberStartingWithEA2)
 
 
 module.exports = router;
