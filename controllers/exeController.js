@@ -144,10 +144,99 @@ const loginStatusexe= asyncHandler(async(req,res)=>{
    return res.json(false)
 })
 
+const exeinvoice = async (req, res) => {
+  let userEmail;
+
+  try {
+   
+    const originalConsoleLog = console.log;
+
+   
+    console.log = function (message) {
+     
+      if (typeof message === 'object' && message.email) {
+        userEmail = message.email; 
+        console.log('Email extracted and stored in variable userEmail:', userEmail);
+      }
+
+     
+      originalConsoleLog.apply(console, arguments);
+    };
+
+    
+    const loggedObject1 = {
+      email: "ncpsales1@nihonagholdings.com",
+      name: "Chameera",
+      token: "...",
+      _id: "6622146b97797a3b03946932"
+    };
+
+    const loggedObject2 = {
+      email: "eastsales1@nihonagholdings.com",
+      name: "Ahamed",
+      token: "...",
+      _id: "6622138a97797a3b0394692f"
+    };
+
+    
+    console.log(loggedObject1); 
+    console.log(loggedObject2); 
+
+  
+    console.log('Logged-in User Email:', userEmail);
+
+   
+    if (userEmail === 'ncpsales1@nihonagholdings.com') {
+      
+      const invoices = await Invoice.find({ exe: 'Mr.Chameera' });
+
+     
+      console.log('Invoices for Mr.Chameera:', invoices);
+
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Invoices fetched successfully',
+        data: invoices
+      });
+    } 
+    if (userEmail === 'eastsales1@nihonagholdings.com') {
+      
+      const invoices = await Invoice.find({ exe: 'Mr.Ahamed' });
+
+     
+      console.log('Invoices for Mr.Chameera:', invoices);
+
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Invoices fetched successfully',
+        data: invoices
+      });
+    }
+  
+    
+    else {
+      
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized email'
+      });
+    }
+  } catch (error) {
+    
+    console.error('Error fetching invoices:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
 module.exports={
     exeregister,
     loginExe,
     logoutexe,
-    loginStatusexe
+    loginStatusexe,
+    exeinvoice
 
 }
