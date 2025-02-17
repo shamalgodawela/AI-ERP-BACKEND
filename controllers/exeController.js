@@ -70,51 +70,51 @@ const exeregister = asyncHandler( async(req,res)=>{
 //Login exe
 
 const loginExe=asyncHandler (async(req,res)=>{
-    const {email, password}= req.body
+  const {email, password}= req.body
 
-    //validate request
-    if(!email || !password){
-      res.status(400);
-      throw new Error("please fill the email and /or password of  your account")
-    }
-    // check if user exists
-    const user= await Exe.findOne({email})
-    if(!user){
-      res.status(400);
-      throw new Error("User not found")
-    }
-  
-    //user exists, check password is correct
-    const passwordIsCorrect= await bcrypt.compare(password, user.password);
-    //generate token
-  const token=generateToken(user._id);
-  
-  // sent http-only cookie
-  
-  if(passwordIsCorrect){
-  res.cookie("token", token, {
-    path:"/",
-    httpOnly: true,
-    expires: new Date(Date.now()+ 1000 * 86400),// 1 day
-    sameSite:"none",
-    secure:true,
-  });
-  
+  //validate request
+  if(!email || !password){
+    res.status(400);
+    throw new Error("please fill the email and /or password of  your account")
   }
-    if (user && passwordIsCorrect){
-      const {_id,name,email}= user
-      res.status(200).json({
-          _id, 
-          name,
-          email,   
-          token,
-      });
-  
-      
-    }else{
-      res.status(400)
-      throw new Error("invalid email or password")
-    }
+  // check if user exists
+  const user= await Exe.findOne({email})
+  if(!user){
+    res.status(400);
+    throw new Error("User not found")
+  }
+
+  //user exists, check password is correct
+  const passwordIsCorrect= await bcrypt.compare(password, user.password);
+  //generate token
+const token=generateToken(user._id);
+
+// sent http-only cookie
+
+if(passwordIsCorrect){
+res.cookie("token", token, {
+  path:"/",
+  httpOnly: true,
+  expires: new Date(Date.now()+ 1000 * 86400),// 1 day
+  sameSite:"none",
+  secure:true,
+});
+
+}
+  if (user && passwordIsCorrect){
+    const {_id,name,email}= user
+    res.status(200).json({
+        _id, 
+        name,
+        email,   
+        token,
+    });
+
+    
+  }else{
+    res.status(400)
+    throw new Error("invalid email or password")
+  }
 
 });
 
@@ -136,7 +136,7 @@ const loginStatusexe= asyncHandler(async(req,res)=>{
   if(!token){
     return res.json(false)
   }
-   //verify token
+  
    const verified=jwt.verify(token, process.env.JWT_SECRET);
    if(verified){
     return res.json(true)
@@ -145,93 +145,31 @@ const loginStatusexe= asyncHandler(async(req,res)=>{
 })
 
 const exeinvoice = async (req, res) => {
-  let userEmail;
-
   try {
-   
-    const originalConsoleLog = console.log;
+      const { password } = req.query;
 
-   
-    console.log = function (message) {
-     
-      if (typeof message === 'object' && message.email) {
-        userEmail = message.email; 
-        console.log('Email extracted and stored in variable userEmail:', userEmail);
+      let exeValue;
+      if (password === '1234') {
+          exeValue = 'Mr.Ahamed';
+      } else if (password === '0909') {
+          exeValue = 'Mr.Dasun';
+      } else {
+          return res.status(401).json({ message: 'Invalid password' });
       }
 
-     
-      originalConsoleLog.apply(console, arguments);
-    };
-
-    
-    const loggedObject1 = {
-      email: "ncpsales1@nihonagholdings.com",
-      name: "Chameera",
-      token: "...",
-      _id: "6622146b97797a3b03946932"
-    };
-
-    const loggedObject2 = {
-      email: "eastsales1@nihonagholdings.com",
-      name: "Ahamed",
-      token: "...",
-      _id: "6622138a97797a3b0394692f"
-    };
-
-    
-    console.log(loggedObject1); 
-    console.log(loggedObject2); 
-
-  
-    console.log('Logged-in User Email:', userEmail);
-
-   
-    if (userEmail === 'ncpsales1@nihonagholdings.com') {
       
-      const invoices = await Invoice.find({ exe: 'Mr.Chameera' });
+      const invoices = await Invoice.find({ exe: exeValue });
 
-     
-      console.log('Invoices for Mr.Chameera:', invoices);
-
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Invoices fetched successfully',
-        data: invoices
-      });
-    } 
-    if (userEmail === 'eastsales1@nihonagholdings.com') {
-      
-      const invoices = await Invoice.find({ exe: 'Mr.Ahamed' });
-
-     
-      console.log('Invoices for Mr.Chameera:', invoices);
-
-      
-      return res.status(200).json({
-        success: true,
-        message: 'Invoices fetched successfully',
-        data: invoices
-      });
-    }
-  
-    
-    else {
-      
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized email'
-      });
-    }
+      res.json(invoices);
   } catch (error) {
-    
-    console.error('Error fetching invoices:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
   }
 };
+
+
+
+
 module.exports={
     exeregister,
     loginExe,
