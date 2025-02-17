@@ -149,11 +149,16 @@ const exeinvoice = async (req, res) => {
       const { password } = req.query;
 
       let exeValue;
-      if (password === '1234') {
+      if (password === 'ahamed@789') {
           exeValue = 'Mr.Ahamed';
-      } else if (password === '0909') {
+      } else if (password === 'dasun@098') {
           exeValue = 'Mr.Dasun';
-      } else {
+      } else if (password === 'chameera@603') {
+        exeValue = 'Mr.Chameera';
+      }else if (password === 'navaneedan@4456') {
+      exeValue = 'Mr.Navaneedan';
+     }
+      else {
           return res.status(401).json({ message: 'Invalid password' });
       }
 
