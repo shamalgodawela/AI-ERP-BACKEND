@@ -157,6 +157,9 @@ const exeinvoice = async (req, res) => {
         exeValue = 'Mr.Chameera';
       }else if (password === 'navaneedan@4456') {
       exeValue = 'Mr.Navaneedan';
+     }else if(password==='nayum@106'){
+      exeValue='Mr.Nayum'
+
      }
       else {
           return res.status(401).json({ message: 'Invalid password' });
