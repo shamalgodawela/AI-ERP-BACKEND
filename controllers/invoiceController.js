@@ -724,6 +724,14 @@ const gettotsalesByDealercode = async (req, res) => {
     let totalInvoiceAmount = 0;
     let totalCollectionAmount = 0;
     let productMovement = {};
+    
+    
+    // get customer
+    const customer = await Invoice.findOne({ code }).select('customer');
+    const customerName = customer ? customer.customer : 'Unknown'
+
+    
+
 
     
     for (const invoice of invoices) {
@@ -759,6 +767,8 @@ const gettotsalesByDealercode = async (req, res) => {
       totalInvoiceAmount: totalInvoiceAmount.toFixed(2),
       totalCollectionAmount: totalCollectionAmount.toFixed(2),
       productMovement,
+      customerName,
+      
     });
   } catch (error) {
     console.error('Error searching invoices by code:', error.message);
