@@ -787,20 +787,29 @@ const searchInvoicesByProductCode = async (req, res) => {
       return res.status(400).json({ error: 'Product code is required' });
     }
 
-   
+    // Find invoices that contain the productCode
     const invoices = await Invoice.find({ 'products.productCode': productCode }).sort({ invoiceDate: -1 });
 
     if (invoices.length === 0) {
       return res.status(404).json({ message: 'No invoices found with the specified product code' });
     }
 
-   
-    res.status(200).json(invoices);
+    // Modify the response to include only the matched product's quantity
+    const updatedInvoices = invoices.map(invoice => {
+      const matchingProduct = invoice.products.find(p => p.productCode === productCode);
+      return {
+        ...invoice.toObject(), // Convert Mongoose document to plain object
+        searchedProductQuantity: matchingProduct ? matchingProduct.quantity : "N/A",
+      };
+    });
+
+    res.status(200).json(updatedInvoices);
   } catch (error) {
     console.error('Error searching invoices by product code:', error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 // get executives product wise sales------------------------------------------------------------------------------------------------------
