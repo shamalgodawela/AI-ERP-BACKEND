@@ -493,9 +493,10 @@ const getSalesByExe = async (req, res) => {
     }
 
     if (startDate && endDate) {
+      // Convert to Date objects
       matchStage.invoiceDate = {
-        $gte: startDate,
-        $lte: endDate,
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
       };
     }
 
@@ -524,6 +525,7 @@ const getSalesByExe = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 
