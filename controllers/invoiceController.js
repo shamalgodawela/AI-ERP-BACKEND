@@ -482,31 +482,40 @@ const getMonthlySalesbyExe = async (req, res) => {
 
 const getSalesByExe = async (req, res) => {
   try {
-    const { exe } = req.query;
-    const matchStage = { GatePassNo: 'Printed' }; 
+    const { exe, startDate, endDate } = req.query;
 
-    
+    const matchStage = {
+      GatePassNo: 'Printed',
+    };
+
     if (exe) {
       matchStage.exe = exe;
     }
 
+    if (startDate && endDate) {
+      matchStage.invoiceDate = {
+        $gte: startDate,
+        $lte: endDate,
+      };
+    }
+
     const result = await Invoice.aggregate([
-      { $match: matchStage }, 
-      { $unwind: '$products' }, 
+      { $match: matchStage },
+      { $unwind: '$products' },
       {
         $group: {
-          _id: '$exe', 
+          _id: '$exe',
           totalSales: {
             $sum: {
               $multiply: [
                 '$products.labelPrice',
                 { $subtract: [1, { $divide: ['$products.discount', 100] }] },
-                '$products.quantity'
-              ]
-            }
-          }
-        }
-      } 
+                '$products.quantity',
+              ],
+            },
+          },
+        },
+      },
     ]);
 
     res.json(result);
@@ -515,6 +524,9 @@ const getSalesByExe = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
 
 
 const getTotalQuantityByProductCode = async (req, res) => {
@@ -809,7 +821,6 @@ const searchInvoicesByProductCode = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 
 // get executives product wise sales------------------------------------------------------------------------------------------------------
