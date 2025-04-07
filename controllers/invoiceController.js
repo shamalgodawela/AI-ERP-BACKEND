@@ -482,30 +482,31 @@ const getMonthlySalesbyExe = async (req, res) => {
 
 const getSalesByExe = async (req, res) => {
   try {
-    const { exe, startDate, endDate } = req.query;
+    // Extract startDate and endDate from query parameters
+    const { startDate, endDate } = req.query;
 
+    // Ensure both startDate and endDate are provided
+    if (!startDate || !endDate) {
+      return res.status(400).json({ error: 'Start date and end date are required' });
+    }
+
+    // Log to verify the received dates (for debugging purposes)
+    console.log('Received startDate:', startDate);
+    console.log('Received endDate:', endDate);
+
+    // Filter to match invoiceDate between startDate and endDate (assuming they are strings in 'YYYY-MM-DD' format)
     const matchStage = {
-      GatePassNo: 'Printed',
+      invoiceDate: { $gte: startDate, $lte: endDate },  // Assuming invoiceDate is in 'YYYY-MM-DD' string format
+      GatePassNo: 'Printed',  // Assuming you want to filter by this field as well
     };
 
-    if (exe) {
-      matchStage.exe = exe;
-    }
-
-    if (startDate && endDate) {
-      // Convert to Date objects
-      matchStage.invoiceDate = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    }
-
+    // Perform the aggregation query
     const result = await Invoice.aggregate([
-      { $match: matchStage },
-      { $unwind: '$products' },
+      { $match: matchStage },  // Match invoices based on the date range
+      { $unwind: '$products' },  // Unwind products if necessary
       {
         $group: {
-          _id: '$exe',
+          _id: '$exe',  // Group by the executive field
           totalSales: {
             $sum: {
               $multiply: [
@@ -519,16 +520,13 @@ const getSalesByExe = async (req, res) => {
       },
     ]);
 
-    res.json(result);
+    // Return the result in JSON format
+    return res.json(result);
   } catch (error) {
     console.error('Error fetching sales by executive:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-
-
-
 
 
 const getTotalQuantityByProductCode = async (req, res) => {
