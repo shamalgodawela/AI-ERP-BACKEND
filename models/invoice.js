@@ -38,7 +38,11 @@ const invoiceSchema = new mongoose.Schema({
   VehicleNo: String,
   VatRegNo:String,
   VatNO:String,
-  TaxNo:String
+  TaxNo:String,
+  CusVatNo: {
+    type: String,
+    unique: true,
+  },
 
 
   
