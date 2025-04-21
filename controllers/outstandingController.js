@@ -1,6 +1,8 @@
 const Outstanding = require('../models/outStanding');
 const Invoice=require('../models/invoice')
 const Cheque=require('../models/Cheque')
+const moment = require('moment');
+
 
 const outstandingController = {
     createOutstanding: async (req, res) => {
@@ -149,16 +151,45 @@ const outstandingController = {
     },
     getExecutiveCollection: async (req, res) => {
         try {
+            const { startDate, endDate } = req.query;
+    
+            // Ensure both startDate and endDate are provided
+            if (!startDate || !endDate) {
+                return res.status(400).json({ message: 'Start Date and End Date are required' });
+            }
+    
+            // Parse the startDate and endDate to Date objects using moment
+            const formattedStartDate = moment(startDate).startOf('day').toDate();
+            const formattedEndDate = moment(endDate).endOf('day').toDate();
+    
+            // Fetch distinct executives from the Invoice collection
             const executives = await Invoice.distinct('exe');
     
             const collections = await Promise.all(executives.map(async (exe) => {
-                const invoices = await Invoice.find({ exe: { $regex: new RegExp(exe, 'i') } });
+                // Fetch invoices for each executive, applying date filtering on depositedate field (converted to date)
+                const invoices = await Invoice.find({
+                    exe: { $regex: new RegExp(exe, 'i') },
+                });
+    
+                // Extract invoice numbers from the fetched invoices
                 const invoiceNumbers = invoices.map(invoice => invoice.invoiceNumber);
-                const outstandingRecords = await Outstanding.find({ invoiceNumber: { $in: invoiceNumbers } });
+    
+                // Fetch outstanding records for those invoice numbers
+                const outstandingRecords = await Outstanding.find({
+                    invoiceNumber: { $in: invoiceNumbers },
+                    depositedate: {
+                        $gte: moment(formattedStartDate).format('YYYY-MM-DD'), // Format depositedate string to match the query format
+                        $lte: moment(formattedEndDate).format('YYYY-MM-DD')  // Format depositedate string to match the query format
+                    }
+                });
+    
+                // Calculate the total collection amount
                 const totalCollection = outstandingRecords.reduce((acc, record) => acc + record.amount, 0);
+    
                 return { exe, totalCollection };
             }));
     
+            // Respond with the calculated collections
             res.json(collections);
         } catch (error) {
             console.error('Failed to fetch executive collections', error);
@@ -259,9 +290,43 @@ const outstandingController = {
             res.status(500).json({ error: 'Internal server error' });
         }
 
-    }
+    },
+    getMonthlyTotal : async (req, res) => {
+        try {
+          const result = await Outstanding.aggregate([
+            {
+              $match: {
+                invoiceNumber: {
+                  $regex: "^(UPC1|UPC2|SU1|EA1|EA1NCP)", // Match invoice numbers starting with UPC1, UPC2, SU1, EA1, or EA1NCP
+                },
+              },
+            },
+            {
+              $project: {
+                // Extract year and month from the date field and the invoice prefix (first 4 characters)
+                monthYear: { $dateToString: { format: "%Y-%m", date: "$date" } },
+                invoicePrefix: { $substr: ["$invoiceNumber", 0, 4] }, // Get the first 4 characters of invoice number
+                outstanding: 1,
+              },
+            },
+            {
+              $group: {
+                _id: { monthYear: "$monthYear", invoicePrefix: "$invoicePrefix" }, // Group by both month-year and invoicePrefix
+                totalOutstanding: { $sum: "$outstanding" }, // Sum the outstanding amounts
+              },
+            },
+            {
+              $sort: { "_id.monthYear": 1, "_id.invoicePrefix": 1 }, // Sort by month-year and invoicePrefix
+            },
+          ]);
+      
+          return res.status(200).json(result);
+        } catch (error) {
+          console.error("Error fetching monthly total:", error);
+          return res.status(500).json({ error: 'Failed to fetch monthly total outstanding' });
+        }
+      },
 };
-
 
 
 

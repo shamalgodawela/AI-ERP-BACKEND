@@ -43,7 +43,8 @@ class OrdersController {
                 VatNO:req.body.VatNO,
                 TaxNo:req.body.TaxNo,
                 CreditPeriod:req.body.CreditPeriod,
-                Paymentmethod:req.body.Paymentmethod
+                Paymentmethod:req.body.Paymentmethod,
+                CusVatNo:req.body.CusVatNo,
             });
 
             // Save the order
@@ -56,7 +57,7 @@ class OrdersController {
 
     async getAllOrders(req, res) {
         try {
-            // Retrieve all orders from the database
+       
             const orders = await Order.find();
 
             // Check if each order is checked based on the presence of its order number in the invoice table
