@@ -624,69 +624,76 @@ const getAllInvoicesWithOutstanding = async (req, res) => {
 };
 const getAllInvoicesWithOutstandingadmin = async (req, res) => {
   try {
-    
-    const invoices = await Invoice.find().sort({
-      invoiceNumber: 1, 
-    });
+  
+    const invoices = await Invoice.find().sort({ invoiceNumber: 1 });
 
-    const invoicesWithOutstanding = await Promise.all(
-      invoices.map(async (invoice) => {
-        
-        const invoiceSuffix = invoice.invoiceNumber.slice(-3);
-
-       
-        let lastOutstanding = await Outstanding.findOne({
-          invoiceNumber: invoice.invoiceNumber,
-        }).sort({ date: -1 });
-
-      
-        const chequeDetails = await Cheque.findOne({
-          invoiceNumber: invoice.invoiceNumber,
-        });
-
-       
-        const chequeValues = chequeDetails
-          ? Array.isArray(chequeDetails.ChequeValue)
-            ? chequeDetails.ChequeValue
-            : [chequeDetails.ChequeValue]
-          : "No Cheques Found";
-
-      
-        let status = "Not Paid";
-        if (lastOutstanding) {
-          if (lastOutstanding.outstanding === 0) {
-            status = "Paid";
-          } else {
-            status = lastOutstanding.outstanding;
-          }
-        }
-
-        
-        return {
-          ...invoice._doc,
-          invoiceSuffix, 
-          lastOutstanding: status,
-          chequeValues: chequeValues,
-        };
-      })
-    );
-
-    
-    invoicesWithOutstanding.sort(
-      (a, b) =>
-        parseInt(a.invoiceSuffix) - parseInt(b.invoiceSuffix)
-    );
+    const invoiceNumbers = invoices.map(inv => inv.invoiceNumber);
 
    
-    res.status(200).json(invoicesWithOutstanding);
-  } catch (error) {
-    console.error(
-      "Error fetching invoices with outstanding and cheque details:",
-      error.message
+    const allOutstandings = await Outstanding.aggregate([
+      { $match: { invoiceNumber: { $in: invoiceNumbers } } },
+      { $sort: { date: -1 } },
+      {
+        $group: {
+          _id: "$invoiceNumber",
+          latestOutstanding: { $first: "$outstanding" },
+        },
+      },
+    ]);
+
+
+    const allCheques = await Cheque.find({ invoiceNumber: { $in: invoiceNumbers } });
+
+   
+    const outstandingMap = new Map();
+    allOutstandings.forEach((out) => {
+      outstandingMap.set(out._id, out.latestOutstanding);
+    });
+
+    const chequeMap = new Map();
+    allCheques.forEach((cheque) => {
+      chequeMap.set(cheque.invoiceNumber, cheque.ChequeValue);
+    });
+
+ 
+    const result = invoices.map((invoice) => {
+      const invoiceSuffix = invoice.invoiceNumber.slice(-3);
+
+      const outstanding = outstandingMap.get(invoice.invoiceNumber);
+      let status = "Not Paid";
+      if (outstanding === 0) {
+        status = "Paid";
+      } else if (typeof outstanding !== "undefined") {
+        status = outstanding;
+      }
+
+      const chequeValue = chequeMap.get(invoice.invoiceNumber);
+      const chequeValues = chequeValue
+        ? Array.isArray(chequeValue)
+          ? chequeValue
+          : [chequeValue]
+        : "No Cheques Found";
+
+      return {
+        ...invoice._doc,
+        invoiceSuffix,
+        lastOutstanding: status,
+        chequeValues: chequeValues,
+      };
+    });
+
+    
+    result.sort(
+      (a, b) => parseInt(a.invoiceSuffix) - parseInt(b.invoiceSuffix)
     );
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching invoices with outstanding and cheque details:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 
