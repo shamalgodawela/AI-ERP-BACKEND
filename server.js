@@ -32,6 +32,8 @@ const AdminOperation=require('./routes/AdminOperation')
 const ChequeRoute=require('./routes/ChequeRoute')
 const TaxInvoiceRoute=require('./routes/TaxInvoiceRoute')
 const MirateRouter=require('./routes/MirateRouter')
+const aiRoute = require('./routes/aiRoute');
+const llmRoute = require('./routes/llmRoute');
 
 
 const app=express()
@@ -77,6 +79,8 @@ app.use('/api',AdminOperation)
 app.use('/api',ChequeRoute)
 app.use('/api',TaxInvoiceRoute)
 app.use('/api',MirateRouter)
+app.use('/api', aiRoute);
+app.use('/api', llmRoute);
 
 
 // Routes

@@ -53,6 +53,7 @@ const loginUser = asyncHandler(async (req, res) => {
     _id: user._id,
     userName: user.userName,
     email: user.email,
+    role: user.role || "admin",
     token,
   });
 });
@@ -102,6 +103,7 @@ const loginAdminOperation = asyncHandler(async (req, res) => {
     _id: user._id,
     userName: user.userName,
     email: user.email,
+    role: user.role || "admin",
     token,
   });
 });

@@ -15,7 +15,7 @@ const generateToken=(id)=>{
 //register user-----------------------------------------------------------------------------------------------------------------------
 
 const registerUser=asyncHandler( async (req, res)=>{
-   const {name, email, password}= req.body
+   const {name, email, password,role}= req.body
 
    //validation
 
@@ -45,6 +45,7 @@ const registerUser=asyncHandler( async (req, res)=>{
     name,
     email,
     password,
+    role
   })
   //generate token
 const token=generateToken(user._id);
@@ -68,6 +69,7 @@ res.cookie("token", token, {
         phone, 
         bio,
         token,
+        role
         
     })
   }else{
@@ -113,7 +115,7 @@ res.cookie("token", token, {
 
 }
   if (user && passwordIsCorrect){
-    const {_id,name,email, photo, phone, bio}= user
+    const {_id,name,email, photo, phone, bio,role}= user
     res.status(200).json({
         _id, 
         name,
@@ -122,6 +124,7 @@ res.cookie("token", token, {
         phone, 
         bio,   
         token,
+        role
     });
 
     
