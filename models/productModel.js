@@ -2,13 +2,7 @@ const mongoose = require("mongoose");
 const { stringify } = require("querystring");
 
 const productSchema=mongoose.Schema({
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        require:true,
-        ref:"User"
-    },
-    
-    name:{
+     name:{
         type:String,
         required:[true, "please add a name"],
         trim:true

@@ -39,7 +39,6 @@ const createProduct = asyncHandler(async(req, res) => {
 
     // Create product
     const product = await Product.create({
-        user: req.user.id,
         name,
         sku,
         category,

@@ -37,11 +37,9 @@ const orderSchema = new mongoose.Schema({
 
   Paymentmethod:{
     type:String,
-    unique:true
   },
   CusVatNo:{
     type:String,
-    unique:true
   },
 });
 
