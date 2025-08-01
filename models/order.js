@@ -41,6 +41,10 @@ const orderSchema = new mongoose.Schema({
   CusVatNo:{
     type:String,
   },
+  IncentiveDueDate: {
+    type: String,
+    required: true,
+  },
 });
 
 const Order = mongoose.model('Order', orderSchema);

@@ -4,19 +4,19 @@ const Invoice = require('../models/invoice');
 class OrdersController {
     async addOrder(req, res) {
         try {
-            // Check if orderNumber already exists
+           
             const existingOrder = await Order.findOne({ orderNumber: req.body.orderNumber });
             if (existingOrder) {
                 return res.status(400).json({ error: 'Order number must be unique' });
             }
 
-            // Calculate unitPrice and invoiceTotal for each product
+            
             const productsWithCalculatedFields = req.body.products.map(product => {
                 const labelPrice = parseFloat(product.labelPrice);
                 const discount = parseFloat(product.discount);
                 const quantity = parseFloat(product.quantity);
-                const unitPrice = labelPrice * (1 - discount / 100); // Calculate unit price
-                const invoiceTotal = unitPrice * quantity; // Calculate invoice total
+                const unitPrice = labelPrice * (1 - discount / 100); 
+                const invoiceTotal = unitPrice * quantity; 
                 return {
                     ...product,
                     unitPrice: isNaN(unitPrice) ? '' : unitPrice.toFixed(2),
@@ -26,7 +26,7 @@ class OrdersController {
 
             const status = req.body.status || "pending";
 
-            // Create a new order with updated product fields
+           
             const newOrder = new Order({
                 products: productsWithCalculatedFields,
                 invoiceNumber: req.body.invoiceNumber,
@@ -45,6 +45,7 @@ class OrdersController {
                 CreditPeriod:req.body.CreditPeriod,
                 Paymentmethod:req.body.Paymentmethod,
                 CusVatNo:req.body.CusVatNo,
+                IncentiveDueDate: req.body.IncentiveDueDate
             });
 
             // Save the order
@@ -60,14 +61,14 @@ class OrdersController {
        
             const orders = await Order.find();
 
-            // Check if each order is checked based on the presence of its order number in the invoice table
+   
             const ordersWithCheckStatus = await Promise.all(
                 orders.map(async (order) => {
-                    // Check if there's an invoice with the order number
+               
                     const invoice = await Invoice.findOne({ orderNumber: order.orderNumber });
                     return {
                         ...order.toJSON(),
-                        checked: !!invoice, // Indicates whether the order is checked (true) or not (false)
+                        checked: !!invoice, 
                     };
                 })
             );
@@ -80,7 +81,7 @@ class OrdersController {
 
     async getOrderDetails(req, res) {
         try {
-            // Retrieve order details by order number
+        
             const order = await Order.findOne({ orderNumber: req.params.orderNumber });
             if (!order) {
                 return res.status(404).json({ error: 'Order not found' });
@@ -93,22 +94,22 @@ class OrdersController {
 
     async updateOrderDetails(req, res) {
         const orderNumber = req.params.orderNumber;
-        const updatedOrderData = req.body; // Assuming updated data is sent in the request body
+        const updatedOrderData = req.body; 
 
         try {
-            // Fetch the order from the database
+           
             let order = await Order.findOne({ orderNumber });
 
-            // Check if order exists
+        
             if (!order) {
                 return res.status(404).json({ error: 'Order not found' });
             }
 
-            // Update order details with the provided data
-            order.set(updatedOrderData); // Apply updates
-            await order.save(); // Save the updated order
+           
+            order.set(updatedOrderData); 
+            await order.save(); r
 
-            // Send the updated order details in the response
+            
             res.status(200).json(order);
         } catch (error) {
             console.error('Failed to update order details', error);
@@ -117,15 +118,15 @@ class OrdersController {
     }
     async getAllOr(req, res) {
         try {
-            // Extract query parameters from the request
+           
             const { period, status, exe } = req.query;
 
-            // Build the filter object based on the provided query parameters
+          
             const filter = {};
             if (period) {
-                // Determine the start and end dates for the specified period
+               
                 let startDate, endDate;
-                const today = moment().startOf('day'); // Get the current date at the start of the day
+                const today = moment().startOf('day');
                 switch (period) {
                     case 'today':
                         startDate = today;
@@ -139,13 +140,12 @@ class OrdersController {
                         startDate = moment(today).startOf('month');
                         endDate = moment(today).endOf('month');
                         break;
-                    // Add cases for other date ranges as needed
+               
                     default:
-                        // Handle invalid period value
+                     
                         return res.status(400).json({ error: 'Invalid period value.' });
                 }
 
-                // Add the date filter to the filter object
                 filter.createdAt = { $gte: startDate, $lte: endDate };
             }
             if (status) {
@@ -155,17 +155,17 @@ class OrdersController {
                 filter.exe = exe;
             }
 
-            // Retrieve orders from the database using the constructed filter
+         
             const orders = await Order.find(filter);
 
-            // Check if each order is checked based on the presence of its order number in the invoice table
+            
             const ordersWithCheckStatus = await Promise.all(
                 orders.map(async (order) => {
-                    // Check if there's an invoice with the order number
+                 
                     const invoice = await Invoice.findOne({ orderNumber: order.orderNumber });
                     return {
                         ...order.toJSON(),
-                        checked: !!invoice, // Indicates whether the order is checked (true) or not (false)
+                        checked: !!invoice,
                     };
                 })
             );

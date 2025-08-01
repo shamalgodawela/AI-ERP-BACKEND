@@ -18,6 +18,10 @@ const outstandingSchema = new mongoose.Schema({
         
 
     },
+    description:{
+        type:String,
+
+    },
      CHnumber:{
         type:String,
         

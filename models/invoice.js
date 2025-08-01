@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { type } = require('os');
 const { stringify } = require("querystring");
 
 const invoiceSchema = new mongoose.Schema({
@@ -43,6 +44,10 @@ const invoiceSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
+  IncentiveDueDate:{
+    type: String,
+    required: true,
+  }
 
 
   

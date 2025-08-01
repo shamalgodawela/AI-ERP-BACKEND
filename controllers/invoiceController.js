@@ -496,7 +496,7 @@ const getSalesByExe = async (req, res) => {
 
     // Filter to match invoiceDate between startDate and endDate (assuming they are strings in 'YYYY-MM-DD' format)
     const matchStage = {
-      invoiceDate: { $gte: startDate, $lte: endDate },  // Assuming invoiceDate is in 'YYYY-MM-DD' string format
+      invoiceDate: { $gte: new Date(startDate), $lte: new Date(endDate) },  // Assuming invoiceDate is in 'YYYY-MM-DD' string format
       GatePassNo: 'Printed',  // Assuming you want to filter by this field as well
     };
 
@@ -727,67 +727,82 @@ const searchInvoicesByExe = async (req, res) => {
 const gettotsalesByDealercode = async (req, res) => {
   try {
     const { code } = req.params;
+    const { startDate, endDate } = req.query;
 
     if (!code) {
       return res.status(400).json({ error: 'Customer code is required' });
     }
-
+   // Build the query
+    const query = { code, GatePassNo: 'Printed' };
     
-    const invoices = await Invoice.find({ code, GatePassNo: 'Printed' }).sort({ invoiceDate: -1 });
+    if (startDate && endDate) {
+      // Validate dates
+      if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
+        return res.status(400).json({ error: 'Invalid date format' });
+      }
 
-    if (invoices.length === 0) {
-      return res.status(404).json({ message: 'No invoices found with GatePassNo "Printed" for the specified customer code' });
+      // Create start and end dates with proper time handling
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0); // Start of the day
+      
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // End of the day
+
+      // Use $expr and $toDate for string-to-date comparison
+      delete query.invoiceDate; // Remove previous filter if present
+      query.$expr = {
+        $and: [
+          { $gte: [ { $toDate: '$invoiceDate' }, start ] },
+          { $lte: [ { $toDate: '$invoiceDate' }, end ] }
+        ]
+      };
     }
 
-    
+    // Debug: log the query to see what's being sent to MongoDB
+  
+
+    const invoices = await Invoice.find(query).sort({ invoiceDate: -1 });
+
+    if (invoices.length === 0) {
+      return res.status(404).json({ 
+        message: 'No invoices found with GatePassNo "Printed" for the specified customer code' + 
+        (startDate && endDate ? ` between ${startDate} and ${endDate}` : '')
+      });
+    }
+
     let totalInvoiceAmount = 0;
     let totalCollectionAmount = 0;
     let productMovement = {};
-    
-    
-    // get customer
+
+    // Get customer name
     const customer = await Invoice.findOne({ code }).select('customer');
-    const customerName = customer ? customer.customer : 'Unknown'
+    const customerName = customer ? customer.customer : 'Unknown';
 
-    
-
-
-    
     for (const invoice of invoices) {
-      
+      // Debug: log each invoice date to verify filtering
+   
+
       if (invoice.products && Array.isArray(invoice.products)) {
         invoice.products.forEach((product) => {
           const productTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
           totalInvoiceAmount += productTotal;
 
-       
           const { productName, quantity } = product;
-          if (productMovement[productName]) {
-            productMovement[productName] += parseFloat(quantity);
-          } else {
-            productMovement[productName] = parseFloat(quantity);
-          }
+          productMovement[productName] = (productMovement[productName] || 0) + parseFloat(quantity);
         });
       }
 
-   
       const outstandingEntries = await Outstanding.find({ invoiceNumber: invoice.invoiceNumber });
-
- 
-      if (outstandingEntries.length > 0) {
-        outstandingEntries.forEach((entry) => {
-          totalCollectionAmount += parseFloat(entry.amount);
-        });
-      }
+      outstandingEntries.forEach((entry) => {
+        totalCollectionAmount += parseFloat(entry.amount);
+      });
     }
-
 
     res.status(200).json({
       totalInvoiceAmount: totalInvoiceAmount.toFixed(2),
       totalCollectionAmount: totalCollectionAmount.toFixed(2),
       productMovement,
       customerName,
-      
     });
   } catch (error) {
     console.error('Error searching invoices by code:', error.message);
@@ -834,14 +849,25 @@ const searchInvoicesByProductCode = async (req, res) => {
 const getProductWiseSalesByExe = async (req, res) => {
   try {
     const { exe } = req.params; 
+    const { startDate, endDate } = req.query;
 
     if (!exe) {
       return res.status(400).json({ error: 'Sales executive name (exe) is required' });
     }
 
+    // Build match stage
+    const matchStage = { GatePassNo: 'Printed', exe };
+    if (startDate && endDate) {
+      // Ensure the time covers the whole end date
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      matchStage.invoiceDate = { $gte: start, $lte: end };
+    }
+
     const salesData = await Invoice.aggregate([
       {
-        $match: { GatePassNo: 'Printed', exe }, 
+        $match: matchStage, 
       },
       {
         $unwind: '$products', 
@@ -887,6 +913,8 @@ const getProductWiseSalesByExe = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
 
 
 module.exports = { 

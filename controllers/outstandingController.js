@@ -7,9 +7,9 @@ const moment = require('moment');
 const outstandingController = {
     createOutstanding: async (req, res) => {
         try {
-            const { invoiceNumber, date, backName, depositedate, CHnumber, amount, outstanding } = req.body;
+            const { invoiceNumber, date, backName, depositedate,description, CHnumber, amount, outstanding } = req.body;
     
-            // Check if a cheque with the provided CHnumber exists
+        
             const existingCheque = await Cheque.findOne({ 
                 ChequeNumber: CHnumber, 
                 invoiceNumber: invoiceNumber 
@@ -28,6 +28,7 @@ const outstandingController = {
                 date,
                 backName,
                 depositedate,
+                description,
                 CHnumber,
                 amount,
                 outstanding
@@ -326,6 +327,19 @@ const outstandingController = {
           return res.status(500).json({ error: 'Failed to fetch monthly total outstanding' });
         }
       },
+
+      getAllDeposite : async (req, res) => {
+        try{
+            const BankDeposite= await Outstanding.find();
+            res.status(200).json(BankDeposite)
+
+        }catch{
+            res.status(500).json({error:'error getting data'})
+
+        }
+      }
+      
+    
 };
 
 

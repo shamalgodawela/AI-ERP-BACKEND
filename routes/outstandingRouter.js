@@ -21,5 +21,8 @@ router.get('/monthly-collection',outstandingController.getMonthlyCollection);
 router.get('/totalsales-and-collection-dealer',outstandingController.getTotalSalesAndCollections);
 router.get('/getmonthly-collection',outstandingController.getMonthlyTotal)
 
+
+router.get('/get-alldeposite-details',outstandingController.getAllDeposite)
+
 module.exports = router;
 

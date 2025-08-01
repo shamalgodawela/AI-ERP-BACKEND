@@ -5,10 +5,6 @@ const dateproductNewSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    GpnNumber: {
-        type: String,
-        required: true
-    },
     productName: {
         type: String,
         required: true
