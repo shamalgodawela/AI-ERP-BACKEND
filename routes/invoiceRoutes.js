@@ -4,7 +4,7 @@ const invoiceController = require('../controllers/invoiceController');
 
 router.post('/add-invoice', invoiceController.addInvoice);
 router.get('/get-all-invoices', invoiceController.getAllInvoices);
-// get invoice details with last outstanding to admin operations and admin
+
 
 router.get('/get-lastoutstanding-invoicedetails',invoiceController.getAllInvoicesWithOutstanding)
 router.get('/get-invoicedetails-admin-outstanding',invoiceController.getAllInvoicesWithOutstandingadmin)
@@ -13,7 +13,6 @@ router.get('/get-invoice/:id', invoiceController.getInvoiceById);
 router.post('/delete-invoice/:id', invoiceController.checkPassword, invoiceController.deleteInvoice);
 router.get('/get-total-invoice-value/:code', invoiceController.getTotalInvoiceValueByCode);
 router.get('/monthly-total-invoice/:code', invoiceController.getMonthlyTotalInvoice);
-router.get('/lastInvoiceNumber',invoiceController.getLastInvoiceNumber);
 router.get('/check/:orderNumber', invoiceController.checkOrderNumberExists);
 
 router.get('/search-invoices', invoiceController.searchInvoices);
@@ -43,6 +42,25 @@ router.get('/search-by-productcode/:productCode',invoiceController.searchInvoice
 
 // get executives product wise sales 
 router.get('/get-executives-sales-eachProduct/:exe',invoiceController.getProductWiseSalesByExe)
+
+
+
+//fetch all last invoice number
+router.get('/get-last-invoice-number-EA1', invoiceController.getLastInvoiceNumberEA1);
+router.get('/get-last-invoice-number-NUM', invoiceController.getLastInvoiceNumberNUM);
+router.get('/get-last-invoice-number-EA2', invoiceController.getLastInvoiceNumberEA2);
+router.get('/get-last-invoice-number-south1', invoiceController.getLastInvoiceNumberSouth1);
+router.get('/get-last-invoice-number-ncp1', invoiceController.getLastInvoiceNumberNCP1);
+router.get('/get-last-invoice-number-upc1', invoiceController.getLastInvoiceNumberUPC1);
+router.get('/get-last-invoice-number-upc2', invoiceController.getLastInvoiceNumberUPC2);
+router.get('/get-last-invoice-number-upcountry', invoiceController.getLastInvoiceNumberUpcountry);
+router.get('/get-last-invoice-number-other', invoiceController.getLastInvoiceNumberother);
+
+router.get('/get-last-TaxNo', invoiceController.getlastTaxNo);
+
+
+
+
 
 
 
