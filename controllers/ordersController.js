@@ -295,6 +295,57 @@ class OrdersController {
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
+    async getLastOrderNumberStartingWithother(req, res) {
+        try {
+            // Find the last order number that starts with "EA"
+            const lastOrder = await Order.findOne({ orderNumber: /^Other/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "NUM" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    async getLastOrderNumberStartingWithSouth1(req, res) {
+        try {
+            // Find the last order number that starts with "EA"
+            const lastOrder = await Order.findOne({ orderNumber: /^SOUTH/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "NUM" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    async getLastOrderNumberStartingWithUpccountry(req, res) {
+        try {
+            const lastOrder = await Order.findOne({ orderNumber:/^UPC2/ })
+                .sort({ orderNumber: -1 })
+                .limit(1);
+    
+            if (lastOrder) {
+                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "NUM" found' });
+            }
+        } catch (error) {
+            console.error('Error fetching last order number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    };
+    
 }
 
 

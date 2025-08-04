@@ -190,29 +190,195 @@ const getMonthlyTotalInvoice = async (req, res) => {
 
 
 
+//fetch last invoice number starting with EA1
+
+const getLastInvoiceNumberEA1 = async (req, res) => {
+    try{
+      const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^EA1/ })
+                .sort({ invoiceNumber: -1 })
+                .limit(1);
 
 
-const getLastInvoiceNumber = async (req, res) => {
-    try {
-       
-        const lastInvoice = await Invoice.findOne().sort({ invoiceDate: -1 });
-
-        if (lastInvoice) {
-            
-            const lastInvoiceNumber = lastInvoice.invoiceNumber;
-            const lastOrderNumber = lastInvoice.orderNumber;
-
-            res.status(200).json({ success: true, lastInvoiceNumber, lastOrderNumber });
-        } else {
-            
-            res.status(404).json({ success: false, message: 'No invoices found in the database' });
-        }
-    } catch (error) {
-       
-        console.error('Error fetching last numbers:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch last numbers', error: error.message });
+                if (lastinvoiceNo) {
+                  return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+              } else {
+                  return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+              }
     }
+    catch (error) {
+            console.error('Error fetching last invoice number:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+     }
 };
+
+//fecth last invoice number starting with EA2
+
+const getLastInvoiceNumberEA2 = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^EA2/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+
+//fetch last invoice number starting with NUM
+
+const getLastInvoiceNumberNUM = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^NUM/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+//fetch last invoice number starting with south1
+const getLastInvoiceNumberSouth1 = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^SOUTH/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+//fetch last invoice number starting with NCP1
+
+const getLastInvoiceNumberNCP1 = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^NCP/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+}
+
+
+//fecth last invoice number starting with UPC1
+const getLastInvoiceNumberUPC1 = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^UPC1/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+
+
+//fecth last invoice number starting with UPC2
+const getLastInvoiceNumberUPC2 = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^UPC2/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+
+
+//fecth last invoice number starting with UPC1
+const getLastInvoiceNumberUpcountry = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^UpCountry/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+
+
+//fecth last invoice number starting with UPC1
+const getLastInvoiceNumberother = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^Other/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+
+
+
+
 
 const checkOrderNumberExists = async (req, res) => {
   try {
@@ -916,6 +1082,26 @@ const getProductWiseSalesByExe = async (req, res) => {
 
 
 
+const getlastTaxNo = async (req, res) => {
+  try {
+    const lastInserted = await Invoice.findOne({
+      TaxNo: { $exists: true, $ne: "" }
+    })
+      .sort({ _id: -1 }) // sorts by most recently inserted
+      .limit(1);
+
+    if (lastInserted) {
+      return res.status(200).json({ lastTaxNo: lastInserted.TaxNo });
+    } else {
+      return res.status(404).json({ error: 'No tax number found' });
+    }
+  } catch (error) {
+    console.error('Error fetching last inserted tax number:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 
 module.exports = { 
   getSumByGatePassNo,
@@ -926,7 +1112,6 @@ module.exports = {
   deleteInvoice,
   getTotalInvoiceValueByCode,
   getMonthlyTotalInvoice,
-  getLastInvoiceNumber,
   checkOrderNumberExists,
   searchInvoices,
   updateInvoice,
@@ -942,7 +1127,17 @@ module.exports = {
   searchInvoicesByExe,
   gettotsalesByDealercode,
   searchInvoicesByProductCode,
-  getProductWiseSalesByExe
+  getProductWiseSalesByExe,
+  getLastInvoiceNumberEA1,
+  getLastInvoiceNumberNUM,
+  getLastInvoiceNumberEA2,
+  getLastInvoiceNumberSouth1,
+  getLastInvoiceNumberNCP1, 
+  getLastInvoiceNumberUPC1,
+  getLastInvoiceNumberUPC2,
+  getLastInvoiceNumberUpcountry,
+  getLastInvoiceNumberother,
+  getlastTaxNo
   
   
  
