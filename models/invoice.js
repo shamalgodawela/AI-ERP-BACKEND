@@ -35,7 +35,11 @@ const invoiceSchema = new mongoose.Schema({
   TermsofPayment: String,
   Duedate: String,
   Tax: Number,
-  GatePassNo: String,
+  GatePassNo:{
+    type: String,
+    default:"Printed",
+    trim: true
+  },
   VehicleNo: String,
   VatRegNo:String,
   VatNO:String,

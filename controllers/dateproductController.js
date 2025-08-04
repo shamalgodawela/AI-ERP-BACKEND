@@ -182,4 +182,5 @@ const getAllDateProducts = async (req, res) => {
     }
 };
 
+
 module.exports = { addProductAndUpdate, getAllDateProducts };
