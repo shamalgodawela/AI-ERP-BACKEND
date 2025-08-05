@@ -24,6 +24,10 @@ const ChequeSchema= new Schema({
     BankBranch:{
         type:String,
         required:true,
+    },
+    status:{
+        type:String,
+        default:"realized",
     }
     
 

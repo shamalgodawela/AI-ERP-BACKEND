@@ -3,9 +3,9 @@ const Invoice = require("../models/invoice");
 
 const AddChequeDetails = async (req, res) => {
     try {
-        const { invoiceNumber, ChequeNumber, ChequeValue, DepositeDate,Bankdetails,BankBranch } = req.body;
+        const { invoiceNumber, ChequeNumber, ChequeValue, DepositeDate,Bankdetails,BankBranch,status } = req.body;
 
-        // Validate input
+      
         if (!invoiceNumber || !ChequeNumber || !ChequeValue) {
             return res.status(400).json({ error: 'All fields are required' });
         }
@@ -19,7 +19,8 @@ const AddChequeDetails = async (req, res) => {
                 ChequeValue,
                 DepositeDate,
                 Bankdetails,
-                BankBranch
+                BankBranch,
+                status
             });
 
             await newCheque.save();
@@ -33,6 +34,25 @@ const AddChequeDetails = async (req, res) => {
     }
 };
 
+const GetAllCheques = async (req, res) => {
+    try {
+        const cheques = await Cheque.find();
+
+        if (cheques.length === 0) {
+            return res.status(404).json({ error: 'No cheques found' });
+        }
+
+        return res.status(200).json({ cheques });
+    } catch (error) {
+        console.error('Error fetching all cheques:', error);
+        res.status(500).json({ error: `Failed to fetch cheque details: ${error.message}` });
+    }
+};
+
+
+
 module.exports = { 
-    AddChequeDetails
+    AddChequeDetails,
+    GetAllCheques
+    
 };
