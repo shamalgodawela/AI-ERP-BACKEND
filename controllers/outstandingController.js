@@ -7,7 +7,7 @@ const moment = require('moment');
 const outstandingController = {
     createOutstanding: async (req, res) => {
         try {
-            const { invoiceNumber, date, backName, depositedate,description, CHnumber, amount, outstanding } = req.body;
+            const { invoiceNumber, date, backName, depositedate,description, CHnumber, amount, outstanding, } = req.body;
     
         
             const existingCheque = await Cheque.findOne({ 
@@ -31,7 +31,9 @@ const outstandingController = {
                 description,
                 CHnumber,
                 amount,
-                outstanding
+                outstanding,
+                paymentstatus,
+                
             });
             await newOutstanding.save();
     
@@ -298,7 +300,7 @@ const outstandingController = {
             {
               $match: {
                 invoiceNumber: {
-                  $regex: "^(UPC1|UPC2|SU1|EA1|EA1NCP)", // Match invoice numbers starting with UPC1, UPC2, SU1, EA1, or EA1NCP
+                  $regex: "^(UPC1|UPC2|SU1|EA1|EA1NCP)", 
                 },
               },
             },

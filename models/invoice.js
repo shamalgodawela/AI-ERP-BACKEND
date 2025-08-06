@@ -51,6 +51,10 @@ const invoiceSchema = new mongoose.Schema({
   IncentiveDueDate:{
     type: String,
     required: true,
+  },
+  IncentiveStatus:{
+    type: String,
+    default: "Settled",
   }
 
 

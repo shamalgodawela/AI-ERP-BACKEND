@@ -1,6 +1,5 @@
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
-const outstanding=require("../models/outStanding");
 const Outstanding = require('../models/outStanding');
 const Cheque = require('../models/Cheque');
 
@@ -1100,6 +1099,83 @@ const getlastTaxNo = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+const ExecutivesIncentive = async (req, res) => {
+  try {
+    const result = await Invoice.aggregate([
+      {
+        $match: {
+          IncentiveStatus: "Settled"
+        }
+      },
+      {
+        $project: {
+          invoiceNumber: 1,
+          customer: 1,
+          exe: 1,
+          IncentiveStatus: 1,
+          ModeofPayment: 1,
+          totalInvoiceAmount: { $sum: "$products.invoiceTotal" }
+        }
+      },
+      {
+        $addFields: {
+          incentiveAmount: {
+            $cond: {
+              if: { $eq: ["$ModeofPayment", "Cash"] },
+              then: {
+                $multiply: [
+                  {
+                    $divide: [
+                      { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 100] },
+                      100
+                    ]
+                  },
+                  2
+                ]
+              },
+              else: {
+                $multiply: [
+                  {
+                    $divide: [
+                      { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 100] },
+                      100
+                    ]
+                  },
+                  1
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]);
+
+    if (!result.length) {
+      return res.status(404).json({ error: "No invoices with IncentiveStatus 'Settled' found" });
+    }
+
+    const formattedResult = result.map(invoice => ({
+      invoiceNumber: invoice.invoiceNumber,
+      customer: invoice.customer,
+      exe: invoice.exe,
+      IncentiveStatus: invoice.IncentiveStatus,
+      ModeofPayment: invoice.ModeofPayment,
+      invoiceTotal: invoice.totalInvoiceAmount.toFixed(2),
+      incentiveAmount: invoice.incentiveAmount.toFixed(2)
+    }));
+
+    return res.status(200).json(formattedResult);
+
+  } catch (error) {
+    console.error("Error fetching Executive Incentives:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
+
+
 
 
 
@@ -1137,7 +1213,8 @@ module.exports = {
   getLastInvoiceNumberUPC2,
   getLastInvoiceNumberUpcountry,
   getLastInvoiceNumberother,
-  getlastTaxNo
+  getlastTaxNo,
+  ExecutivesIncentive
   
   
  

@@ -34,7 +34,7 @@ const outstandingSchema = new mongoose.Schema({
     outstanding: {
         type: Number,
         required: true
-    },
+    }
    
 });
 
