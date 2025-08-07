@@ -54,8 +54,11 @@ const invoiceSchema = new mongoose.Schema({
   },
   IncentiveStatus:{
     type: String,
-    default: "Settled",
-  }
+  
+  },
+  Incentivesettlement:{
+    type: String,
+  },
 
 
   
