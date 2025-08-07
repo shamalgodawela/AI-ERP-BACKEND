@@ -1115,7 +1115,8 @@ const ExecutivesIncentive = async (req, res) => {
           exe: 1,
           IncentiveStatus: 1,
           ModeofPayment: 1,
-
+          IncentiveDueDate: 1,
+          Duedate: 1,
           Incentivesettlement: 1,
           totalInvoiceAmount: { $sum: "$products.invoiceTotal" }
         }
@@ -1163,7 +1164,8 @@ const ExecutivesIncentive = async (req, res) => {
       exe: invoice.exe,
       IncentiveStatus: invoice.IncentiveStatus,
       ModeofPayment: invoice.ModeofPayment,
-
+      IncentiveDueDate:invoice.IncentiveDueDate,
+      Duedate: invoice.Duedate,
       Incentivesettlement: invoice.Incentivesettlement,
       invoiceTotal: invoice.totalInvoiceAmount.toFixed(2),
       incentiveAmount: invoice.incentiveAmount.toFixed(2)
