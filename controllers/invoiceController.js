@@ -1103,12 +1103,6 @@ const ExecutivesIncentive = async (req, res) => {
   try {
     const result = await Invoice.aggregate([
       {
-        $match: {
-          IncentiveStatus: "Settled",
-          Incentivesettlement:"Not_Received"
-        }
-      },
-      {
         $project: {
           invoiceNumber: 1,
           customer: 1,
