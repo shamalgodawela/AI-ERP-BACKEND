@@ -32,7 +32,7 @@ const outstandingController = {
                 CHnumber,
                 amount,
                 outstanding,
-                paymentstatus,
+
                 
             });
             await newOutstanding.save();
