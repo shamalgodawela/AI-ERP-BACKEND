@@ -1120,45 +1120,28 @@ const ExecutivesIncentive = async (req, res) => {
           incentiveAmount: {
             $cond: {
               if: { $eq: ["$ModeofPayment", "Cash"] },
-              then: {
-                $multiply: [
-                  {
-                    $divide: [
-                      { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 100] },
-                      100
-                    ]
-                  },
-                  2
-                ]
-              },
-              else: {
-                $multiply: [
-                  {
-                    $divide: [
-                      { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 100] },
-                      100
-                    ]
-                  },
-                  1
-                ]
-              }
+              then: { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 2] },
+              else: { $divide: ["$totalInvoiceAmount", 118] }
             }
           }
         }
       }
     ]);
 
-    if (!result.length) {
+    // Filter only invoices with IncentiveStatus 'Settled'
+    const filteredResult = result.filter(inv => inv.IncentiveStatus === "Settled");
+
+    if (!filteredResult.length) {
       return res.status(404).json({ error: "No invoices with IncentiveStatus 'Settled' found" });
     }
 
-    const formattedResult = result.map(invoice => ({
+    const formattedResult = filteredResult.map(invoice => ({
       invoiceNumber: invoice.invoiceNumber,
       customer: invoice.customer,
       exe: invoice.exe,
       IncentiveStatus: invoice.IncentiveStatus,
       ModeofPayment: invoice.ModeofPayment,
-      IncentiveDueDate:invoice.IncentiveDueDate,
+      IncentiveDueDate: invoice.IncentiveDueDate,
       Duedate: invoice.Duedate,
       Incentivesettlement: invoice.Incentivesettlement,
       invoiceTotal: invoice.totalInvoiceAmount.toFixed(2),
@@ -1172,6 +1155,7 @@ const ExecutivesIncentive = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 
