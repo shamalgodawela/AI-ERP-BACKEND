@@ -1103,6 +1103,12 @@ const ExecutivesIncentive = async (req, res) => {
   try {
     const result = await Invoice.aggregate([
       {
+        $match: {
+          IncentiveStatus: "Settled",
+          Incentivesettlement:"Not_Received"
+        }
+      },
+      {
         $project: {
           invoiceNumber: 1,
           customer: 1,
@@ -1120,28 +1126,45 @@ const ExecutivesIncentive = async (req, res) => {
           incentiveAmount: {
             $cond: {
               if: { $eq: ["$ModeofPayment", "Cash"] },
-              then: { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 2] },
-              else: { $divide: ["$totalInvoiceAmount", 118] }
+              then: {
+                $multiply: [
+                  {
+                    $divide: [
+                      { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 100] },
+                      100
+                    ]
+                  },
+                  2
+                ]
+              },
+              else: {
+                $multiply: [
+                  {
+                    $divide: [
+                      { $multiply: [{ $divide: ["$totalInvoiceAmount", 118] }, 100] },
+                      100
+                    ]
+                  },
+                  1
+                ]
+              }
             }
           }
         }
       }
     ]);
 
-    // Filter only invoices with IncentiveStatus 'Settled'
-    const filteredResult = result.filter(inv => inv.IncentiveStatus === "Settled");
-
-    if (!filteredResult.length) {
+    if (!result.length) {
       return res.status(404).json({ error: "No invoices with IncentiveStatus 'Settled' found" });
     }
 
-    const formattedResult = filteredResult.map(invoice => ({
+    const formattedResult = result.map(invoice => ({
       invoiceNumber: invoice.invoiceNumber,
       customer: invoice.customer,
       exe: invoice.exe,
       IncentiveStatus: invoice.IncentiveStatus,
       ModeofPayment: invoice.ModeofPayment,
-      IncentiveDueDate: invoice.IncentiveDueDate,
+      IncentiveDueDate:invoice.IncentiveDueDate,
       Duedate: invoice.Duedate,
       Incentivesettlement: invoice.Incentivesettlement,
       invoiceTotal: invoice.totalInvoiceAmount.toFixed(2),
@@ -1155,7 +1178,6 @@ const ExecutivesIncentive = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 
 
