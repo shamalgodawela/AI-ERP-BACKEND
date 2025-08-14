@@ -9,19 +9,6 @@ const outstandingController = {
         try {
             const { invoiceNumber, date, backName, depositedate,description, CHnumber, amount, outstanding, } = req.body;
     
-        
-            const existingCheque = await Cheque.findOne({ 
-                ChequeNumber: CHnumber, 
-                invoiceNumber: invoiceNumber 
-            });
-            
-    
-            if (existingCheque) {
-                // Update ChequeValue
-                existingCheque.ChequeValue = parseFloat(existingCheque.ChequeValue) - parseFloat(amount);
-                await existingCheque.save();
-            }
-    
             // Create a new Outstanding entry
             const newOutstanding = new Outstanding({
                 invoiceNumber,

@@ -49,10 +49,65 @@ const GetAllCheques = async (req, res) => {
     }
 };
 
+const GetSingleCheque = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const cheque = await Cheque.findById(id);
+
+        if (!cheque) {
+            return res.status(404).json({ error: "Cheque not found" });
+        }
+
+        return res.status(200).json({ cheque });
+    } catch (error) {
+        console.error("Error fetching cheque:", error);
+        return res.status(500).json({ error: `Failed to fetch cheque: ${error.message}` });
+    }
+};
+
+const EditChequeDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { invoiceNumber, ChequeNumber, ChequeValue, DepositeDate, Bankdetails, BankBranch, status } = req.body;
+
+        const cheque = await Cheque.findById(id);
+        if (!cheque) {
+            return res.status(404).json({ error: 'Cheque not found' });
+        }
+
+        // Optional: Validate invoiceNumber exists
+        if (invoiceNumber) {
+            const existingInvoice = await Invoice.findOne({ invoiceNumber });
+            if (!existingInvoice) {
+                return res.status(404).json({ error: 'Invoice not found' });
+            }
+        }
+
+        cheque.invoiceNumber = invoiceNumber ?? cheque.invoiceNumber;
+        cheque.ChequeNumber = ChequeNumber ?? cheque.ChequeNumber;
+        cheque.ChequeValue = ChequeValue ?? cheque.ChequeValue;
+        cheque.DepositeDate = DepositeDate ?? cheque.DepositeDate;
+        cheque.Bankdetails = Bankdetails ?? cheque.Bankdetails;
+        cheque.BankBranch = BankBranch ?? cheque.BankBranch;
+        cheque.status = status ?? cheque.status;
+
+        await cheque.save();
+
+        return res.status(200).json({ message: 'Cheque updated successfully', cheque });
+    } catch (error) {
+        console.error('Error updating cheque details:', error);
+        res.status(500).json({ error: `Failed to update cheque details: ${error.message}` });
+    }
+};
+
+
 
 
 module.exports = { 
     AddChequeDetails,
-    GetAllCheques
+    GetAllCheques,
+    EditChequeDetails,
+    GetSingleCheque
     
 };
