@@ -59,7 +59,10 @@ const invoiceSchema = new mongoose.Schema({
   Incentivesettlement:{
     type: String,
   },
-  
+  StockName: {
+    type: String,
+    required: true,
+  },
 
   
   
