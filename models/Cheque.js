@@ -27,7 +27,7 @@ const ChequeSchema= new Schema({
     },
     status:{
         type:String,
-       
+        default:"Not_realized",
     }
     
 
