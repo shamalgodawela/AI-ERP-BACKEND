@@ -210,11 +210,11 @@ const getLastInvoiceNumberEA1 = async (req, res) => {
      }
 };
 
-//fecth last invoice number starting with EA2
+//fecth last invoice number starting with PT1 puttalama
 
-const getLastInvoiceNumberEA2 = async (req, res) => {
+const getLastInvoiceNumberPT1 = async (req, res) => {
   try{
-    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^EA2/ })
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^PT1/ })
               .sort({ invoiceNumber: -1 })
               .limit(1);
 
@@ -222,7 +222,7 @@ const getLastInvoiceNumberEA2 = async (req, res) => {
               if (lastinvoiceNo) {
                 return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
             } else {
-                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+                return res.status(404).json({ error: 'No order with order number starting with "PT1" found' });
             }
   }
   catch (error) {
@@ -231,7 +231,7 @@ const getLastInvoiceNumberEA2 = async (req, res) => {
    }
 };
 
-//fetch last invoice number starting with NUM
+//fetch last invoice number starting with NUM Gampaha area
 
 const getLastInvoiceNumberNUM = async (req, res) => {
   try{
@@ -243,7 +243,7 @@ const getLastInvoiceNumberNUM = async (req, res) => {
               if (lastinvoiceNo) {
                 return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
             } else {
-                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+                return res.status(404).json({ error: 'No order with order number starting with "NUM" found' });
             }
   }
   catch (error) {
@@ -251,10 +251,10 @@ const getLastInvoiceNumberNUM = async (req, res) => {
           return res.status(500).json({ error: 'Internal server error' });
    }
 };
-//fetch last invoice number starting with south1
-const getLastInvoiceNumberSouth1 = async (req, res) => {
+//fetch last invoice number starting with KU1
+const getLastInvoiceNumberKU1 = async (req, res) => {
   try{
-    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^SOUTH/ })
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^KU1/ })
               .sort({ invoiceNumber: -1 })
               .limit(1);
 
@@ -262,7 +262,7 @@ const getLastInvoiceNumberSouth1 = async (req, res) => {
               if (lastinvoiceNo) {
                 return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
             } else {
-                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+                return res.status(404).json({ error: 'No order with order number starting with "KU1" found' });
             }
   }
   catch (error) {
@@ -270,7 +270,7 @@ const getLastInvoiceNumberSouth1 = async (req, res) => {
           return res.status(500).json({ error: 'Internal server error' });
    }
 };
-//fetch last invoice number starting with NCP1
+//fetch last invoice number starting with NCP1 MR Buddika
 
 const getLastInvoiceNumberNCP1 = async (req, res) => {
   try{
@@ -282,7 +282,7 @@ const getLastInvoiceNumberNCP1 = async (req, res) => {
               if (lastinvoiceNo) {
                 return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
             } else {
-                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+                return res.status(404).json({ error: 'No order with order number starting with "NCP" found' });
             }
   }
   catch (error) {
@@ -290,48 +290,6 @@ const getLastInvoiceNumberNCP1 = async (req, res) => {
           return res.status(500).json({ error: 'Internal server error' });
    }
 }
-
-
-//fecth last invoice number starting with UPC1
-const getLastInvoiceNumberUPC1 = async (req, res) => {
-  try{
-    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^UPC1/ })
-              .sort({ invoiceNumber: -1 })
-              .limit(1);
-
-
-              if (lastinvoiceNo) {
-                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
-            } else {
-                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
-            }
-  }
-  catch (error) {
-          console.error('Error fetching last invoice number:', error);
-          return res.status(500).json({ error: 'Internal server error' });
-   }
-};
-
-
-//fecth last invoice number starting with UPC2
-const getLastInvoiceNumberUPC2 = async (req, res) => {
-  try{
-    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^UPC2/ })
-              .sort({ invoiceNumber: -1 })
-              .limit(1);
-
-
-              if (lastinvoiceNo) {
-                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
-            } else {
-                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
-            }
-  }
-  catch (error) {
-          console.error('Error fetching last invoice number:', error);
-          return res.status(500).json({ error: 'Internal server error' });
-   }
-};
 
 
 //fecth last invoice number starting with UPC1
@@ -1208,11 +1166,9 @@ module.exports = {
   getProductWiseSalesByExe,
   getLastInvoiceNumberEA1,
   getLastInvoiceNumberNUM,
-  getLastInvoiceNumberEA2,
-  getLastInvoiceNumberSouth1,
+  getLastInvoiceNumberPT1,
+  getLastInvoiceNumberKU1,
   getLastInvoiceNumberNCP1, 
-  getLastInvoiceNumberUPC1,
-  getLastInvoiceNumberUPC2,
   getLastInvoiceNumberUpcountry,
   getLastInvoiceNumberother,
   getlastTaxNo,

@@ -48,11 +48,9 @@ router.get('/get-executives-sales-eachProduct/:exe',invoiceController.getProduct
 //fetch all last invoice number
 router.get('/get-last-invoice-number-EA1', invoiceController.getLastInvoiceNumberEA1);
 router.get('/get-last-invoice-number-NUM', invoiceController.getLastInvoiceNumberNUM);
-router.get('/get-last-invoice-number-EA2', invoiceController.getLastInvoiceNumberEA2);
-router.get('/get-last-invoice-number-south1', invoiceController.getLastInvoiceNumberSouth1);
+router.get('/get-last-invoice-number-PT1', invoiceController.getLastInvoiceNumberPT1);
+router.get('/get-last-invoice-number-KU1', invoiceController.getLastInvoiceNumberKU1);
 router.get('/get-last-invoice-number-ncp1', invoiceController.getLastInvoiceNumberNCP1);
-router.get('/get-last-invoice-number-upc1', invoiceController.getLastInvoiceNumberUPC1);
-router.get('/get-last-invoice-number-upc2', invoiceController.getLastInvoiceNumberUPC2);
 router.get('/get-last-invoice-number-upcountry', invoiceController.getLastInvoiceNumberUpcountry);
 router.get('/get-last-invoice-number-other', invoiceController.getLastInvoiceNumberother);
 
