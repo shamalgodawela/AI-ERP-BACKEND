@@ -176,9 +176,10 @@ class OrdersController {
             res.status(500).json({ error: 'Internal server error' });
         }
     }
+    // east Ahamed order number
     async getLastOrderNumberStartingWithEA(req, res) {
         try {
-            // Find the last order number that starts with "EA"
+            
             const lastOrder = await Order.findOne({ orderNumber: /^EA1/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
@@ -193,27 +194,29 @@ class OrdersController {
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
-    async getLastOrderNumberStartingWithEA2(req, res) {
+    // Puttalama last order number Mr Arshad
+    async getLastOrderNumberStartingWithPT1(req, res) {
         try {
-            // Find the last order number that starts with "EA2"
-            const lastOrder = await Order.findOne({ orderNumber: /^EA2/ })
+            
+            const lastOrder = await Order.findOne({ orderNumber: /^PT1/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
     
             if (lastOrder) {
                 return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
             } else {
-                return res.status(404).json({ error: 'No order with order number starting with "EA" found' });
+                return res.status(404).json({ error: 'No order with order number starting with "PT1" found' });
             }
         } catch (error) {
             console.error('Error fetching last order number:', error);
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
-    async getLastOrderNumberStartingWithSU(req, res) {
+    // Kurunagala Last Order Number Miss. Mubashshahira
+    async getLastOrderNumberStartingWithKU1(req, res) {
         try {
-            // Find the last order number that starts with "EA"
-            const lastOrder = await Order.findOne({ orderNumber: /^SU/ })
+           
+            const lastOrder = await Order.findOne({ orderNumber: /^KU1/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
     
@@ -227,9 +230,10 @@ class OrdersController {
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
+    // NCP last order number Mr. Buddhika
     async getLastOrderNumberStartingWithNCP(req, res) {
         try {
-            // Find the last order number that starts with "EA"
+           
             const lastOrder = await Order.findOne({ orderNumber: /^NCP/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
@@ -237,50 +241,17 @@ class OrdersController {
             if (lastOrder) {
                 return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
             } else {
-                return res.status(404).json({ error: 'No order with order number starting with "NCP" found' });
+                return res.status(404).json({ error: 'No order with order number starting with "MT1" found' });
             }
         } catch (error) {
             console.error('Error fetching last order number:', error);
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
-    async getLastOrderNumberStartingWithUPC(req, res) {
-        try {
-            // Find the last order number that starts with "EA"
-            const lastOrder = await Order.findOne({ orderNumber: /^UPC1/ })
-                .sort({ orderNumber: -1 })
-                .limit(1);
-    
-            if (lastOrder) {
-                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
-            } else {
-                return res.status(404).json({ error: 'No order with order number starting with "UPC" found' });
-            }
-        } catch (error) {
-            console.error('Error fetching last order number:', error);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
-    };
-    async getLastOrderNumberStartingWithUPC2(req, res) {
-        try {
-            // Find the last order number that starts with "EA"
-            const lastOrder = await Order.findOne({ orderNumber: /^UPC2/ })
-                .sort({ orderNumber: -1 })
-                .limit(1);
-    
-            if (lastOrder) {
-                return res.status(200).json({ lastOrderNumber: lastOrder.orderNumber });
-            } else {
-                return res.status(404).json({ error: 'No order with order number starting with "UPC" found' });
-            }
-        } catch (error) {
-            console.error('Error fetching last order number:', error);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
-    };
+    //mr nayum order number gampaha area
     async getLastOrderNumberStartingWithNUM(req, res) {
         try {
-            // Find the last order number that starts with "EA"
+            
             const lastOrder = await Order.findOne({ orderNumber: /^NUM/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
@@ -295,9 +266,10 @@ class OrdersController {
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
+    //other 
     async getLastOrderNumberStartingWithother(req, res) {
         try {
-            // Find the last order number that starts with "EA"
+            
             const lastOrder = await Order.findOne({ orderNumber: /^Other/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
@@ -312,9 +284,10 @@ class OrdersController {
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
+    //temp south area
     async getLastOrderNumberStartingWithSouth1(req, res) {
         try {
-            // Find the last order number that starts with "EA"
+           
             const lastOrder = await Order.findOne({ orderNumber: /^SOUTH/ })
                 .sort({ orderNumber: -1 })
                 .limit(1);
@@ -329,6 +302,7 @@ class OrdersController {
             return res.status(500).json({ error: 'Internal server error' });
         }
     };
+    //temp upcountry
     async getLastOrderNumberStartingWithUpccountry(req, res) {
         try {
             const lastOrder = await Order.findOne({ orderNumber:/^UPC2/ })
