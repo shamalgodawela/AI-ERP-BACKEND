@@ -69,7 +69,7 @@ const addProductAndUpdate = async (req, res) => {
                     let newQuantityBPB20 = (bulkProductBPB20.weight * bulkProductBPB20.quantity - numberOfUnits * 6) / bulkProductBPB20.weight;
 
                     
-                    bulkProductBPB20.quantity = newQuantityGRN25;
+                    bulkProductBPB20.quantity = newQuantityBPB20;
                     await bulkProductBPB20.save();
                 }
             } 
