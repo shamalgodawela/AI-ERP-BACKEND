@@ -29,10 +29,10 @@ const addProductAndUpdate = async (req, res) => {
             
             if (category === 'BP20') {
                 
-                let bulkProductBPB15 = await BulkProduct.findOne({ bulkCode: 'BPB15' });
+                let bulkProductBPB15 = await BulkProduct.findOne({ bulkCode: 'BPB20' });
                 if (bulkProductBPB15) {
                    
-                    let newQuantityBPB15 = (bulkProductBPB15.weight * bulkProductBPB15.quantity - numberOfUnits * 15) / bulkProductBPB15.weight;
+                    let newQuantityBPB15 = (bulkProductBPB15.weight * bulkProductBPB15.quantity - numberOfUnits * 20) / bulkProductBPB15.weight;
 
                   
                     bulkProductBPB15.quantity = newQuantityBPB15;
@@ -50,27 +50,27 @@ const addProductAndUpdate = async (req, res) => {
                     await bulkProductGRN25.save();
                 }
             } 
-            else if (category === 'MNP10') {
+            else if (category === 'MNP20') {
                
-                let bulkProductMNPB50 = await BulkProduct.findOne({ bulkCode: 'DAP50' });
-                if (bulkProductMNPB50) {
+                let bulkProductDAP50 = await BulkProduct.findOne({ bulkCode: 'DAP50' });
+                if (bulkProductDAP50) {
                    
-                    let newQuantityMNPB50 = (bulkProductMNPB50.weight * bulkProductMNPB50.quantity - numberOfUnits * 6) / bulkProductMNPB50.weight;
+                    let newQuantityDAP50 = (bulkProductDAP50.weight * bulkProductDAP50.quantity - numberOfUnits * 4) / bulkProductDAP50.weight;
 
                  
-                    bulkProductMNPB50.quantity = newQuantityMNPB50;
-                    await bulkProductMNPB50.save();
+                    bulkProductDAP50.quantity = newQuantityDAP50;
+                    await bulkProductDAP50.save();
                 }
 
                 
-                let bulkProductGRN25 = await BulkProduct.findOne({ bulkCode: 'GRN25' });
-                if (bulkProductGRN25) {
+                let bulkProductBPB20 = await BulkProduct.findOne({ bulkCode: 'BPB20' });
+                if (bulkProductBPB20) {
                   
-                    let newQuantityGRN25 = (bulkProductGRN25.weight * bulkProductGRN25.quantity - numberOfUnits * 4) / bulkProductGRN25.weight;
+                    let newQuantityBPB20 = (bulkProductBPB20.weight * bulkProductBPB20.quantity - numberOfUnits * 6) / bulkProductBPB20.weight;
 
                     
-                    bulkProductGRN25.quantity = newQuantityGRN25;
-                    await bulkProductGRN25.save();
+                    bulkProductBPB20.quantity = newQuantityGRN25;
+                    await bulkProductBPB20.save();
                 }
             } 
             else if (category === 'MG800') {
