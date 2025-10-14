@@ -61,6 +61,9 @@ router.get('/get-last-TaxNo', invoiceController.getlastTaxNo);
 router.get('/get-incentive', invoiceController.ExecutivesIncentive);
 
 
+//get last tax no
+router.get('/get-last-tax-no', invoiceController.getLastTaxNo);
+
 
 
 

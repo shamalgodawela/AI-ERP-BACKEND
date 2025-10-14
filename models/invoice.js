@@ -50,7 +50,6 @@ const invoiceSchema = new mongoose.Schema({
   },
   IncentiveDueDate:{
     type: String,
-    required: true,
   },
   IncentiveStatus:{
     type: String,
@@ -61,7 +60,6 @@ const invoiceSchema = new mongoose.Schema({
   },
   StockName: {
     type: String,
-    required: true,
   },
 
   

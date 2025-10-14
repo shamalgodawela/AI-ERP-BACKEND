@@ -1134,7 +1134,28 @@ const ExecutivesIncentive = async (req, res) => {
 
 
 
+const getLastTaxNo = async (req, res) => {
+  try {
+    // Find the last inserted invoice and select only TaxNo
+    const lastInvoice = await Invoice.findOne({}, { TaxNo: 1, _id: 0 })
+                                     .sort({ _id: -1 });
 
+    let nextTaxNo;
+
+    if (!lastInvoice || !lastInvoice.TaxNo) {
+      // If no invoice exists, start from a default number
+      nextTaxNo = 1;
+    } else {
+      // Convert TaxNo to number and increment
+      nextTaxNo = parseInt(lastInvoice.TaxNo, 10) + 1;
+    }
+
+    res.status(200).json({ nextTaxNo });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 
@@ -1172,7 +1193,8 @@ module.exports = {
   getLastInvoiceNumberUpcountry,
   getLastInvoiceNumberother,
   getlastTaxNo,
-  ExecutivesIncentive
+  ExecutivesIncentive,
+  getLastTaxNo
   
   
  
