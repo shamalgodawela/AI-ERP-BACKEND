@@ -23,12 +23,14 @@ const addInventory = async (req, res) => {
       return res.status(400).json({ message: "At least one valid product is required" });
     }
 
-    // Find existing inventory for the area+owner
-    let inventory = await Inventory.findOne({ area, owner });
+    // Find existing inventory for the area+owner using normalized keys
+    const areaKey = String(area).trim().toLowerCase();
+    const ownerKey = String(owner).trim().toLowerCase();
+    let inventory = await Inventory.findOne({ areaKey, ownerKey });
 
     if (!inventory) {
       // Create new inventory document
-      inventory = new Inventory({ area, owner, products: incomingProducts });
+      inventory = new Inventory({ area: String(area).trim(), owner: String(owner).trim(), products: incomingProducts });
       await inventory.save();
       return res.status(201).json({ message: "Inventory added successfully", inventory });
     }

@@ -12,6 +12,9 @@ const inventorySchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  // Normalized keys for consistent lookups and unique constraint
+  areaKey: { type: String, required: true, index: true },
+  ownerKey: { type: String, required: true, index: true },
   products: [
     {
       productName: { type: String, required: true, trim: true },
@@ -26,6 +29,16 @@ const inventorySchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+});
+
+// Compound unique index to prevent duplicate (area, owner) ignoring case/spacing via keys
+inventorySchema.index({ areaKey: 1, ownerKey: 1 }, { unique: true });
+
+// Ensure normalized keys are set
+inventorySchema.pre('validate', function(next) {
+  if (this.area) this.areaKey = String(this.area).trim().toLowerCase();
+  if (this.owner) this.ownerKey = String(this.owner).trim().toLowerCase();
+  next();
 });
 
 const Inventory = mongoose.model('Inventory', inventorySchema);
