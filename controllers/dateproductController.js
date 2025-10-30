@@ -29,7 +29,7 @@ const addProductAndUpdate = async (req, res) => {
             
             if (category === 'BP20') {
                 
-                let bulkProductBPB15 = await BulkProduct.findOne({ bulkCode: 'BPB20' });
+                let bulkProductBPB15 = await BulkProduct.findOne({ bulkCode: 'BPB20-1' });
                 if (bulkProductBPB15) {
                    
                     let newQuantityBPB15 = (bulkProductBPB15.weight * bulkProductBPB15.quantity - numberOfUnits * 20) / bulkProductBPB15.weight;
