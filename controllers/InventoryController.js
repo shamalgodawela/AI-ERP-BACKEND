@@ -1,23 +1,62 @@
 const Inventory = require('../models/Inventory'); // adjust path
 
-// Add a new inventory
+// Add or update inventory by area+owner, aggregating product quantities
 const addInventory = async (req, res) => {
   try {
     const { area, owner, products } = req.body;
 
-    if (!area || !owner || !products || products.length === 0) {
+    if (!area || !owner || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ message: "Area, owner, and products are required" });
     }
 
-    const newInventory = new Inventory({
-      area,
-      owner,
-      products
-    });
+    // Normalize incoming products: ensure numbers and trimmed identifiers
+    const incomingProducts = products.map((p) => ({
+      productName: (p.productName || p.name || '').trim(),
+      productCode: (p.productCode || p.code || '').trim(),
+      quantity: Number(p.quantity) || 0,
+      labelPrice: p.labelPrice,
+      discount: p.discount,
+      unitPrice: p.unitPrice,
+    })).filter((p) => p.productName || p.productCode);
 
-    await newInventory.save();
+    if (incomingProducts.length === 0) {
+      return res.status(400).json({ message: "At least one valid product is required" });
+    }
 
-    res.status(201).json({ message: "Inventory added successfully", inventory: newInventory });
+    // Find existing inventory for the area+owner
+    let inventory = await Inventory.findOne({ area, owner });
+
+    if (!inventory) {
+      // Create new inventory document
+      inventory = new Inventory({ area, owner, products: incomingProducts });
+      await inventory.save();
+      return res.status(201).json({ message: "Inventory added successfully", inventory });
+    }
+
+    // Merge quantities into existing inventory
+    for (const inc of incomingProducts) {
+      // Match priority: productCode (if provided) else productName
+      const matchBy = inc.productCode ? 'productCode' : 'productName';
+      const idx = inventory.products.findIndex((ep) => {
+        if (matchBy === 'productCode' && ep.productCode) {
+          return ep.productCode.trim() === inc.productCode;
+        }
+        return ep.productName && ep.productName.trim() === inc.productName;
+      });
+
+      if (idx >= 0) {
+        // Update quantity (sum) and optionally refresh price fields
+        inventory.products[idx].quantity = Number(inventory.products[idx].quantity || 0) + Number(inc.quantity || 0);
+        if (inc.labelPrice !== undefined) inventory.products[idx].labelPrice = inc.labelPrice;
+        if (inc.discount !== undefined) inventory.products[idx].discount = inc.discount;
+        if (inc.unitPrice !== undefined) inventory.products[idx].unitPrice = inc.unitPrice;
+      } else {
+        inventory.products.push(inc);
+      }
+    }
+
+    await inventory.save();
+    return res.status(200).json({ message: "Inventory updated successfully", inventory });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
