@@ -1,5 +1,6 @@
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
+const Inventory = require('../models/Inventory');
 const Outstanding = require('../models/outStanding');
 const Cheque = require('../models/Cheque');
 
@@ -11,35 +12,92 @@ const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
 
-    
+    // Try to find inventory by owner matching StockName
+    const inventoryOwner = invoiceData.StockName;
+    const ownerKey = inventoryOwner ? String(inventoryOwner).trim().toLowerCase() : null;
+    const inventoryDoc = ownerKey ? await Inventory.findOne({ ownerKey }) : null;
+
+    // Loop through each product in the invoice
     for (const product of products) {
-      product.unitPrice = parseFloat(product.labelPrice) - (parseFloat(product.labelPrice) * parseFloat(product.discount) / 100);
-      product.invoiceTotal = parseFloat(product.unitPrice) * parseFloat(product.quantity);
-       
-      const existingProduct = await Product.findOne({
-        sku: { $regex: new RegExp(product.productCode, "i") },
-        category: { $regex: new RegExp(product.category, "i") },
-      });
+      const quantity = parseFloat(product.quantity);
+      const labelPrice = parseFloat(product.labelPrice);
+      const discount = parseFloat(product.discount) || 0;
 
-      if (existingProduct) {
-        
-        existingProduct.quantity -= parseFloat(product.quantity);
-        existingProduct.amount -= parseFloat(product.invoiceTotal);
+      // 🚫 1. Validate quantity
+      if (!quantity || quantity <= 0) {
+        return res.status(400).json({
+          error: `Cannot add invoice. Quantity for product "${product.productCode}" must be greater than 0.`,
+        });
+      }
 
-        
-        await existingProduct.save();
+      // ✅ 2. Calculate unit price and invoice total
+      product.unitPrice = labelPrice - (labelPrice * discount) / 100;
+      product.invoiceTotal = product.unitPrice * quantity;
+
+      if (inventoryDoc) {
+        // Use Inventory stock when StockName matches Inventory owner
+        const matchByCode = (p) => p.productCode && product.productCode && p.productCode.trim().toLowerCase() === String(product.productCode).trim().toLowerCase();
+        const matchByName = (p) => p.productName && product.productName && p.productName.trim().toLowerCase() === String(product.productName).trim().toLowerCase();
+        const existingIndex = inventoryDoc.products.findIndex((p) => matchByCode(p) || matchByName(p));
+
+        if (existingIndex === -1) {
+          return res.status(400).json({
+            error: `Cannot add invoice. Inventory for owner "${inventoryOwner}" does not contain product ${product.productCode || product.productName || ''}.`,
+          });
+        }
+
+        const invProd = inventoryDoc.products[existingIndex];
+        const availableQty = Number(invProd.quantity || 0);
+        if (availableQty < quantity) {
+          return res.status(400).json({
+            error: `Cannot add invoice. Inventory product "${invProd.productCode || invProd.productName}" has insufficient quantity.`,
+          });
+        }
+
+        // Deduct from inventory
+        inventoryDoc.products[existingIndex].quantity = availableQty - quantity;
+        await inventoryDoc.save();
       } else {
-        
-        console.error(`No matching product found for product code ${product.productCode} or category mismatch.`);
-        return res.status(400).json({ error: 'Invalid product code or category mismatch' });
+        // Fallback to Product collection as before
+        const existingProduct = await Product.findOne({
+          sku: { $regex: new RegExp(product.productCode, "i") },
+          category: { $regex: new RegExp(product.category, "i") },
+        });
+
+        if (!existingProduct) {
+          console.error(
+            `No matching product found for product code ${product.productCode} or category mismatch.`
+          );
+          return res.status(400).json({
+            error: "Invalid product code or category mismatch",
+          });
+        }
+
+        if (existingProduct.quantity < quantity) {
+          return res.status(400).json({
+            error: `Cannot add invoice. Product "${existingProduct.sku}" has insufficient quantity.`,
+          });
+        }
+
+        existingProduct.quantity -= quantity;
+        existingProduct.amount =
+          (existingProduct.amount || 0) - product.invoiceTotal;
+
+        await existingProduct.save();
       }
     }
 
-    
-    const totalUnitPrice = products.reduce((total, product) => total + parseFloat(product.unitPrice || 0), 0);
-    const totalInvoiceTotal = products.reduce((total, product) => total + parseFloat(product.invoiceTotal || 0), 0);
+    // ✅ 6. Calculate total prices for the invoice
+    const totalUnitPrice = products.reduce(
+      (total, p) => total + (parseFloat(p.unitPrice) || 0),
+      0
+    );
+    const totalInvoiceTotal = products.reduce(
+      (total, p) => total + (parseFloat(p.invoiceTotal) || 0),
+      0
+    );
 
-    
+    // ✅ 7. Prepare and save invoice
     invoiceData.products = products;
     invoiceData.totalUnitPrice = totalUnitPrice;
     invoiceData.totalInvoiceTotal = totalInvoiceTotal;
@@ -47,12 +105,17 @@ const addInvoice = async (req, res) => {
     const newInvoice = new Invoice(invoiceData);
     const savedInvoice = await newInvoice.save();
 
-    res.status(201).json(savedInvoice);
+    // ✅ 8. Return success response
+    res.status(201).json({
+      message: "Invoice added successfully",
+      invoice: savedInvoice,
+    });
   } catch (error) {
-    console.error('Error adding invoice:', error.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error adding invoice:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 
