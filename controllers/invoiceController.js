@@ -1129,6 +1129,7 @@ const ExecutivesIncentive = async (req, res) => {
           invoiceNumber: 1,
           customer: 1,
           exe: 1,
+          invoiceDate:1,
           IncentiveStatus: 1,
           ModeofPayment: 1,
           IncentiveDueDate: 1,
