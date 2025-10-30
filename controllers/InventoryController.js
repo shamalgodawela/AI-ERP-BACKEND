@@ -35,13 +35,14 @@ const addInventory = async (req, res) => {
 
     // Merge quantities into existing inventory
     for (const inc of incomingProducts) {
-      // Match priority: productCode (if provided) else productName
-      const matchBy = inc.productCode ? 'productCode' : 'productName';
+      const incCode = (inc.productCode || '').trim().toLowerCase();
+      const incName = (inc.productName || '').trim().toLowerCase();
       const idx = inventory.products.findIndex((ep) => {
-        if (matchBy === 'productCode' && ep.productCode) {
-          return ep.productCode.trim() === inc.productCode;
-        }
-        return ep.productName && ep.productName.trim() === inc.productName;
+        const epCode = (ep.productCode || '').trim().toLowerCase();
+        const epName = (ep.productName || '').trim().toLowerCase();
+        const codeMatch = incCode && epCode && epCode === incCode;
+        const nameMatch = incName && epName && epName === incName;
+        return codeMatch || nameMatch;
       });
 
       if (idx >= 0) {
