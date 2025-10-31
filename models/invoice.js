@@ -60,7 +60,6 @@ const invoiceSchema = new mongoose.Schema({
   },
   StockName: {
     type: String,
-    required:true
   },
 
   
