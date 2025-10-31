@@ -34,7 +34,10 @@ const addInvoice = async (req, res) => {
       product.unitPrice = labelPrice - (labelPrice * discount) / 100;
       product.invoiceTotal = product.unitPrice * quantity;
 
-      if (inventoryDoc) {
+      // If StockName is 'MS', always use Product collection (do not use Inventory)
+      const shouldUseInventory = inventoryDoc && ownerKey !== 'ms';
+
+      if (shouldUseInventory) {
         // Use Inventory stock when StockName matches Inventory owner
         const matchByCode = (p) => p.productCode && product.productCode && p.productCode.trim().toLowerCase() === String(product.productCode).trim().toLowerCase();
         const matchByName = (p) => p.productName && product.productName && p.productName.trim().toLowerCase() === String(product.productName).trim().toLowerCase();
@@ -59,10 +62,14 @@ const addInvoice = async (req, res) => {
         await inventoryDoc.save();
       } else {
         // Fallback to Product collection as before
-        const existingProduct = await Product.findOne({
-          sku: { $regex: new RegExp(product.productCode, "i") },
-          category: { $regex: new RegExp(product.category, "i") },
-        });
+        const productQuery = {
+          sku: { $regex: new RegExp(escapeRegExp(String(product.productCode || '')), 'i') },
+        };
+        if (product.category) {
+          productQuery.category = { $regex: new RegExp(escapeRegExp(String(product.category)), 'i') };
+        }
+
+        const existingProduct = await Product.findOne(productQuery);
 
         if (!existingProduct) {
           console.error(
