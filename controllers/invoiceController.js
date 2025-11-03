@@ -12,14 +12,27 @@ const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
 
-    // Find inventory by owner matching StockName (case-insensitive)
+    // Find inventory by owner matching StockName (case-insensitive, tolerant of "M." vs "Mr.", dots/spaces)
     const inventoryOwner = invoiceData.StockName;
     const rawOwner = inventoryOwner ? String(inventoryOwner).trim() : null;
-    const inventoryDoc = rawOwner
-      ? await Inventory.findOne({
-          owner: { $regex: new RegExp(`^${escapeRegExp(rawOwner)}$`, 'i') },
-        })
-      : null;
+    let inventoryDoc = null;
+    if (rawOwner) {
+      const candidates = new Set();
+      const asIs = rawOwner;
+      const mrExpanded = rawOwner.replace(/^m\.?\s*/i, 'Mr.');
+      const noDots = rawOwner.replace(/\./g, '');
+      const mrExpandedNoDots = mrExpanded.replace(/\./g, '');
+      const collapsedSpaces = rawOwner.replace(/\s+/g, ' ').trim();
+      [asIs, mrExpanded, noDots, mrExpandedNoDots, collapsedSpaces].forEach((c) => {
+        if (c && c.length) candidates.add(c);
+      });
+
+      const ownerRegexes = Array.from(candidates).map((c) => ({
+        owner: { $regex: new RegExp(`^${escapeRegExp(c)}$`, 'i') },
+      }));
+
+      inventoryDoc = await Inventory.findOne({ $or: ownerRegexes });
+    }
 
     // Loop through each product in the invoice
     for (const product of products) {
