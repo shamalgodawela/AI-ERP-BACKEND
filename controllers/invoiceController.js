@@ -14,11 +14,12 @@ const addInvoice = async (req, res) => {
 
     // Try to find inventory by owner matching StockName
     const inventoryOwner = invoiceData.StockName;
-    const ownerKey = inventoryOwner ? String(inventoryOwner).trim().toLowerCase() : null;
+    const ownerKey = inventoryOwner
+  ? String(inventoryOwner).trim().toLowerCase().replace(/^m\./, "mr.")
+  : null;
     const inventoryDoc = ownerKey
   ? await Inventory.findOne({ ownerKey: ownerKey })
   : null;
-
 
     // Loop through each product in the invoice
     for (const product of products) {
