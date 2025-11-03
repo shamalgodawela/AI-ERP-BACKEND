@@ -12,16 +12,12 @@ const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
 
-    // Try to find inventory by owner matching StockName (by ownerKey OR owner)
+    // Find inventory by owner matching StockName (case-insensitive)
     const inventoryOwner = invoiceData.StockName;
     const rawOwner = inventoryOwner ? String(inventoryOwner).trim() : null;
-    const ownerKey = rawOwner ? rawOwner.toLowerCase().replace(/^m\./, "mr.") : null;
-    const inventoryDoc = ownerKey
+    const inventoryDoc = rawOwner
       ? await Inventory.findOne({
-          $or: [
-            { ownerKey },
-            { owner: { $regex: new RegExp(`^${escapeRegExp(rawOwner)}$`, 'i') } },
-          ],
+          owner: { $regex: new RegExp(`^${escapeRegExp(rawOwner)}$`, 'i') },
         })
       : null;
 
@@ -43,7 +39,7 @@ const addInvoice = async (req, res) => {
       product.invoiceTotal = product.unitPrice * quantity;
 
       // If StockName is 'MS', always use Product collection (do not use Inventory)
-      const shouldUseInventory = inventoryDoc && ownerKey !== 'ms';
+      const shouldUseInventory = inventoryDoc && String(rawOwner).trim().toLowerCase() !== 'ms';
 
       if (shouldUseInventory) {
         // Use Inventory stock when StockName matches Inventory owner
