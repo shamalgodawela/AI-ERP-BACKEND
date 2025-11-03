@@ -56,9 +56,19 @@ const addInvoice = async (req, res) => {
 
       if (shouldUseInventory) {
         // Use Inventory stock when StockName matches Inventory owner
-        const matchByCode = (p) => p.productCode && product.productCode && p.productCode.trim().toLowerCase() === String(product.productCode).trim().toLowerCase();
-        const matchByName = (p) => p.productName && product.productName && p.productName.trim().toLowerCase() === String(product.productName).trim().toLowerCase();
-        const existingIndex = inventoryDoc.products.findIndex((p) => matchByCode(p) || matchByName(p));
+        const normalize = (v) => String(v || '')
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .replace(/[.-_]/g, '');
+
+        const targetCode = normalize(product.productCode);
+        const targetName = normalize(product.productName);
+
+        const existingIndex = inventoryDoc.products.findIndex((p) => {
+          const codeMatch = targetCode && normalize(p.productCode) === targetCode;
+          const nameMatch = targetName && normalize(p.productName) === targetName;
+          return codeMatch || nameMatch;
+        });
 
         if (existingIndex === -1) {
           return res.status(400).json({
