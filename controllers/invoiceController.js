@@ -34,6 +34,13 @@ const addInvoice = async (req, res) => {
       inventoryDoc = await Inventory.findOne({ $or: ownerRegexes });
     }
 
+    const ownerMode = !!rawOwner && String(rawOwner).trim().toLowerCase() !== 'ms';
+    if (ownerMode && !inventoryDoc) {
+      return res.status(400).json({
+        error: `Cannot add invoice. Inventory for owner "${rawOwner}" not found.`,
+      });
+    }
+
     // Loop through each product in the invoice
     for (const product of products) {
       const quantity = parseFloat(product.quantity);
@@ -52,7 +59,7 @@ const addInvoice = async (req, res) => {
       product.invoiceTotal = product.unitPrice * quantity;
 
       // If StockName is 'MS', always use Product collection (do not use Inventory)
-      const shouldUseInventory = inventoryDoc && String(rawOwner).trim().toLowerCase() !== 'ms';
+      const shouldUseInventory = ownerMode && !!inventoryDoc;
 
       if (shouldUseInventory) {
         // Use Inventory stock when StockName matches Inventory owner
