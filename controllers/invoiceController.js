@@ -12,17 +12,20 @@ const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
 
-    // Find inventory by owner matching StockName (case-insensitive, tolerant of "M." vs "Mr.", dots/spaces)
-    const inventoryOwner = invoiceData.StockName;
-    const rawOwner = inventoryOwner ? String(inventoryOwner).trim() : null;
+    // Check if StockName is "MS" (main stock) - case insensitive
+    const stockName = invoiceData.StockName ? String(invoiceData.StockName).trim() : '';
+    const isMainStock = stockName.toLowerCase() === 'ms';
+
     let inventoryDoc = null;
-    if (rawOwner) {
+    
+    // Only look for inventory if NOT main stock
+    if (!isMainStock && stockName) {
       const candidates = new Set();
-      const asIs = rawOwner;
-      const mrExpanded = rawOwner.replace(/^m\.?\s*/i, 'Mr.');
-      const noDots = rawOwner.replace(/\./g, '');
+      const asIs = stockName;
+      const mrExpanded = stockName.replace(/^m\.?\s*/i, 'Mr.');
+      const noDots = stockName.replace(/\./g, '');
       const mrExpandedNoDots = mrExpanded.replace(/\./g, '');
-      const collapsedSpaces = rawOwner.replace(/\s+/g, ' ').trim();
+      const collapsedSpaces = stockName.replace(/\s+/g, ' ').trim();
       [asIs, mrExpanded, noDots, mrExpandedNoDots, collapsedSpaces].forEach((c) => {
         if (c && c.length) candidates.add(c);
       });
@@ -32,13 +35,13 @@ const addInvoice = async (req, res) => {
       }));
 
       inventoryDoc = await Inventory.findOne({ $or: ownerRegexes });
-    }
 
-    const ownerMode = !!rawOwner && String(rawOwner).trim().toLowerCase() !== 'ms';
-    if (ownerMode && !inventoryDoc) {
-      return res.status(400).json({
-        error: `Cannot add invoice. Inventory for owner "${rawOwner}" not found.`,
-      });
+      // If inventory owner specified but not found, return error
+      if (!inventoryDoc) {
+        return res.status(400).json({
+          error: `Cannot add invoice. Inventory for owner "${stockName}" not found.`,
+        });
+      }
     }
 
     // Loop through each product in the invoice
@@ -48,9 +51,9 @@ const addInvoice = async (req, res) => {
       const discount = parseFloat(product.discount) || 0;
 
       // 🚫 1. Validate quantity
-      if (!quantity || quantity <= 0) {
+      if (!quantity || quantity <= 0 || isNaN(quantity)) {
         return res.status(400).json({
-          error: `Cannot add invoice. Quantity for product "${product.productCode}" must be greater than 0.`,
+          error: `Cannot add invoice. Quantity for product "${product.productCode || product.productName}" must be greater than 0.`,
         });
       }
 
@@ -58,10 +61,41 @@ const addInvoice = async (req, res) => {
       product.unitPrice = labelPrice - (labelPrice * discount) / 100;
       product.invoiceTotal = product.unitPrice * quantity;
 
-      // If StockName is 'MS', always use Product collection (do not use Inventory)
-      const shouldUseInventory = ownerMode && !!inventoryDoc;
+      if (isMainStock || !inventoryDoc) {
+        // Use Product collection (main stock) - for MS or when no inventory found
+        const productQuery = {
+          sku: { $regex: new RegExp(escapeRegExp(String(product.productCode || '')), 'i') },
+        };
+        if (product.category) {
+          productQuery.category = { $regex: new RegExp(escapeRegExp(String(product.category)), 'i') };
+        }
 
-      if (shouldUseInventory) {
+        const existingProduct = await Product.findOne(productQuery);
+
+        if (!existingProduct) {
+          console.error(
+            `No matching product found for product code ${product.productCode} or category mismatch.`
+          );
+          return res.status(400).json({
+            error: `Invalid product code "${product.productCode}" or category mismatch`,
+          });
+        }
+
+        // Convert quantity to number for comparison (Product.quantity is String in model)
+        const availableQty = parseFloat(existingProduct.quantity);
+        if (isNaN(availableQty) || availableQty < quantity) {
+          return res.status(400).json({
+            error: `Cannot add invoice. Product "${existingProduct.sku}" has insufficient quantity. Available: ${availableQty}, Required: ${quantity}`,
+          });
+        }
+
+        // Reduce stock (convert to number, subtract, convert back to string for model)
+        existingProduct.quantity = String(availableQty - quantity);
+        existingProduct.amount =
+          (parseFloat(existingProduct.amount) || 0) - product.invoiceTotal;
+
+        await existingProduct.save();
+      } else {
         // Use Inventory stock when StockName matches Inventory owner
         const normalize = (v) => String(v || '')
           .toLowerCase()
@@ -79,7 +113,7 @@ const addInvoice = async (req, res) => {
 
         if (existingIndex === -1) {
           return res.status(400).json({
-            error: `Cannot add invoice. Inventory for owner "${inventoryOwner}" does not contain product ${product.productCode || product.productName || ''}.`,
+            error: `Cannot add invoice. Inventory for owner "${stockName}" does not contain product ${product.productCode || product.productName || ''}.`,
           });
         }
 
@@ -87,44 +121,13 @@ const addInvoice = async (req, res) => {
         const availableQty = Number(invProd.quantity || 0);
         if (availableQty < quantity) {
           return res.status(400).json({
-            error: `Cannot add invoice. Inventory product "${invProd.productCode || invProd.productName}" has insufficient quantity.`,
+            error: `Cannot add invoice. Inventory product "${invProd.productCode || invProd.productName}" has insufficient quantity. Available: ${availableQty}, Required: ${quantity}`,
           });
         }
 
         // Deduct from inventory
         inventoryDoc.products[existingIndex].quantity = availableQty - quantity;
         await inventoryDoc.save();
-      } else {
-        // Fallback to Product collection as before
-        const productQuery = {
-          sku: { $regex: new RegExp(escapeRegExp(String(product.productCode || '')), 'i') },
-        };
-        if (product.category) {
-          productQuery.category = { $regex: new RegExp(escapeRegExp(String(product.category)), 'i') };
-        }
-
-        const existingProduct = await Product.findOne(productQuery);
-
-        if (!existingProduct) {
-          console.error(
-            `No matching product found for product code ${product.productCode} or category mismatch.`
-          );
-          return res.status(400).json({
-            error: "Invalid product code or category mismatch",
-          });
-        }
-
-        if (existingProduct.quantity < quantity) {
-          return res.status(400).json({
-            error: `Cannot add invoice. Product "${existingProduct.sku}" has insufficient quantity.`,
-          });
-        }
-
-        existingProduct.quantity -= quantity;
-        existingProduct.amount =
-          (existingProduct.amount || 0) - product.invoiceTotal;
-
-        await existingProduct.save();
       }
     }
 
@@ -152,8 +155,12 @@ const addInvoice = async (req, res) => {
       invoice: savedInvoice,
     });
   } catch (error) {
-    console.error("Error adding invoice:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error adding invoice:", error);
+    console.error("Error stack:", error.stack);
+    res.status(500).json({ 
+      error: "Internal Server Error",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
