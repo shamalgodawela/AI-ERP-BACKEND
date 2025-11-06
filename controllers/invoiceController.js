@@ -12,6 +12,19 @@ const addInvoice = async (req, res) => {
   try {
     const { products, ...invoiceData } = req.body;
 
+    // Validate required fields early
+    if (!invoiceData.invoiceNumber) {
+      return res.status(400).json({
+        error: "Invoice number is required",
+      });
+    }
+
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({
+        error: "Products array is required and must contain at least one product",
+      });
+    }
+
     // Check if StockName is "MS" (main stock) - case insensitive
     const stockName = invoiceData.StockName ? String(invoiceData.StockName).trim() : '';
     const isMainStock = stockName.toLowerCase() === 'ms';
@@ -131,20 +144,58 @@ const addInvoice = async (req, res) => {
       }
     }
 
-    // ✅ 6. Calculate total prices for the invoice
-    const totalUnitPrice = products.reduce(
-      (total, p) => total + (parseFloat(p.unitPrice) || 0),
+    // ✅ 6. Calculate total prices for the invoice and ensure proper data types
+    const processedProducts = products.map(p => ({
+      productCode: String(p.productCode || ''),
+      productName: String(p.productName || ''),
+      quantity: Number(p.quantity) || 0,
+      labelPrice: Number(p.labelPrice) || 0,
+      discount: Number(p.discount) || 0,
+      unitPrice: Number(p.unitPrice) || 0,
+      invoiceTotal: Number(p.invoiceTotal) || 0,
+    }));
+
+    const totalUnitPrice = processedProducts.reduce(
+      (total, p) => total + p.unitPrice,
       0
     );
-    const totalInvoiceTotal = products.reduce(
-      (total, p) => total + (parseFloat(p.invoiceTotal) || 0),
+    const totalInvoiceTotal = processedProducts.reduce(
+      (total, p) => total + p.invoiceTotal,
       0
     );
 
     // ✅ 7. Prepare and save invoice
-    invoiceData.products = products;
+    invoiceData.products = processedProducts;
     invoiceData.totalUnitPrice = totalUnitPrice;
     invoiceData.totalInvoiceTotal = totalInvoiceTotal;
+    // Ensure StockName is preserved
+    if (stockName) {
+      invoiceData.StockName = stockName;
+    }
+
+    // Check for duplicate invoice number before saving
+    const existingInvoice = await Invoice.findOne({ 
+      invoiceNumber: invoiceData.invoiceNumber 
+    });
+    
+    if (existingInvoice) {
+      return res.status(400).json({
+        error: `Invoice number "${invoiceData.invoiceNumber}" already exists`,
+      });
+    }
+
+    // Check for duplicate CusVatNo if provided
+    if (invoiceData.CusVatNo) {
+      const existingCusVat = await Invoice.findOne({ 
+        CusVatNo: invoiceData.CusVatNo 
+      });
+      
+      if (existingCusVat) {
+        return res.status(400).json({
+          error: `Customer VAT number "${invoiceData.CusVatNo}" already exists`,
+        });
+      }
+    }
 
     const newInvoice = new Invoice(invoiceData);
     const savedInvoice = await newInvoice.save();
@@ -156,10 +207,30 @@ const addInvoice = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding invoice:", error);
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
     console.error("Error stack:", error.stack);
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.message,
+      });
+    }
+    
+    if (error.code === 11000) {
+      // Duplicate key error
+      const field = Object.keys(error.keyPattern || {})[0];
+      return res.status(400).json({
+        error: `Duplicate value for field "${field}"`,
+        details: error.message,
+      });
+    }
+    
     res.status(500).json({ 
       error: "Internal Server Error",
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred while saving the invoice'
     });
   }
 };
