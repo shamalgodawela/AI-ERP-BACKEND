@@ -1320,18 +1320,19 @@ const ExecutivesIncentive = async (req, res) => {
 
 const getLastTaxNo = async (req, res) => {
   try {
-    // Find the last inserted invoice and select only TaxNo
-    const lastInvoice = await Invoice.findOne({}, { TaxNo: 1, _id: 0 })
-                                     .sort({ _id: -1 });
+    // Find the most recent invoice whose TaxNo is not empty or zero
+    const lastValidInvoice = await Invoice.findOne(
+      { TaxNo: { $nin: [null, "", 0, "0"] } },
+      { TaxNo: 1, _id: 0 }
+    ).sort({ _id: -1 });
 
-    let nextTaxNo;
+    let nextTaxNo = 1;
 
-    if (!lastInvoice || !lastInvoice.TaxNo) {
-      // If no invoice exists, start from a default number
-      nextTaxNo = 1;
-    } else {
-      // Convert TaxNo to number and increment
-      nextTaxNo = parseInt(lastInvoice.TaxNo, 10) + 1;
+    if (lastValidInvoice && lastValidInvoice.TaxNo) {
+      const parsedTaxNo = parseInt(lastValidInvoice.TaxNo, 10);
+      if (!Number.isNaN(parsedTaxNo) && parsedTaxNo > 0) {
+        nextTaxNo = parsedTaxNo + 1;
+      }
     }
 
     res.status(200).json({ nextTaxNo });
