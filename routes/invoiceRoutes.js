@@ -64,6 +64,9 @@ router.get('/get-incentive', invoiceController.ExecutivesIncentive);
 //get last tax no
 router.get('/get-last-tax-no', invoiceController.getLastTaxNo);
 
+//get product quantities by product code with date filtering
+router.get('/get-product-quantity-by-code', invoiceController.getProductQuantityByCode);
+
 
 
 

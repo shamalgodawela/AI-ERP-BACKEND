@@ -1342,6 +1342,92 @@ const getLastTaxNo = async (req, res) => {
   }
 };
 
+const getProductQuantityByCode = async (req, res) => {
+  try {
+    const { startDate, endDate, exe } = req.query;
+
+    // Build match stage
+    const matchStage = { GatePassNo: 'Printed' };
+
+    // Add executive filtering if provided
+    if (exe) {
+      matchStage.exe = exe;
+    }
+
+    // Add date filtering if provided
+    if (startDate && endDate) {
+      // Validate dates
+      if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
+        return res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD format' });
+      }
+
+      // Create start and end dates with proper time handling
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0); // Start of the day
+      
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // End of the day
+
+      // Use $expr and $toDate for string-to-date comparison
+      // If exe filter exists, combine with date filter
+      if (matchStage.$expr) {
+        matchStage.$expr.$and.push(
+          { $gte: [{ $toDate: '$invoiceDate' }, start] },
+          { $lte: [{ $toDate: '$invoiceDate' }, end] }
+        );
+      } else {
+        matchStage.$expr = {
+          $and: [
+            { $gte: [{ $toDate: '$invoiceDate' }, start] },
+            { $lte: [{ $toDate: '$invoiceDate' }, end] }
+          ]
+        };
+      }
+    } else if (startDate || endDate) {
+      return res.status(400).json({ error: 'Both startDate and endDate are required for date filtering' });
+    }
+
+    const result = await Invoice.aggregate([
+      { $match: matchStage },
+      { $unwind: '$products' },
+      {
+        $group: {
+          _id: '$products.productCode',
+          productName: { $first: '$products.productName' },
+          totalQuantity: { $sum: { $toDouble: '$products.quantity' } }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          productCode: '$_id',
+          productName: 1,
+          totalQuantity: { $round: ['$totalQuantity', 2] }
+        }
+      },
+      {
+        $sort: { productCode: 1 }
+      }
+    ]);
+
+    if (result.length === 0) {
+      let message = 'No products found';
+      const filters = [];
+      if (exe) filters.push(`for executive: ${exe}`);
+      if (startDate && endDate) filters.push(`between ${startDate} and ${endDate}`);
+      if (filters.length > 0) {
+        message += ' ' + filters.join(' ');
+      }
+      return res.status(404).json({ message });
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error fetching product quantities by code:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 
 
 
@@ -1379,7 +1465,8 @@ module.exports = {
   getLastInvoiceNumberother,
   getlastTaxNo,
   ExecutivesIncentive,
-  getLastTaxNo
+  getLastTaxNo,
+  getProductQuantityByCode
   
   
  
