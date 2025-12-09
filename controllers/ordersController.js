@@ -45,7 +45,8 @@ class OrdersController {
                 CreditPeriod:req.body.CreditPeriod,
                 Paymentmethod:req.body.Paymentmethod,
                 CusVatNo:req.body.CusVatNo,
-                IncentiveDueDate: req.body.IncentiveDueDate
+                IncentiveDueDate: req.body.IncentiveDueDate,
+                FreeissuedStatus:req.body.FreeissuedStatus,
             });
 
             // Save the order

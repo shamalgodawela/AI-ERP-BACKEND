@@ -61,6 +61,9 @@ const invoiceSchema = new mongoose.Schema({
   StockName: {
     type: String,
   },
+  FreeissuedStatus:{
+    type:String
+  }
 
   
   

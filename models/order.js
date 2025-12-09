@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { type } = require('os');
 
 const orderSchema = new mongoose.Schema({
   products: [
@@ -45,6 +46,9 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  FreeissuedStatus:{
+    type:String
+  }
 });
 
 const Order = mongoose.model('Order', orderSchema);
