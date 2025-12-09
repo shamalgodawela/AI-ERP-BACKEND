@@ -1281,7 +1281,7 @@ const ExecutivesIncentive = async (req, res) => {
                       100
                     ]
                   },
-                  1
+                  0.5
                 ]
               }
             }
