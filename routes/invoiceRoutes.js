@@ -20,9 +20,7 @@ router.put('/invoices/:invoiceNumber', invoiceController.updateInvoice);
 router.get('/invoices/:invoiceNumber', invoiceController.getInvoiceByNumber);
 
 //get sales details
-router.get('/invoi/sum', invoiceController.getSumByGatePassNo);
 router.get('/monthlysales',invoiceController.getMonthlySales)
-router.get('/monthlysalesbyexe',invoiceController.getMonthlySalesbyExe)
 router.get('/salesbyExe',invoiceController.getSalesByExe)
 
 router.get('/totalproduct', invoiceController.getTotalQuantityByProductCode)

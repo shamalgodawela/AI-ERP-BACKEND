@@ -624,47 +624,6 @@ const getInvoiceByNumber = async (req, res) => {
 
 //get sales details -----------------------------------------------------------------------------------------------------
 
-const getSumByGatePassNo = async (req, res) => {
-  try {
-    const result = await Invoice.aggregate([
-      { $match: { GatePassNo: 'Printed' } },
-      { $unwind: '$products' },
-      {
-        $group: {
-          _id: '$_id',
-          invoiceTotal: {
-            $sum: {
-              $multiply: [
-                '$products.labelPrice',
-                { $subtract: [1, { $divide: ['$products.discount', 100] }] },
-                '$products.quantity'
-              ]
-            }
-          },
-          taxRate: { $first: { $ifNull: ['$Tax', 0] } } // Include tax rate or set to 0 if not present
-        }
-      },
-      {
-        $project: {
-          invoiceTotal: {
-            $add: [
-              '$invoiceTotal',
-              { $multiply: ['$invoiceTotal', { $divide: ['$taxRate', 100] }] }
-            ]
-          }
-        }
-      },
-      { $group: { _id: null, totalSum: { $sum: '$invoiceTotal' } } }
-    ]);
-
-    const totalsaless = result.length > 0 ? result[0].totalSum : 0;
-    res.json({ sum: totalsaless });
-  } catch (error) {
-    console.error('Error calculating sum:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
 
 
 
@@ -721,103 +680,44 @@ const getMonthlySales = async (req, res) => {
   }
 };
 
-const getMonthlySalesbyExe = async (req, res) => {
-  try {
-    const { exe } = req.query; 
-    const matchStage = { GatePassNo: 'Printed' }; 
 
-    
-    if (exe) {
-      matchStage.exe = exe;
-    }
-
-    const result = await Invoice.aggregate([
-      { $match: matchStage }, 
-      { $unwind: '$products' }, 
-      {
-        $addFields: {
-          invoiceDate: { $toDate: '$invoiceDate' }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$invoiceDate' },
-            month: { $month: '$invoiceDate' },
-            exe: '$exe' 
-          },
-          invoiceTotal: {
-            $sum: {
-              $multiply: [
-                '$products.labelPrice',
-                { $subtract: [1, { $divide: ['$products.discount', 100] }] },
-                '$products.quantity'
-              ]
-            }
-          }
-        }
-      }, 
-      {
-        $group: {
-          _id: {
-            year: '$_id.year',
-            month: '$_id.month',
-            exe: '$_id.exe'
-          },
-          totalSales: { $sum: '$invoiceTotal' }
-        }
-      }, 
-      { $sort: { '_id.year': 1, '_id.month': 1 } } 
-    ]);
-
-    const formattedResult = result.map(item => ({
-      year: item._id.year,
-      month: item._id.month,
-      exe: item._id.exe,
-      totalSales: item.totalSales
-    }));
-
-    res.json(formattedResult);
-  } catch (error) {
-    console.error('Error fetching monthly sales:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
 
 
 const getSalesByExe = async (req, res) => {
   try {
-    // Extract startDate and endDate from query parameters
     const { startDate, endDate } = req.query;
 
-    // Ensure both startDate and endDate are provided
     if (!startDate || !endDate) {
       return res.status(400).json({ error: 'Start date and end date are required' });
     }
 
-    // Log to verify the received dates (for debugging purposes)
-    console.log('Received startDate:', startDate);
-    console.log('Received endDate:', endDate);
+    // Keep startDate and endDate as strings in YYYY-MM-DD format
+    // No need to convert to Date
+    const start = startDate;
+    const end = endDate;
 
-    // Filter to match invoiceDate between startDate and endDate (assuming they are strings in 'YYYY-MM-DD' format)
-    const matchStage = {
-      invoiceDate: { $gte: new Date(startDate), $lte: new Date(endDate) },  // Assuming invoiceDate is in 'YYYY-MM-DD' string format
-      GatePassNo: 'Printed',  // Assuming you want to filter by this field as well
-    };
-
-    // Perform the aggregation query
     const result = await Invoice.aggregate([
-      { $match: matchStage },  // Match invoices based on the date range
-      { $unwind: '$products' },  // Unwind products if necessary
+      {
+        $match: {
+          invoiceDate: { $gte: start, $lte: end },
+          GatePassNo: 'Printed',
+        },
+      },
+      { $unwind: '$products' },
       {
         $group: {
-          _id: '$exe',  // Group by the executive field
+          _id: '$exe',
           totalSales: {
             $sum: {
               $multiply: [
-                '$products.labelPrice',
-                { $subtract: [1, { $divide: ['$products.discount', 100] }] },
-                '$products.quantity',
+                { $ifNull: ['$products.labelPrice', 0] },
+                {
+                  $subtract: [
+                    1,
+                    { $divide: [{ $ifNull: ['$products.discount', 0] }, 100] },
+                  ],
+                },
+                { $ifNull: ['$products.quantity', 0] },
               ],
             },
           },
@@ -825,13 +725,13 @@ const getSalesByExe = async (req, res) => {
       },
     ]);
 
-    // Return the result in JSON format
-    return res.json(result);
+    res.json(result);
   } catch (error) {
     console.error('Error fetching sales by executive:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 const getTotalQuantityByProductCode = async (req, res) => {
@@ -1432,7 +1332,6 @@ const getProductQuantityByCode = async (req, res) => {
 
 
 module.exports = { 
-  getSumByGatePassNo,
   addInvoice,
   getAllInvoices, 
   getInvoiceById, 
@@ -1444,9 +1343,7 @@ module.exports = {
   searchInvoices,
   updateInvoice,
   getInvoiceByNumber,
-  getSumByGatePassNo,
   getMonthlySales,
-  getMonthlySalesbyExe,
   getSalesByExe,
   getTotalQuantityByProductCode,
   getexeforoutstanding,
@@ -1474,6 +1371,4 @@ module.exports = {
   
 };
 
-
-
-
+getSalesByExe
