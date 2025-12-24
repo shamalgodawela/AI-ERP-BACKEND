@@ -50,7 +50,6 @@ const registerUser=asyncHandler( async (req, res)=>{
   //generate token
 const token=generateToken(user._id);
 
-// sent http-only cookie
 res.cookie("token", token, {
   path:"/",
   httpOnly: true,
@@ -108,7 +107,7 @@ if(passwordIsCorrect){
 res.cookie("token", token, {
   path:"/",
   httpOnly: true,
-  expires: new Date(Date.now()+ 1000 * 86400),// 1 day
+  expires: new Date(Date.now()+ 1000 * 86400),
   sameSite:"none",
   secure:true,
 });

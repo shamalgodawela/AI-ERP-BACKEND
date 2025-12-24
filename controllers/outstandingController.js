@@ -142,48 +142,63 @@ const outstandingController = {
     getExecutiveCollection: async (req, res) => {
         try {
             const { startDate, endDate } = req.query;
-    
+
             // Ensure both startDate and endDate are provided
             if (!startDate || !endDate) {
-                return res.status(400).json({ message: 'Start Date and End Date are required' });
+                return res
+                    .status(400)
+                    .json({ message: 'Start Date and End Date are required' });
             }
-    
-            // Parse the startDate and endDate to Date objects using moment
-            const formattedStartDate = moment(startDate).startOf('day').toDate();
-            const formattedEndDate = moment(endDate).endOf('day').toDate();
-    
-            // Fetch distinct executives from the Invoice collection
+
+            // Build Date objects for reliable range queries, using Outstanding.date
+            const start = moment(startDate).startOf('day').toDate();
+            const end = moment(endDate).endOf('day').toDate();
+
+            // Fetch distinct executives from all invoices (no GatePassNo / Printed filter)
             const executives = await Invoice.distinct('exe');
-    
-            const collections = await Promise.all(executives.map(async (exe) => {
-                // Fetch invoices for each executive, applying date filtering on depositedate field (converted to date)
-                const invoices = await Invoice.find({
-                    exe: { $regex: new RegExp(exe, 'i') },
-                });
-    
-                // Extract invoice numbers from the fetched invoices
-                const invoiceNumbers = invoices.map(invoice => invoice.invoiceNumber);
-    
-                // Fetch outstanding records for those invoice numbers
-                const outstandingRecords = await Outstanding.find({
-                    invoiceNumber: { $in: invoiceNumbers },
-                    depositedate: {
-                        $gte: moment(formattedStartDate).format('YYYY-MM-DD'), // Format depositedate string to match the query format
-                        $lte: moment(formattedEndDate).format('YYYY-MM-DD')  // Format depositedate string to match the query format
+
+            const collections = await Promise.all(
+                executives.map(async (exe) => {
+                    // Fetch all invoices for this executive
+                    const invoices = await Invoice.find({ exe }).select(
+                        'invoiceNumber'
+                    );
+
+                    const invoiceNumbers = invoices.map(
+                        (invoice) => invoice.invoiceNumber
+                    );
+
+                    if (invoiceNumbers.length === 0) {
+                        return { exe, totalCollection: 0 };
                     }
-                });
-    
-                // Calculate the total collection amount
-                const totalCollection = outstandingRecords.reduce((acc, record) => acc + record.amount, 0);
-    
-                return { exe, totalCollection };
-            }));
-    
+
+                    // Fetch outstanding records for those invoice numbers,
+                    // and filter by Outstanding.date (stored as Date in DB)
+                    const outstandingRecords = await Outstanding.find({
+                        invoiceNumber: { $in: invoiceNumbers },
+                        date: {
+                            $gte: start,
+                            $lte: end,
+                        },
+                    });
+
+                    // Sum the collection amount
+                    const totalCollection = outstandingRecords.reduce(
+                        (acc, record) => acc + (record.amount || 0),
+                        0
+                    );
+
+                    return { exe, totalCollection };
+                })
+            );
+
             // Respond with the calculated collections
             res.json(collections);
         } catch (error) {
             console.error('Failed to fetch executive collections', error);
-            res.status(500).json({ message: 'Failed to fetch executive collections' });
+            res
+                .status(500)
+                .json({ message: 'Failed to fetch executive collections' });
         }
     },
     getMonthlyCollection: async (req, res) => {
