@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const { type } = require('os');
-const { stringify } = require("querystring");
 
 const invoiceSchema = new mongoose.Schema({
   products: [
@@ -14,61 +12,84 @@ const invoiceSchema = new mongoose.Schema({
       invoiceTotal: Number,
     }
   ],
+
   invoiceNumber: {
     type: String,
     required: true,
     unique: true,
-    trim:true
+    trim: true
   },
+
   customer: String,
   code: String,
   address: String,
   contact: String,
   invoiceDate: String,
+
   orderNumber: {
     type: String,
-    trim:true
+    trim: true
   },
+
   orderDate: String,
   exe: String,
   ModeofPayment: String,
   TermsofPayment: String,
   Duedate: String,
   Tax: Number,
-  GatePassNo:{
+
+  GatePassNo: {
     type: String,
-    default:"Printed",
+    default: "Printed",
     trim: true
   },
+
   VehicleNo: String,
-  VatRegNo:String,
-  VatNO:String,
-  TaxNo:String,
+  VatRegNo: String,
+  VatNO: String,
+  TaxNo: String,
+
   CusVatNo: {
     type: String,
-    unique: true,
+    unique: true
   },
-  IncentiveDueDate:{
-    type: String,
-  },
-  IncentiveStatus:{
-    type: String,
-  
-  },
-  Incentivesettlement:{
-    type: String,
-  },
-  StockName: {
-    type: String,
-  },
-  FreeissuedStatus:{
-    type:String
-  }
 
-  
-  
-});
+  IncentiveDueDate: String,
+  IncentiveStatus: String,
+  Incentivesettlement: String,
+
+  StockName: String,
+  FreeissuedStatus: String,
+
+  // 🔹 NEW: Cheque details (multiple allowed)
+  cheques: [
+    {
+      chequeNo: {
+        type: String,
+        trim: true
+      },
+      bankName: {
+        type: String,
+        trim: true
+      },
+      depositDate: {
+        type: String
+      },
+      amount: {
+        type: Number
+      },
+      status: {
+        type: String,
+        default: "Pending" // Pending | Cleared | Bounced
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
+
+}, { timestamps: true });
 
 const Invoice = mongoose.model('Invoice', invoiceSchema);
-
 module.exports = Invoice;
