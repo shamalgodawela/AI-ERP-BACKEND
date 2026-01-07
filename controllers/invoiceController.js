@@ -588,7 +588,7 @@ const searchInvoices = async (req, res) => {
 
 const updateInvoice = async (req, res) => {
   const { invoiceNumber } = req.params;
-  const { GatePassNo, chequeData } = req.body; // destructure chequeData
+  const { GatePassNo, chequeData } = req.body;
 
   try {
     const invoice = await Invoice.findOne({ invoiceNumber });
@@ -597,22 +597,40 @@ const updateInvoice = async (req, res) => {
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
-    // Update GatePassNo if provided
-    if (GatePassNo) invoice.GatePassNo = GatePassNo;
-
-    // Push new cheque details if provided
-    if (chequeData && chequeData.chequeNo) {
-      invoice.cheques.push(chequeData);
+    // Update GatePass
+    if (GatePassNo) {
+      invoice.GatePassNo = GatePassNo;
     }
 
-    // Save the invoice
+    // ✅ Push cheque ONLY if valid
+    if (
+      chequeData &&
+      chequeData.chequeNo &&
+      chequeData.amount
+    ) {
+      invoice.cheques.push({
+        chequeNo: chequeData.chequeNo,
+        bankName: chequeData.bankName,
+        depositDate: chequeData.depositDate,
+        amount: Number(chequeData.amount),
+        status: chequeData.status || 'Pending',
+        addedAt: new Date(),
+      });
+    }
+
     await invoice.save();
 
-    res.status(200).json({ message: 'Invoice updated successfully', invoice });
+    res.status(200).json({
+      message: 'Invoice updated successfully',
+      invoice,
+    });
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error', error });
   }
 };
+
 
 const getInvoiceByNumber = async (req, res) => {
   const { invoiceNumber } = req.params;
@@ -1444,7 +1462,8 @@ module.exports = {
   getlastTaxNo,
   ExecutivesIncentive,
   getLastTaxNo,
-  getProductQuantityByCode
+  getProductQuantityByCode,
+  updateInvoice
   
   
  
