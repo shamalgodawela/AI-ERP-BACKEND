@@ -586,64 +586,46 @@ const searchInvoices = async (req, res) => {
   }
 };
 
-// PUT /api/invoices/:invoiceNumber
 const updateInvoice = async (req, res) => {
   const { invoiceNumber } = req.params;
-  const { GatePassNo, chequeId, status } = req.body;
+  const { GatePassNo, chequeData } = req.body;
 
   try {
-    // 🔍 DEBUG LOG (important)
-    console.log("Update request:", { invoiceNumber, chequeId, status });
+    const invoice = await Invoice.findOne({ invoiceNumber });
 
-    // ✅ Cheque status update
-    if (chequeId && status) {
-      const updatedInvoice = await Invoice.findOneAndUpdate(
-        {
-          invoiceNumber,
-          "cheques._id": new mongoose.Types.ObjectId(chequeId)
-        },
-        {
-          $set: {
-            "cheques.$.status": status
-          }
-        },
-        { new: true }
-      );
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
 
-      if (!updatedInvoice) {
-        return res.status(404).json({ message: "Cheque not found" });
-      }
+    // Update GatePassNo if provided
+    if (GatePassNo) {
+      invoice.GatePassNo = GatePassNo;
+    }
 
-      return res.status(200).json({
-        message: "Cheque status updated successfully",
-        invoice: updatedInvoice
+    // Push cheque if valid
+    if (chequeData && chequeData.chequeNo && chequeData.amount) {
+      invoice.cheques.push({
+        chequeNo: chequeData.chequeNo,
+        bankName: chequeData.bankName || '',
+        depositDate: chequeData.depositDate || '',
+        amount: Number(chequeData.amount),
+        status: chequeData.status || 'Pending',
+        addedAt: new Date(),
       });
     }
 
-    // ✅ GatePass update
-    const invoice = await Invoice.findOneAndUpdate(
-      { invoiceNumber },
-      { $set: { GatePassNo } },
-      { new: true }
-    );
-
-    if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
+    await invoice.save();
 
     res.status(200).json({
-      message: "Invoice updated successfully",
-      invoice
+      message: 'Invoice updated successfully',
+      invoice,
     });
 
   } catch (error) {
-    console.error("Update invoice error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error('Update invoice error:', error);
+    res.status(500).json({ message: 'Server error', error });
   }
 };
-
-
-
 
 const getInvoiceByNumber = async (req, res) => {
   const { invoiceNumber } = req.params;
