@@ -1422,7 +1422,36 @@ const getProductQuantityByCode = async (req, res) => {
   }
 };
 
+const updateChequeStatus = async (req, res) => {
+  const { invoiceNumber } = req.params;
+  const { chequeId, status } = req.body;
 
+  try {
+    const invoice = await Invoice.findOne({ invoiceNumber });
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    // Find the cheque to update
+    const cheque = invoice.cheques.id(chequeId);
+
+    if (!cheque) {
+      return res.status(404).json({ message: 'Cheque not found' });
+    }
+
+    cheque.status = status; // update status
+    await invoice.save();
+
+    res.status(200).json({
+      message: `Cheque status updated to ${status}`,
+      invoice,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 
 module.exports = { 
@@ -1458,12 +1487,11 @@ module.exports = {
   ExecutivesIncentive,
   getLastTaxNo,
   getProductQuantityByCode,
-  updateInvoice
+  updateInvoice,
+  updateChequeStatus
   
   
  
   
   
 };
-
-getSalesByExe

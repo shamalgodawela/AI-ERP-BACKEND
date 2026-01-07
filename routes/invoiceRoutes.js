@@ -66,6 +66,10 @@ router.get('/get-last-tax-no', invoiceController.getLastTaxNo);
 router.get('/get-product-quantity-by-code', invoiceController.getProductQuantityByCode);
 
 
+//update invoice status
+router.put('/invoices/cheque-status/:invoiceNumber', invoiceController.updateChequeStatus);
+
+
 
 
 
