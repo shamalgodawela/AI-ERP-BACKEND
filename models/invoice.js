@@ -80,7 +80,7 @@ const invoiceSchema = new mongoose.Schema({
       },
       status: {
         type: String,
-        default: "Pending" // Pending | Cleared | Bounced
+        default: "Pending" 
       },
       addedAt: {
         type: Date,
