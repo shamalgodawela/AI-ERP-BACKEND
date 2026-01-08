@@ -1453,6 +1453,47 @@ const updateChequeStatus = async (req, res) => {
   }
 };
 
+const getAllChequeDetails = async (req, res) => {
+  try {
+    const invoices = await Invoice.find(
+      { cheques: { $exists: true, $ne: [] } },
+      {
+        invoiceNumber: 1,
+        customer: 1,
+        invoiceDate: 1,
+        Duedate: 1,
+        cheques: 1
+      }
+    );
+
+    const chequeList = [];
+
+    invoices.forEach((invoice) => {
+      invoice.cheques.forEach((cheque) => {
+        chequeList.push({
+          invoiceNumber: invoice.invoiceNumber,
+          customer: invoice.customer,
+          invoiceDate: invoice.invoiceDate,
+          dueDate: invoice.Duedate,
+
+          chequeId: cheque._id,
+          chequeNo: cheque.chequeNo,
+          bankName: cheque.bankName,
+          depositDate: cheque.depositDate,
+          amount: cheque.amount,
+          status: cheque.status,
+          addedAt: cheque.addedAt
+        });
+      });
+    });
+
+    res.status(200).json(chequeList);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch cheque details' });
+  }
+};
+
 
 module.exports = { 
   addInvoice,
@@ -1488,7 +1529,8 @@ module.exports = {
   getLastTaxNo,
   getProductQuantityByCode,
   updateInvoice,
-  updateChequeStatus
+  updateChequeStatus,
+  getAllChequeDetails
   
   
  
