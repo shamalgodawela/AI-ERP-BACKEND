@@ -1453,6 +1453,68 @@ const updateChequeStatus = async (req, res) => {
   }
 };
 
+const updateChequeDepositDate = async (req, res) => {
+  const { invoiceNumber } = req.params;
+  const { chequeId, depositDate } = req.body;
+
+  try {
+    const invoice = await Invoice.findOne({ invoiceNumber });
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    // Find the cheque to update
+    const cheque = invoice.cheques.id(chequeId);
+
+    if (!cheque) {
+      return res.status(404).json({ message: 'Cheque not found' });
+    }
+
+    cheque.depositDate = depositDate; // update deposit date
+    await invoice.save();
+
+    res.status(200).json({
+      message: 'Deposit date updated successfully',
+      invoice,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const updateChequeAmount = async (req, res) => {
+  const { invoiceNumber } = req.params;
+  const { chequeId, amount } = req.body;
+
+  try {
+    const invoice = await Invoice.findOne({ invoiceNumber });
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    // Find the cheque to update
+    const cheque = invoice.cheques.id(chequeId);
+
+    if (!cheque) {
+      return res.status(404).json({ message: 'Cheque not found' });
+    }
+
+    cheque.amount = parseFloat(amount); // update amount
+    await invoice.save();
+
+    res.status(200).json({
+      message: 'Cheque amount updated successfully',
+      invoice,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 const getAllChequeDetails = async (req, res) => {
   try {
     const invoices = await Invoice.find(
@@ -1530,9 +1592,11 @@ module.exports = {
   getProductQuantityByCode,
   updateInvoice,
   updateChequeStatus,
+  updateChequeDepositDate,
+  updateChequeAmount,
   getAllChequeDetails
   
-  
+
  
   
   

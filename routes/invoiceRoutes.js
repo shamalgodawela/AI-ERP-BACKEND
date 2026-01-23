@@ -68,6 +68,8 @@ router.get('/get-product-quantity-by-code', invoiceController.getProductQuantity
 
 //update invoice status
 router.put('/invoices/cheque-status/:invoiceNumber', invoiceController.updateChequeStatus);
+router.put('/invoices/cheque-deposit-date/:invoiceNumber', invoiceController.updateChequeDepositDate);
+router.put('/invoices/cheque-amount/:invoiceNumber', invoiceController.updateChequeAmount);
 router.get('/cheques', invoiceController.getAllChequeDetails);
 
 
