@@ -1522,6 +1522,7 @@ const getAllChequeDetails = async (req, res) => {
       {
         invoiceNumber: 1,
         customer: 1,
+        exe: 1,
         invoiceDate: 1,
         Duedate: 1,
         cheques: 1
@@ -1537,6 +1538,7 @@ const getAllChequeDetails = async (req, res) => {
           customer: invoice.customer,
           invoiceDate: invoice.invoiceDate,
           dueDate: invoice.Duedate,
+          exe: invoice.exe,
 
           chequeId: cheque._id,
           chequeNo: cheque.chequeNo,
