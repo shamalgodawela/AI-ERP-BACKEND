@@ -1364,20 +1364,22 @@ const getProductQuantityByCode = async (req, res) => {
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999); // End of the day
 
-      // Use $expr and $toDate for string-to-date comparison
-      // If exe filter exists, combine with date filter
-      if (matchStage.$expr) {
-        matchStage.$expr.$and.push(
-          { $gte: [{ $toDate: '$invoiceDate' }, start] },
-          { $lte: [{ $toDate: '$invoiceDate' }, end] }
-        );
-      } else {
+      // Build $expr for safe string-to-date comparison (skip empty invoiceDate)
+      const dateExprConditions = [
+        { $ne: ['$invoiceDate', ''] },
+        { $gte: [{ $toDate: '$invoiceDate' }, start] },
+        { $lte: [{ $toDate: '$invoiceDate' }, end] },
+      ];
+
+      if (matchStage.$expr && Array.isArray(matchStage.$expr.$and)) {
+        matchStage.$expr.$and.push(...dateExprConditions);
+      } else if (matchStage.$expr) {
+        // If there is some existing $expr but not in $and form, wrap it
         matchStage.$expr = {
-          $and: [
-            { $gte: [{ $toDate: '$invoiceDate' }, start] },
-            { $lte: [{ $toDate: '$invoiceDate' }, end] }
-          ]
+          $and: [matchStage.$expr, ...dateExprConditions],
         };
+      } else {
+        matchStage.$expr = { $and: dateExprConditions };
       }
     } else if (startDate || endDate) {
       return res.status(400).json({ error: 'Both startDate and endDate are required for date filtering' });
