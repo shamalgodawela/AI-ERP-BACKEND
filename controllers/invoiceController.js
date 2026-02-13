@@ -1343,9 +1343,11 @@ const getProductQuantityByCode = async (req, res) => {
     // Build match stage
     const matchStage = { GatePassNo: 'Printed' };
 
-    // Add executive filtering if provided
+    // Add executive filtering if provided (case-insensitive, ignore extra spaces)
     if (exe) {
-      matchStage.exe = exe;
+      matchStage.exe = {
+        $regex: new RegExp(`^${escapeRegExp(exe.trim())}\\s*$`, 'i'),
+      };
     }
 
     // Add date filtering if provided
@@ -1597,6 +1599,7 @@ module.exports = {
   updateChequeDepositDate,
   updateChequeAmount,
   getAllChequeDetails
+  
   
 
  
