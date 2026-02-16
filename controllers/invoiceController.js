@@ -1349,8 +1349,6 @@ const getProductQuantityByCode = async (req, res) => {
         $regex: new RegExp(`^${escapeRegExp(exe.trim())}\\s*$`, 'i'),
       };
     }
-
-    // Add date filtering if provided
     if (startDate && endDate) {
       // Validate dates
       if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
