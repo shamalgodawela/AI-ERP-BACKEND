@@ -396,7 +396,7 @@ const getLastInvoiceNumberEA1 = async (req, res) => {
 
 const getLastInvoiceNumberSOUTH1 = async (req, res) => {
   try{
-    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^SOUTH1/ })
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^SOUTH/ })
               .sort({ invoiceNumber: -1 })
               .limit(1);
 
