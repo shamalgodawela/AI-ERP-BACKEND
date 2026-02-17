@@ -392,6 +392,27 @@ const getLastInvoiceNumberEA1 = async (req, res) => {
      }
 };
 
+//fecth last invoice number starting with SOUTH1 
+
+const getLastInvoiceNumberSOUTH1 = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^SOUTH1/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "SOUTH1" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
+
 //fecth last invoice number starting with PT1 puttalama
 
 const getLastInvoiceNumberPT1 = async (req, res) => {
@@ -1590,6 +1611,7 @@ module.exports = {
   getLastInvoiceNumberNCP1, 
   getLastInvoiceNumberUpcountry,
   getLastInvoiceNumberother,
+  getLastInvoiceNumberSOUTH1,
   getlastTaxNo,
   ExecutivesIncentive,
   getLastTaxNo,

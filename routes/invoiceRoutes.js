@@ -51,6 +51,11 @@ router.get('/get-last-invoice-number-KU1', invoiceController.getLastInvoiceNumbe
 router.get('/get-last-invoice-number-ncp1', invoiceController.getLastInvoiceNumberNCP1);
 router.get('/get-last-invoice-number-upcountry', invoiceController.getLastInvoiceNumberUpcountry);
 router.get('/get-last-invoice-number-other', invoiceController.getLastInvoiceNumberother);
+router.get('/get-last-invoice-number-SOUTH1', invoiceController.getLastInvoiceNumberSOUTH1);
+
+
+
+
 
 router.get('/get-last-TaxNo', invoiceController.getlastTaxNo);
 
