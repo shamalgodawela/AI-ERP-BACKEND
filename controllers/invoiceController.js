@@ -609,7 +609,7 @@ const searchInvoices = async (req, res) => {
 
 const updateInvoice = async (req, res) => {
   const { invoiceNumber } = req.params;
-  const { GatePassNo, chequeData } = req.body;
+  const { GatePassNo, chequeData, IncentiveDueDate, IncentiveStatus, Incentivesettlement } = req.body;
 
   try {
     const invoice = await Invoice.findOne({ invoiceNumber });
@@ -618,9 +618,69 @@ const updateInvoice = async (req, res) => {
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
+    // Store previous GatePassNo to check if we're canceling
+    const previousGatePassNo = invoice.GatePassNo;
+    const isBeingCanceled = GatePassNo === 'Canceled' && previousGatePassNo !== 'Canceled';
+
     // Update GatePassNo if provided
     if (GatePassNo) {
       invoice.GatePassNo = GatePassNo;
+    }
+
+    // Update incentive fields if provided
+    if (IncentiveDueDate !== undefined) {
+      invoice.IncentiveDueDate = IncentiveDueDate;
+    }
+    if (IncentiveStatus !== undefined) {
+      invoice.IncentiveStatus = IncentiveStatus;
+    }
+    if (Incentivesettlement !== undefined) {
+      invoice.Incentivesettlement = Incentivesettlement;
+    }
+
+    // If invoice is being canceled, restore products to main inventory
+    if (isBeingCanceled && invoice.products && invoice.products.length > 0) {
+      const stockName = invoice.StockName ? String(invoice.StockName).trim() : '';
+      const isMainStock = stockName.toLowerCase() === 'ms' || !stockName;
+
+      // Only restore to main inventory if it was from main stock
+      if (isMainStock) {
+        for (const product of invoice.products) {
+          const productCode = product.productCode;
+          const quantity = parseFloat(product.quantity) || 0;
+          const invoiceTotal = parseFloat(product.invoiceTotal) || 0;
+
+          if (!productCode || quantity <= 0) {
+            console.warn(`Skipping invalid product in canceled invoice: ${productCode}`);
+            continue;
+          }
+
+          // Find the product in main inventory by SKU (productCode)
+          const productQuery = {
+            sku: { $regex: new RegExp(escapeRegExp(String(productCode)), 'i') },
+          };
+          if (product.category) {
+            productQuery.category = { $regex: new RegExp(escapeRegExp(String(product.category)), 'i') };
+          }
+
+          const existingProduct = await Product.findOne(productQuery);
+
+          if (existingProduct) {
+            // Restore quantity
+            const currentQty = parseFloat(existingProduct.quantity) || 0;
+            existingProduct.quantity = String(currentQty + quantity);
+
+            // Restore amount
+            const currentAmount = parseFloat(existingProduct.amount) || 0;
+            existingProduct.amount = currentAmount + invoiceTotal;
+
+            await existingProduct.save();
+            console.log(`Restored ${quantity} units of ${productCode} to main inventory`);
+          } else {
+            console.warn(`Product ${productCode} not found in main inventory, cannot restore`);
+          }
+        }
+      }
     }
 
     // Push cheque if valid
