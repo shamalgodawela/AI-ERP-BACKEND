@@ -33,6 +33,7 @@ const ChequeRoute=require('./routes/ChequeRoute')
 const TaxInvoiceRoute=require('./routes/TaxInvoiceRoute')
 const MirateRouter=require('./routes/MirateRouter')
 const InventoryRoute=require('./routes/InventoryRoute')
+const AccountRoute=require('./routes/AccountRoute')
 
 
 
@@ -80,6 +81,7 @@ app.use('/api',ChequeRoute)
 app.use('/api',TaxInvoiceRoute)
 app.use('/api',MirateRouter)
 app.use('/api/inventory',InventoryRoute)
+app.use('/api/account',AccountRoute)
 
 
 // Routes
