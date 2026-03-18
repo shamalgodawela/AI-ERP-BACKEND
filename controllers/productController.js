@@ -188,6 +188,29 @@ const getProductByCategory = asyncHandler(async (req, res) => {
     }
   });
 
+  const saveDailyStock = async () => {
+    try {
+        const products = await Product.find();
+
+        // Create JSON structure
+        const snapshot = {
+            date: new Date(),
+            totalProducts: products.length,
+            products: products
+        };
+
+        // Save to MongoDB
+        await StockSnapshot.create({
+            data: snapshot
+        });
+
+        console.log("✅ Stock snapshot saved");
+    } catch (error) {
+        console.error("❌ Error saving stock:", error);
+    }
+};
+
+
 
 module.exports={
     createProduct,
@@ -195,6 +218,7 @@ module.exports={
     getSingleProduct,
     deleteProduct,
     updateProduct,
-    getProductByCategory
+    getProductByCategory,
+    saveDailyStock
   
 }

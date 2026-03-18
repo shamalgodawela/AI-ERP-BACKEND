@@ -84,6 +84,7 @@ app.use('/api/inventory',InventoryRoute)
 app.use('/api/account',AccountRoute)
 
 
+
 // Routes
 app.get("/", (req, res)=>{
     res.send("Home page")
