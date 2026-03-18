@@ -211,7 +211,14 @@ const getProductByCategory = asyncHandler(async (req, res) => {
 };
 
 
-
+const getAllSnapshots = async (req, res) => {
+    try {
+      const snapshots = await StockSnapshot.find().sort({ createdAt: -1 }); // latest first
+      res.status(200).json(snapshots);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 module.exports={
     createProduct,
     getProducts,
@@ -219,6 +226,7 @@ module.exports={
     deleteProduct,
     updateProduct,
     getProductByCategory,
-    saveDailyStock
+    saveDailyStock,
+    getAllSnapshots
   
 }
