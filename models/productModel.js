@@ -29,8 +29,8 @@ const productSchema=mongoose.Schema({
         trim:true
     },
     description:{
-        type:Number,
-        required:[true,"please add a description"],
+        type:String,
+        required:[true,"please add a Category"],
         
     },
     image:{
