@@ -535,6 +535,24 @@ const getLastInvoiceNumberother = async (req, res) => {
           return res.status(500).json({ error: 'Internal server error' });
    }
 };
+const getLastInvoiceNumberUpcountry1 = async (req, res) => {
+  try{
+    const lastinvoiceNo = await Invoice.findOne({ invoiceNumber: /^UpCountry1/ })
+              .sort({ invoiceNumber: -1 })
+              .limit(1);
+
+
+              if (lastinvoiceNo) {
+                return res.status(200).json({ lastinvoice: lastinvoiceNo.invoiceNumber });
+            } else {
+                return res.status(404).json({ error: 'No order with order number starting with "UpCountry1" found' });
+            }
+  }
+  catch (error) {
+          console.error('Error fetching last invoice number:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+   }
+};
 
 
 
@@ -1680,7 +1698,8 @@ module.exports = {
   updateChequeStatus,
   updateChequeDepositDate,
   updateChequeAmount,
-  getAllChequeDetails
+  getAllChequeDetails,
+  getLastInvoiceNumberUpcountry1
   
   
 
