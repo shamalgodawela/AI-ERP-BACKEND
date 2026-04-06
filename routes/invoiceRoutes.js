@@ -52,7 +52,8 @@ router.get('/get-last-invoice-number-ncp1', invoiceController.getLastInvoiceNumb
 router.get('/get-last-invoice-number-upcountry', invoiceController.getLastInvoiceNumberUpcountry);
 router.get('/get-last-invoice-number-other', invoiceController.getLastInvoiceNumberother);
 router.get('/get-last-invoice-number-SOUTH1', invoiceController.getLastInvoiceNumberSOUTH1);
-
+router.get('/get-last-invoice-number-UpCountry1', invoiceController.getLastInvoiceNumberUpcountry1
+);
 
 
 

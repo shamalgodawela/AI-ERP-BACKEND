@@ -27,6 +27,7 @@ router.get('/lastorder/PT1', ordersController.getLastOrderNumberStartingWithPT1)
 router.get('/lastorder/south1', ordersController.getLastOrderNumberStartingWithSouth1);
 router.get('/lastorder/upcountry', ordersController.getLastOrderNumberStartingWithUpccountry);
 router.get('/lastorder/other', ordersController.getLastOrderNumberStartingWithother);
+router.get('/lastorder/UpCountry1', ordersController.getLastOrderNumberStartingWithUpccountry1);
 
 
 
