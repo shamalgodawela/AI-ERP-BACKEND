@@ -4,7 +4,7 @@ const BulkProduct = require('../models/bulkproduct');
 const addProduct = async (req, res) => {
   try {
     // Extract data from request body
-    const { bulkCode, products, quantity, weight,weightsh,name } = req.body;
+    const { bulkCode, products, quantity, weight,weightsh,name,BulkGRN } = req.body;
 // Create a new bulk product instance
     const newBulkProduct = new BulkProduct({
       bulkCode,
@@ -12,7 +12,8 @@ const addProduct = async (req, res) => {
       quantity,
       weight,
       weightsh,
-      name
+      name,
+      BulkGRN
       
     });
 

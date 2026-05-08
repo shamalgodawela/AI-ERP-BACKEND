@@ -5,6 +5,11 @@ const dateproductNewSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    GRNnumber:{
+        type:String,
+        required:true,
+        unique:true
+    },
     productName: {
         type: String,
         required: true

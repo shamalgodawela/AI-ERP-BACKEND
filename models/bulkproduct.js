@@ -10,6 +10,10 @@ const productSchema = new mongoose.Schema({
         required:true
       
       },
+      productweight:{
+        type:String,
+        required:true
+      }
       
     }
   ],
@@ -33,7 +37,13 @@ const productSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
+  },
+  BulkGRN:{
+    type:String,
+    required:true
+    unique:true
   }
+
   
  
 });

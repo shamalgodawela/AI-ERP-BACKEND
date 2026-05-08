@@ -5,7 +5,7 @@ const BulkProduct = require('../models/bulkproduct');
 
 
 const addProductAndUpdate = async (req, res) => {
-    const { GpnDate, productName, category, unitPrice, numberOfUnits, packsize } = req.body;
+    const { GpnDate, GRNnumber, productName, category, unitPrice, numberOfUnits, packsize } = req.body;
 
     try {
         console.log('Request SKU:', category); 
@@ -145,6 +145,7 @@ const addProductAndUpdate = async (req, res) => {
           
             const newProduct = await DateProduct.create({
                 GpnDate,
+                GRNnumber,
                 productName,
                 category,
                 unitPrice,
