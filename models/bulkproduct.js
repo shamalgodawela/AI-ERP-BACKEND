@@ -40,7 +40,7 @@ const productSchema = new mongoose.Schema({
   },
   BulkGRN:{
     type:String,
-    required:true
+    required:true,
     unique:true
   }
 
