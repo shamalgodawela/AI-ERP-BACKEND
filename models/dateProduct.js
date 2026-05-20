@@ -5,10 +5,9 @@ const dateproductNewSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    GRNnumber:{
+    BulkGRN:{
         type:String,
-        required:true,
-        unique:true
+        required:true
     },
     productName: {
         type: String,
