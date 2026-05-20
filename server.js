@@ -34,6 +34,7 @@ const TaxInvoiceRoute=require('./routes/TaxInvoiceRoute')
 const MirateRouter=require('./routes/MirateRouter')
 const InventoryRoute=require('./routes/InventoryRoute')
 const AccountRoute=require('./routes/AccountRoute')
+const areaStockReturnRoute=require('./routes/areaStockReturnRoute')
 
 
 
@@ -83,6 +84,7 @@ app.use('/api',TaxInvoiceRoute)
 app.use('/api',MirateRouter)
 app.use('/api/inventory',InventoryRoute)
 app.use('/api/account',AccountRoute)
+app.use('/api', areaStockReturnRoute)
 
 
 
