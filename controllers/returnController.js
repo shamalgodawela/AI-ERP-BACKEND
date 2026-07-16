@@ -1,6 +1,48 @@
 const Return = require('../models/return');
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
+const Inventory = require('../models/Inventory');
+
+const escapeRegExp = (string) => {
+    return String(string || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+const normalizeStockValue = (value) => {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[.-_]/g, '');
+};
+
+const findInventoryByStockName = async (stockName) => {
+    const normalizedName = String(stockName || '').trim();
+    if (!normalizedName) return null;
+
+    const candidates = new Set();
+    const asIs = normalizedName;
+    const mrExpanded = normalizedName.replace(/^m\.?\s*/i, 'Mr.');
+    const noDots = normalizedName.replace(/\./g, '');
+    const mrExpandedNoDots = mrExpanded.replace(/\./g, '');
+    const collapsedSpaces = normalizedName.replace(/\s+/g, ' ').trim();
+    const normalizedNoSpaces = normalizeStockValue(normalizedName);
+    const normalizedMrNoSpaces = normalizeStockValue(mrExpanded);
+
+    [asIs, mrExpanded, noDots, mrExpandedNoDots, collapsedSpaces].forEach((candidate) => {
+        if (candidate && candidate.length) candidates.add(candidate);
+    });
+
+    const ownerRegexes = Array.from(candidates).map((candidate) => ({
+        owner: { $regex: new RegExp(`^${escapeRegExp(candidate)}$`, 'i') },
+    }));
+
+    return Inventory.findOne({
+        $or: [
+            ...ownerRegexes,
+            { ownerKey: { $in: [normalizedName.toLowerCase(), normalizedNoSpaces, normalizedMrNoSpaces] } },
+            { areaKey: { $in: [normalizedName.toLowerCase(), normalizedNoSpaces, normalizedMrNoSpaces] } },
+        ],
+    });
+};
 
 const addReturnDetails = async (req, res) => {
     const {
@@ -9,10 +51,20 @@ const addReturnDetails = async (req, res) => {
         customer,
         reason,
         date,
-        remarks
+        remarks,
+        stockType,
+        stockName,
     } = req.body;
 
     try {
+        const selectedStockType = String(stockType || 'MS').toUpperCase();
+        const selectedStockName = String(stockName || '').trim();
+        const isMainStock = selectedStockType === 'MS' || selectedStockName.toLowerCase() === 'ms';
+
+        if (!isMainStock && !selectedStockName) {
+            return res.status(400).json({ message: 'Area stock name is required when stock target is area stock.' });
+        }
+
         const existingInvoice = await Invoice.findOne({ invoiceNumber: { $regex: new RegExp(invoiceNumber, "i") } });
 
         if (existingInvoice) {
@@ -28,20 +80,58 @@ const addReturnDetails = async (req, res) => {
             await existingInvoice.save();
 
             for (const product of products) {
-                const { productCode, quantity } = product;
-                
-                // Find the product by category in the Product database
-                const existingProduct = await Product.findOne({ category: productCode });
-                
-                if (existingProduct) {
-                    // Update the quantity of the existing product
-                    existingProduct.quantity = parseFloat(existingProduct.quantity) + parseFloat(quantity);
-                    await existingProduct.save();
+                const { productCode, productName, quantity } = product;
+
+                if (isMainStock) {
+                    const existingProduct = await Product.findOne({
+                        $or: [
+                            { category: { $regex: new RegExp(`^${escapeRegExp(productCode)}$`, 'i') } },
+                            { sku: { $regex: new RegExp(escapeRegExp(productCode), 'i') } },
+                        ],
+                    });
+
+                    if (existingProduct) {
+                        existingProduct.quantity = String(parseFloat(existingProduct.quantity || 0) + parseFloat(quantity || 0));
+                        await existingProduct.save();
+                    }
+                } else {
+                    const inventoryDoc = await findInventoryByStockName(selectedStockName);
+                    if (!inventoryDoc) {
+                        return res.status(404).json({ message: `No inventory found for stock "${selectedStockName}".` });
+                    }
+
+                    const normalize = (value) => String(value || '')
+                        .toLowerCase()
+                        .replace(/\s+/g, '')
+                        .replace(/[.-_]/g, '');
+
+                    const targetCode = normalize(productCode);
+                    const targetName = normalize(productName);
+
+                    let inventoryProduct = inventoryDoc.products.find((item) => {
+                        const codeMatches = targetCode && normalize(item.productCode) === targetCode;
+                        const nameMatches = targetName && normalize(item.productName) === targetName;
+                        const exactCodeMatches = item.productCode && productCode && String(item.productCode).toLowerCase() === String(productCode).toLowerCase();
+                        const exactNameMatches = item.productName && productName && String(item.productName).toLowerCase() === String(productName).toLowerCase();
+                        return codeMatches || nameMatches || exactCodeMatches || exactNameMatches;
+                    });
+
+                    if (!inventoryProduct) {
+                        inventoryDoc.products.push({
+                            productName: productName || productCode,
+                            productCode: productCode || '',
+                            quantity: 0,
+                            labelPrice: '',
+                            discount: '',
+                            unitPrice: '',
+                        });
+                        inventoryProduct = inventoryDoc.products[inventoryDoc.products.length - 1];
+                    }
+
+                    inventoryProduct.quantity = parseFloat(inventoryProduct.quantity || 0) + parseFloat(quantity || 0);
+                    await inventoryDoc.save();
                 }
-                
             }
-            
-            
 
             const newReturn = new Return({
                 products,
@@ -49,7 +139,9 @@ const addReturnDetails = async (req, res) => {
                 customer,
                 reason,
                 date,
-                remarks
+                remarks,
+                stockType: selectedStockType,
+                stockName: isMainStock ? '' : selectedStockName,
             });
 
             const savedReturn = await newReturn.save();

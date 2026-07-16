@@ -8,6 +8,14 @@ const returnSchema = new mongoose.Schema({
         unitPrice: Number,
         returntotal:Number,
     }],
+    stockType: {
+        type: String,
+        default: 'MS'
+    },
+    stockName: {
+        type: String,
+        default: ''
+    },
     invoiceNumber: {
         type: String,
         required: true
