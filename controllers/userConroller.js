@@ -7,10 +7,20 @@ const Token = require("../models/tokenModel");
 const crypto=require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
-const generateToken=(id)=>{
-  return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1d"})
-
+const generateToken = (user) => {
+    return jwt.sign(
+        {
+            id: user._id,
+            role: user.role
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: "1d"
+        }
+    );
 };
+
+module.exports = generateToken;
 
 //register user-----------------------------------------------------------------------------------------------------------------------
 
@@ -99,7 +109,7 @@ const loginUser=asyncHandler( async(req, res)=>{
   //user exists, check password is correct
   const passwordIsCorrect= await bcrypt.compare(password, user.password);
   //generate token
-const token=generateToken(user._id);
+const token=generateToken(user);
 
 // sent http-only cookie
 

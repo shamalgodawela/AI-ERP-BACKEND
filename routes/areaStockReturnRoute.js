@@ -5,7 +5,10 @@ const {
     getAllAreaStockReturns,
 } = require('../controllers/areaStockReturnController');
 
-router.post('/area-stock-returns', addAreaStockReturn);
-router.get('/area-stock-returns', getAllAreaStockReturns);
+const protect = require("../middleWare/authMiddleware");
+const authorize = require("../middleWare/authorize");
+
+router.post('/area-stock-returns', protect,authorize("user"), addAreaStockReturn);
+router.get('/area-stock-returns', protect,authorize("user"), getAllAreaStockReturns);
 
 module.exports = router;

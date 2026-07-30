@@ -7,7 +7,7 @@ router.post('/exeregister', exeregister);
 router.post('/loginexe', loginExe)
 router.get('/logout', logoutexe)
 router.get('/logedinexe', loginStatusexe)
-router.get('/exe-getinvoice', exeinvoice)
+router.get('/exe-getinvoice', protectexe, exeinvoice)
 
 
 module.exports=router;

@@ -5,32 +5,33 @@ const { request } = require("express");
 const { use } = require("../routes/userRoute");
 
 
-const protect= asyncHandler(async(req, res, next)=>{
+const protect = asyncHandler(async (req, res, next) => {
     try {
-        const token= req.cookies.token
-        if(!token){
-            res.status(401)
+
+        const token = req.cookies.token;
+
+        if (!token) {
+            res.status(401);
             throw new Error("Not authorized, please login");
         }
 
-        //verify token
-        const verified=jwt.verify(token, process.env.JWT_SECRET);
-        //get user id from token
-        const user= await User.findById(verified.id).select("-password");
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
 
-        if(!user){
-            res.status(401)
+        const user = await User.findById(verified.id).select("-password");
+
+        if (!user) {
+            res.status(401);
             throw new Error("User not found");
         }
 
-        req.user=user 
-        next()
+        req.user = user;
 
-} catch (error) {
-    res.status(401)
-    throw new Error("Not authorized, please login");
+        next();
+
+    } catch (error) {
+        res.status(401);
+        throw new Error("Not authorized, please login");
     }
-
 });
 
 module.exports= protect;

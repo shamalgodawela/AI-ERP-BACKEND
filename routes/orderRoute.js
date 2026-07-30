@@ -1,9 +1,12 @@
 const express = require('express');
 const OrdersController = require('../controllers/ordersController');
+const protect = require("../middleWare/authMiddleware");
+const authorize = require("../middleWare/authorize");
 
 const router = express.Router();
 const ordersController = new OrdersController();
 
+router.use(protect, authorize("user","admin","Operation","account"));
 
 router.post('/orders', ordersController.addOrder);
 

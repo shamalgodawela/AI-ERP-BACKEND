@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const protect = require("../middleWare/authMiddleware");
+const authorize = require("../middleWare/authorize");
 const invoiceController = require('../controllers/invoiceController');
+
+router.use(protect, authorize("user","admin","Operation","account"));
 
 router.post('/add-invoice', invoiceController.addInvoice);
 router.get('/get-all-invoices', invoiceController.getAllInvoices);
