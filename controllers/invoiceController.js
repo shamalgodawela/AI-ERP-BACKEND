@@ -1,14 +1,48 @@
+const mongoose = require('mongoose');
 const Invoice = require('../models/invoice');
 const Product = require("../models/productModel");
 const Inventory = require('../models/Inventory');
 const Outstanding = require('../models/outStanding');
 const Cheque = require('../models/Cheque');
 
-
 const escapeRegExp = (string) => {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
+
+const rollbackStockUpdates = async (updates) => {
+  try {
+    const inventoryDocs = new Map();
+
+    for (const update of updates) {
+      if (update.type === 'main') {
+        update.product.quantity = update.originalQuantity;
+        update.product.amount = update.originalAmount;
+        await update.product.save();
+      } else if (update.type === 'inventory') {
+        const key = update.inventoryDoc._id.toString();
+        if (!inventoryDocs.has(key)) {
+          inventoryDocs.set(key, { inventoryDoc: update.inventoryDoc, quantities: {} });
+        }
+        inventoryDocs.get(key).quantities[update.index] = update.originalQuantity;
+      }
+    }
+
+    for (const { inventoryDoc, quantities } of inventoryDocs.values()) {
+      for (const [index, quantity] of Object.entries(quantities)) {
+        if (inventoryDoc.products[index]) {
+          inventoryDoc.products[index].quantity = quantity;
+        }
+      }
+      await inventoryDoc.save();
+    }
+  } catch (rollbackError) {
+    console.error('Error rolling back stock updates:', rollbackError);
+  }
+};
+
 const addInvoice = async (req, res) => {
+  const stockUpdates = [];
+
   try {
     const { products, ...invoiceData } = req.body;
 
@@ -22,6 +56,13 @@ const addInvoice = async (req, res) => {
     if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({
         error: "Products array is required and must contain at least one product",
+      });
+    }
+
+    const invoiceExists = await Invoice.findOne({ invoiceNumber: invoiceData.invoiceNumber });
+    if (invoiceExists) {
+      return res.status(400).json({
+        error: `Invoice number "${invoiceData.invoiceNumber}" already exists`,
       });
     }
 
@@ -63,14 +104,14 @@ const addInvoice = async (req, res) => {
       const labelPrice = parseFloat(product.labelPrice);
       const discount = parseFloat(product.discount) || 0;
 
-      // 🚫 1. Validate quantity
+      // 1. Validate quantity
       if (!quantity || quantity <= 0 || isNaN(quantity)) {
         return res.status(400).json({
           error: `Cannot add invoice. Quantity for product "${product.productCode || product.productName}" must be greater than 0.`,
         });
       }
 
-      // ✅ 2. Calculate unit price and invoice total
+      // 2. Calculate unit price and invoice total
       product.unitPrice = labelPrice - (labelPrice * discount) / 100;
       product.invoiceTotal = product.unitPrice * quantity;
 
@@ -101,6 +142,13 @@ const addInvoice = async (req, res) => {
             error: `Cannot add invoice. Product "${existingProduct.sku}" has insufficient quantity. Available: ${availableQty}, Required: ${quantity}`,
           });
         }
+
+        stockUpdates.push({
+          type: 'main',
+          product: existingProduct,
+          originalQuantity: existingProduct.quantity,
+          originalAmount: existingProduct.amount,
+        });
 
         // Reduce stock (convert to number, subtract, convert back to string for model)
         existingProduct.quantity = String(availableQty - quantity);
@@ -138,13 +186,20 @@ const addInvoice = async (req, res) => {
           });
         }
 
+        stockUpdates.push({
+          type: 'inventory',
+          inventoryDoc,
+          index: existingIndex,
+          originalQuantity: invProd.quantity,
+        });
+
         // Deduct from inventory
         inventoryDoc.products[existingIndex].quantity = availableQty - quantity;
         await inventoryDoc.save();
       }
     }
 
-    // ✅ 6. Calculate total prices for the invoice and ensure proper data types
+    //  6. Calculate total prices for the invoice and ensure proper data types
     const processedProducts = products.map(p => ({
       productCode: String(p.productCode || ''),
       productName: String(p.productName || ''),
@@ -220,14 +275,22 @@ const addInvoice = async (req, res) => {
     }
     
     if (error.code === 11000) {
-      // Duplicate key error
+      await rollbackStockUpdates(stockUpdates);
       const field = Object.keys(error.keyPattern || {})[0];
       return res.status(400).json({
         error: `Duplicate value for field "${field}"`,
         details: error.message,
       });
     }
+
+    if (error.message && error.message.startsWith('Invoice number')) {
+      await rollbackStockUpdates(stockUpdates);
+      return res.status(400).json({
+        error: error.message,
+      });
+    }
     
+    await rollbackStockUpdates(stockUpdates);
     res.status(500).json({ 
       error: "Internal Server Error",
       details: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred while saving the invoice'
