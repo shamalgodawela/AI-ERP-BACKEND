@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const User = require('../models/userModel');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -55,10 +56,16 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 });
 
+const getAllUsers = asyncHandler(async (req, res) => {
+  // Return all users excluding sensitive fields
+  const users = await User.find({}).select('-password');
+  res.status(200).json(users);
+});
+
 
   
 
 module.exports = {
   registerUser,
-  
+  getAllUsers,
 };
