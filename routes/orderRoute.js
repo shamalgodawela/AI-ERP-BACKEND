@@ -19,7 +19,7 @@ router.get('/orders/:orderNumber', protect, authorize("user","admin","Operation"
 
 router.put('/orders/:orderNumber', protect, authorize("user","admin","Operation","account"), ordersController.updateOrderDetails);
 
-router.get('/allor', protect, authorize("admin"), ordersController.getAllOr);
+router.get('/allor', protect, authorize("user", "admin"), ordersController.getAllOr);
 router.get('/lastorder/ea', protect, authorize("user","admin","Operation","account"), ordersController.getLastOrderNumberStartingWithEA);
 router.get('/lastorder/KU1', protect, authorize("user","admin","Operation","account"), ordersController.getLastOrderNumberStartingWithKU1);
 router.get('/lastorder/NCP', protect, authorize("user","admin","Operation","account"), ordersController.getLastOrderNumberStartingWithNCP);
