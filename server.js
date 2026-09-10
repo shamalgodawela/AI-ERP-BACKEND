@@ -35,7 +35,7 @@ const MirateRouter=require('./routes/MirateRouter')
 const InventoryRoute=require('./routes/InventoryRoute')
 const AccountRoute=require('./routes/AccountRoute')
 const areaStockReturnRoute=require('./routes/areaStockReturnRoute')
-require('./CRON/Stockcron');
+// require('./CRON/Stockcron');
 
 
 
