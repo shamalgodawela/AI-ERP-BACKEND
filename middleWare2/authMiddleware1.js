@@ -1,7 +1,7 @@
 const asyncHandler =require("express-async-handler");
 const Exe = require("../models/exe");
 const jwt = require("jsonwebtoken");
-
+//middleware to protect routes
 const protectexe= asyncHandler(async(req, res, next)=>{
     try {
         const token= req.cookies.token
