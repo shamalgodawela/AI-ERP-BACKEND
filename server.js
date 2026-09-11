@@ -42,15 +42,31 @@ const areaStockReturnRoute=require('./routes/areaStockReturnRoute')
 
 const app=express()
 
+app.use(cors({
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            "http://localhost:3000",
+            "https://nihon-inventory.vercel.app"
+        ];
+
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
+
 //middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.use(cors({
-    origin:["http://localhost:3000", "https://nihon-inventory.vercel.app"],
-    credentials:true
-}));
+// app.use(cors({
+//     origin:["http://localhost:3000", "https://nihon-inventory.vercel.app"],
+//     credentials:true
+// }));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
